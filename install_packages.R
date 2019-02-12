@@ -4,9 +4,9 @@ bioconductor_packages <- c("GO.db", "preprocessCore", "impute",
                            "threejs")
 
 
-install_packages <- c("shiny", "matrixStats", "Hmisc", 
-                      "splines", "foreach", "doParallel", 
-                      "fastcluster", "dynamicTreeCut", "survival", 
+install_packages <- c("shiny", "matrixStats", "Hmisc",
+                      "splines", "foreach", "doParallel",
+                      "fastcluster", "dynamicTreeCut", "survival",
                       "WGCNA", "flexdashboard", "plotly",
                       "shinythemes", "V8", "ggplot2",
                       "ggrepel", "ggdendro", "ggthemes",
@@ -16,7 +16,8 @@ install_packages <- c("shiny", "matrixStats", "Hmisc",
                       "visNetwork", "GGally", "sna",
                       "pls", "BiocManager", "devtools",
                       "rmarkdown", "plotly", "ade4",
-                      "igraph", "network", "plotly")
+                      "igraph", "network", "plotly",
+                      "compositions")
 
 github_packages <- c("ropensci/iheatmapr")
 
@@ -45,39 +46,40 @@ if (length(setdiff(biocManager_packages, rownames(installed.packages()))) > 0) {
 
 
 #define MAX_NUM_DLLS 10000
-library("flexdashboard") 
-library("metagenomeSeq") 
-library("shiny") 
-library("V8") 
-library("shinythemes") 
-library("WGCNA") 
-library("ggplot2") 
-library("ggdendro") 
-library("ggrepel") 
-library('dendextend') 
-library("ggthemes") 
-library("pheatmap") 
-library("reshape2") 
-library("gridExtra") 
-library("RColorBrewer") 
-library("dynamicTreeCut") 
-library("omicade4") 
-library("ade4") 
-library("data.table") 
-library("vegan") 
-library("tools") 
-library("DT") 
-library("plotly") 
-library("iheatmapr") 
-library("threejs") 
-library("shinyjs") 
-library("cowplot") 
-library("igraph") 
-library("visNetwork") 
-library("GGally") 
-library("network") 
-library("rmarkdown") 
-library("pls") 
-library("sva") #Batch correction 
-library("mixOmics") #CLR transformation 
-library("plotly") 
+library("flexdashboard")
+library("metagenomeSeq")
+library("shiny")
+library("V8")
+library("shinythemes")
+library("WGCNA")
+library("ggplot2")
+library("ggdendro")
+library("ggrepel")
+library('dendextend')
+library("ggthemes")
+library("pheatmap")
+library("reshape2")
+library("gridExtra")
+library("RColorBrewer")
+library("dynamicTreeCut")
+library("omicade4")
+library("ade4")
+library("data.table")
+library("vegan")
+library("tools")
+library("compositions")
+library("DT")
+library("plotly")
+library("iheatmapr")
+library("threejs")
+library("shinyjs")
+library("cowplot")
+library("igraph")
+library("visNetwork")
+library("GGally")
+library("network")
+library("rmarkdown")
+library("pls")
+library("sva") #Batch correction
+library("mixOmics") #CLR transformation
+library("plotly")
