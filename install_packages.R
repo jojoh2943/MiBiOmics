@@ -14,12 +14,11 @@ install_packages <- c("shiny", "matrixStats", "Hmisc",
                       "gridExtra", "RColorBrewer", "vegan",
                       "DT", "shinyjs", "cowplot",
                       "visNetwork", "GGally", "sna",
-                      "pls", "BiocManager", "devtools",
+                      "pls", "BiocManager", "iheatmapr",
                       "rmarkdown", "plotly", "ade4",
                       "igraph", "network", "plotly",
                       "compositions")
 
-github_packages <- c("ropensci/iheatmapr")
 
 biocManager_packages <- c("mixOmics")
 
@@ -32,10 +31,6 @@ if (length(setdiff(install_packages, rownames(installed.packages()))) > 0) {
   install.packages(setdiff(install_packages, rownames(installed.packages())))
 }
 
-if (length(setdiff(github_packages, rownames(installed.packages()))) > 0) {
-  library("devtools")
-  devtools::install_github(setdiff(github_packages, rownames(installed.packages())), upgrade = "never")
-}
 
 if (length(setdiff(biocManager_packages, rownames(installed.packages()))) > 0) {
   source("http://bioconductor.org/biocLite.R")
