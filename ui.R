@@ -11,26 +11,9 @@ source("function.R")
 
 #### GENERAL WGCNA CONFIGURATION ####
 options(stringsAsFactors = FALSE)
-enableWGCNAThreads() 
+enableWGCNAThreads()
 
 #### JS AND CSS ####
-
-jscode <- "
-shinyjs.disableTab = function(name) {
-  var tab = $('.nav li a[data-value=' + name + ']');
-  tab.bind('click.tab', function(e) {
-    e.preventDefault();
-    return false;
-  });
-  tab.addClass('disabled');
-}
-
-shinyjs.enableTab = function(name) {
-  var tab = $('.nav li a[data-value=' + name + ']');
-  tab.unbind('click.tab');
-  tab.removeClass('disabled');
-}
-"
 
 css <- "
 .nav li a.disabled {
@@ -44,11 +27,11 @@ css <- "
 #==========#
 #### UI ####
 #==========#
-# The UI generate the shiny web interface.  
+# The UI generate the shiny web interface.
 
 ui <- tagList(
-  useShinyjs(),  
-  extendShinyjs(text = jscode),
+  useShinyjs(),
+  extendShinyjs(script = "function.js", functions = c("enableTab","disableTab")),
   inlineCSS(css),
   navbarPage(theme = shinytheme('yeti'),
              id = "navbar",
@@ -63,8 +46,8 @@ ui <- tagList(
                           column(6,
                                  tabsetPanel(type = "tabs", # A box containing several panels.
                                              tabPanel("Choose Your Analysis",
-                                                      selectInput("TypeAnalysis", 
-                                                                  "Type of analysis: ", 
+                                                      selectInput("TypeAnalysis",
+                                                                  "Type of analysis: ",
                                                                   choices = c("Simple WGCNA" = "simple", "Multi-omics Analysis" = "multivariate", " " = "blank"),
                                                                   selected = "blank"),
                                                       conditionalPanel("input.TypeAnalysis == 'simple'",
@@ -80,7 +63,7 @@ ui <- tagList(
                                                                                         conditionalPanel("input.CountingT1 == 'OTUs'",
                                                                                                          checkboxInput("TaxonFile1", "Additionnal Taxon File (CSV)", FALSE)),
                                                                                         radioButtons("OmicTable", "Second 'Omic' Table:", choices = c("Genes" = "Genes", "OTUs" = "OTUs", "Metabolites" = "Metabolites"), selected = character(0))
-                                                                       ) 
+                                                                       )
                                                       )),
                                              tabPanel("Advanced Parameters",
                                                       radioButtons("Filtration", "Filtration:", choices = c("Yes" = "Yes", "No" = "No"), selected = "No"),
@@ -115,12 +98,12 @@ ui <- tagList(
                                                                                         selectInput("TypeTransformation1", "Type of transformation: ", choices = c("Log10" = "Log10", "Log2"= "Log2", "Hellinger"= "Hellinger", "Square" = "Square", "Square Root" = "sqrt", "ILR" = "ILR", "CLR" = "CLR"))),
                                                                        hr()),
                                                       checkboxInput("batchEffect", "Batch Effect", value = FALSE),
-                                                      
+
                                                                        uiOutput("batchCol"),
                                                       uiOutput("selectSample")
                                              ) # end TabPanel advanced Parameter
                                  ) #End TabPanel where user select its options
-                                 
+
                           ),
                           #### CHOOSING THE VIEWING OPTION
                           column(3,
@@ -131,16 +114,16 @@ ui <- tagList(
                                  h3("Dimensions dataset:"),
                                  DT::dataTableOutput("ViewDim")
                                  )
-                          
+
                         ), #End first Row
                         fluidRow( #Begin Second Row --> Data visualization
                           h2("Information Visualization"),
                           DT::dataTableOutput("ViewTable")
                         ), #End second row
-                        
+
                         fluidRow( #Beginning third row
-                          
-                          #### COUNTING TABLE UPLOAD 
+
+                          #### COUNTING TABLE UPLOAD
                           column(3,
                             h3("Upload Counting Table"),
                             conditionalPanel(("input.LoadExample == 'No' && input.LoadExample2 == 'No'"),
@@ -152,10 +135,10 @@ ui <- tagList(
                                              radioButtons("sep", "Separator", choices = c(Comma = ",",Semicolon = ";",Tab = "\t"), selected = ","),
                                              radioButtons("dec", "Decimal", choices = c(Comma = ",", Dot = "."), selected = ".")
                             )
-                            
+
                           ),
-                          
-                          #### ANNOTATION TABLE UPLOAD 
+
+                          #### ANNOTATION TABLE UPLOAD
                           column(3,
                             h3("Upload Annotation File"),
                             conditionalPanel(("input.LoadExample == 'No' && input.LoadExample2 == 'No'"),
@@ -168,8 +151,8 @@ ui <- tagList(
                                              radioButtons("dec2", "Decimal", choices = c(Comma = ",", Dot = "."), selected = ".")
                             )
                           ),
-                          
-                          #### TAXA TABLE UPLOAD 
+
+                          #### TAXA TABLE UPLOAD
                           column(3,
                             h3("Upload Optional File"),
                             conditionalPanel(condition = "((input.CountingT == 'OTUs' | input.CountingT1 == 'OTUs') && (input.TaxonFile | input.TaxonFile1) && (input.LoadExample == 'No' | input.LoadExample2 == 'No'))",
@@ -181,9 +164,9 @@ ui <- tagList(
                                              radioButtons("sep3", "Separator", choices = c(Comma = ",", Semicolon = ";", Tab = "\t"), selected = ",")
                             )
                           ),
-                          
-                          #### UPLOAD SECOND OMIC TABLE 
-                          
+
+                          #### UPLOAD SECOND OMIC TABLE
+
                           column(3,
                             h3("Upload your second omic table"),
                             conditionalPanel("input.TypeAnalysis == 'multivariate' && input.LoadExample2 == 'No'",
@@ -196,11 +179,11 @@ ui <- tagList(
                                              radioButtons("dec4", "Decimal", choices = c(Comma = ",", Dot = "."), selected = ".")
                             )
                           )
-                        
+
                       ) # End third row
                       )
              ),# End First Page
-             
+
              #### PAGE 2 ####
              tabPanel("DATA_OVERVIEW",
                       id = "DATA_OVERVIEW",
@@ -219,8 +202,8 @@ ui <- tagList(
                                                                                      selected = "average"),
                                                                          actionButton("showMethod", "How to choose the right method ?"),
                                                                          uiOutput("SelectVariable"),
-                                                                         radioButtons("pdf_or_svg_page2_dataset1_dendrogramme", 
-                                                                                      "Choose an extension:", 
+                                                                         radioButtons("pdf_or_svg_page2_dataset1_dendrogramme",
+                                                                                      "Choose an extension:",
                                                                                       choices = c("pdf", "svg")),
                                                                          downloadButton("Download_Page2_dataset1_dendrogramme", "Download")
                                                                 ),
@@ -237,22 +220,22 @@ ui <- tagList(
                                                                                                       selected = "bray"),
                                                                                           actionButton("showDist", "How to choose the right distance ?")),
                                                                          uiOutput("SelectVariable3"),
-                                                                         radioButtons("pdf_or_svg_page2_dataset1_ordination", 
-                                                                                      "Choose an extension:", 
+                                                                         radioButtons("pdf_or_svg_page2_dataset1_ordination",
+                                                                                      "Choose an extension:",
                                                                                       choices = c("pdf", "svg")),
                                                                          downloadButton("Download_Page2_dataset1_ordination", "Download")
-                                                                         
+
                                                                 ),
                                                                 tabPanel("Dataset Specificity", value = "Page2_dataset1_rel_ab",
                                                                          plotOutput("Relative_Abundance", height = 650),
                                                                          uiOutput("SelectTaxo"),
                                                                          uiOutput("SelectVariable_rel_ab"),
-                                                                         radioButtons("pdf_or_svg_page2_dataset1_rel_ab", 
-                                                                                      "Choose an extension:", 
+                                                                         radioButtons("pdf_or_svg_page2_dataset1_rel_ab",
+                                                                                      "Choose an extension:",
                                                                                       choices = c("pdf", "svg")),
                                                                          downloadButton("Download_Page2_dataset1_rel_ab", "Download")
-                                                                )) 
-                                             )    
+                                                                ))
+                                             )
                                   )),
                                   tabPanel("Second Dataset", value = "Page2_dataset2",
                                            fluidRow( # Begin First row (preference selection)
@@ -266,13 +249,13 @@ ui <- tagList(
                                                                                      selected = "average"),
                                                                          actionButton("showMethod_sec", "How to choose the right method ?"),
                                                                          uiOutput("SelectVariable_sec"),
-                                                                         radioButtons("pdf_or_svg_page2_dataset2_dendrogramme", 
-                                                                                      "Choose an extension:", 
+                                                                         radioButtons("pdf_or_svg_page2_dataset2_dendrogramme",
+                                                                                      "Choose an extension:",
                                                                                       choices = c("pdf", "svg")),
                                                                          downloadButton("Download_Page2_dataset2_dendrogramme", "Download")
                                                                 ),
                                                                 tabPanel("General Ordination", value = "Page2_dataset2_ordination",
-              
+
                                                                          plotlyOutput("PCoA_sec", width = 850, height = 650),
                                                                          selectInput("selectOrdinationSec",
                                                                                      label = "Choose a type of ordination",
@@ -284,10 +267,10 @@ ui <- tagList(
                                                                                                       choices = c("bray", "euclidean", "manhattan", "jaccard", "binomial", "cao"),
                                                                                                       selected = "bray"),
                                                                                           actionButton("showDist_sec", "How to choose the right distance ?")),
-                                                                         
+
                                                                          uiOutput("SelectVariable3_sec"),
-                                                                         radioButtons("pdf_or_svg_page2_dataset2_ordination", 
-                                                                                      "Choose an extension:", 
+                                                                         radioButtons("pdf_or_svg_page2_dataset2_ordination",
+                                                                                      "Choose an extension:",
                                                                                       choices = c("pdf", "svg")),
                                                                          downloadButton("Download_Page2_dataset2_ordination", "Download")
 
@@ -296,22 +279,22 @@ ui <- tagList(
                                                                          plotOutput("Relative_Abundance_sec", height = 650),
                                                                          uiOutput("SelectTaxo_sec"),
                                                                          uiOutput("SelectVariable_rel_ab_sec"),
-                                                                         radioButtons("pdf_or_svg_page2_dataset2_rel_ab", 
-                                                                                      "Choose an extension:", 
+                                                                         radioButtons("pdf_or_svg_page2_dataset2_rel_ab",
+                                                                                      "Choose an extension:",
                                                                                       choices = c("pdf", "svg")),
                                                                          downloadButton("Download_Page2_dataset2_rel_ab", "Download")
                                                                 )
                                                                 )
                                              )
                                              ))
-                      
-                        
+
+
                       ), #End First Row
                       br()
-                      
-                      
+
+
   ), # End Second Page
-  
+
   #### PAGE 3 ####
   tabPanel("NETWORK_INFERENCE", # Beginning third Page
            id = "NETWORK_INFERENCE",
@@ -324,69 +307,69 @@ ui <- tagList(
                                          h3("Choose Your Preferences: "),
                                          powers = c(c(1:10), seq(from = 12, to=20, by=2)),
                                          uiOutput("Power"),
-                                         
+
                                          actionButton("showPower", "How to choose the right softPower ?"),
-                                         
+
                                          hr(),
-                                         
+
                                          uiOutput("ModuleSize"),
-                                         
+
                                          hr(),
                                          radioButtons('signed', "Choose between a signed and a unsigned network: ",
                                                       choices = c("signed", "unsigned"),
                                                       selected = "signed"),
-                                         
+
                                          actionButton("showSigned", "What is the difference between a signed and a unsigned Network ?"),
-                                         
+
                                          hr(),
-                                         
+
                                          radioButtons('corNetwork', "Choose the correlation option for the network: ",
                                                       choices= c('pearson', 'spearman', 'bicor'),
                                                       selected = 'pearson'),
-                                         
+
                                          hr(),
-                                         
+
                                          uiOutput("buttonPower"),
-                                         
+
                                          uiOutput("buttonNet"),
-                                         
-                                         radioButtons("pdf_or_svg_p3", 
-                                                      "Choose an extension:", 
+
+                                         radioButtons("pdf_or_svg_p3",
+                                                      "Choose an extension:",
                                                       choices = c("pdf", "svg")),
-                                         
+
                                          downloadButton("Download_Network_Creation", "Download"),
-                                         
+
                                          hr()
-                                         
+
                                   ),
-                                  
-                                  
+
+
                                   column(6,
                                          h3("Scale Free Topoly against Soft Power: "),
                                          plotOutput("ScaleFree", height = 650)
-                                         
+
                                   ),
                                   conditionalPanel("input.TypeAnalysis == 'simple'",
                                                    column(2,
-                                                          h3("Click here to unlock the network exploration and the multivariate analysis 
+                                                          h3("Click here to unlock the network exploration and the multivariate analysis
                                             (if you uploaded two counting tables)"),
                                                           actionButton("enableTabulations", "Explore your network")
                                                    )),
                                   conditionalPanel("input.TypeAnalysis == 'multivariate'",
                                                    column(2,
-                                                          h3("Click here to unlock the network exploration and the multivariate analysis 
+                                                          h3("Click here to unlock the network exploration and the multivariate analysis
                                             (if you uploaded two counting tables)"),
                                                           actionButton("goD2", "Check your second dataset")
                                                    ))
-                                  
-                                  
+
+
                                 ), #End first Row
                                 fluidRow( #Second Row
-                                  
+
                                   column(6,
                                          h3("Classical Multidimensional Scaling plot to visualize the network"),
                                          uiOutput("multiScalePlotOutput")
-                                         
+
                                   ),
                                   column(6,
                                          h3("Module Clustering: "),
@@ -406,7 +389,7 @@ ui <- tagList(
                                 # , #End third Row
                                 # h2("SparCC"),
                                 # fluidRow( #Begining fourth row
-                                #   
+                                #
                                 #   column(10,
                                 #          h3("SparCC Network"),
                                 #          uiOutput("buttonSparcc"),
@@ -420,59 +403,59 @@ ui <- tagList(
                                          h3("Choose Your Preferences: "),
                                          powers = c(c(1:10), seq(from = 12, to=20, by=2)),
                                          uiOutput("Power2"),
-                                         
+
                                          actionButton("showPower2", "How to choose the right softPower ?"),
-                                         
+
                                          hr(),
-                                         
+
                                          uiOutput("ModuleSize2"),
-                                         
+
                                          hr(),
                                          radioButtons('signed2', "Choose between a signed and a unsigned network: ",
                                                       choices = c("signed", "unsigned"),
                                                       selected = "signed"),
-                                         
+
                                          actionButton("showSigned2", "What is the difference between a signed and a unsigned Network ?"),
-                                         
+
                                          hr(),
-                                         
+
                                          radioButtons('corNetwork2', "Choose the correlation option for the network: ",
                                                       choices= c('pearson', 'spearman', 'bicor'),
                                                       selected = 'pearson'),
-                                         
+
                                          hr(),
-                                         
+
                                          uiOutput("buttonPower2"),
-                                         
+
                                          uiOutput("buttonNet2"),
-                                         
-                                         radioButtons("pdf_or_svg_p3_dataset2", 
-                                                      "Choose an extension:", 
+
+                                         radioButtons("pdf_or_svg_p3_dataset2",
+                                                      "Choose an extension:",
                                                       choices = c("pdf", "svg")),
-                                         
+
                                          downloadButton("Download_Network_Creation_dataset2", "Download"),
-                                         
+
                                          hr()
-                                         
+
                                   ),
                                   column(6,
                                          h3("Scale Free Topoly against Soft Power: "),
                                          plotOutput("ScaleFree2", height = 650)
-                                         
+
                                   ),
                                   column(2,
-                                         h3("Click here to unlock the network exploration and the multivariate analysis 
+                                         h3("Click here to unlock the network exploration and the multivariate analysis
                                             (if you uploaded two counting tables)"),
                                          actionButton("enableTabulations2", "Explore your network")
                                   )
-                                  
+
                                 ), #End first Row
                                 fluidRow( #Second Row
-                                  
+
                                   column(6,
                                          h3("Classical Multidimensional Scaling plot to visualize the network"),
                                          uiOutput("multiScalePlotOutput2")
-                                         
+
                                   ),
                                   column(6,
                                          h3("Module Clustering: "),
@@ -491,17 +474,17 @@ ui <- tagList(
                                 ), #End third Row
                                 h2("SparCC"),
                                 fluidRow( #Begining fourth row
-                                  
+
                                   column(10,
                                          h3("SparCC Network"),
                                          uiOutput("buttonSparcc2"),
                                          visNetworkOutput("sparcc.Network2", height = 1000)
                                   )
-                                ) # End Fourth Row 
+                                ) # End Fourth Row
                        )
                        )
            ), # End third Page
-  
+
  ### PAGE 4 ###
   # tabPanel("SPARCC", #Beginning page 4
   #          id = "SPARCC",
@@ -529,13 +512,13 @@ ui <- tagList(
            #          h3("Relative Abundance SparCC Network Modules"),
            #          #verbatimTextOutput("Relative_Abundance_Module_sparcc")
            #          plotlyOutput("Relative_Abundance_Module_sparcc", height = 650)
-           # 
+           #
            #   ),
            #   column(6,
            #          h3("Correlation between the modules and the external variables"),
            #          #verbatimTextOutput("Relative_Abundance_Module_sparcc")
            #          iheatmaprOutput("HEATMAP_SPARCC", height = 650)
-           # 
+           #
            #   )
            # ) #Beginning third row
 
@@ -552,7 +535,7 @@ ui <- tagList(
                                          h3("Choose Your Preferences"),
                                          p("In this section you will be able to explore the genes or OTUs of specific modules."),
                                          p("The selection inputs under each plots allow you to select your preferences"),
-                                         p("First, take a look at the heatmap on your right and try to find interesting correlation. For the 
+                                         p("First, take a look at the heatmap on your right and try to find interesting correlation. For the
                                            modules and variables of your choice, explore their specificity in the network to better understand what
                                            links these entity together."),
                                          hr(),
@@ -561,19 +544,19 @@ ui <- tagList(
                                                       selected = "spearman"),
                                          uiOutput("SelectModule"),
                                          hr(),
-                                         
-                                         radioButtons("pdf_or_svg_p4", 
-                                                      "Choose an extension:", 
+
+                                         radioButtons("pdf_or_svg_p4",
+                                                      "Choose an extension:",
                                                       choices = c("pdf", "svg")),
-                                         
+
                                          downloadButton("Download_Network_Exploration", "Download")
-                                         
+
                                          ),
                                   column(9,
                                          title = "Module's Correlation to External Traits",
                                          plotOutput("Corr_External_Trait", height = 750)
                                   )
-                                  
+
                                   ), # end first row
                                 br(),
                                 br(),
@@ -613,8 +596,8 @@ ui <- tagList(
                                          numericInput("ncomponent", "Number of Components:",
                                                       1, min = 1, max = 10,
                                                       value = 6),
-                                         
-                                         
+
+
                                          downloadButton("PLS_VIP", "Download")),
                                   column(6,
                                          h3("PLS"),
@@ -629,7 +612,7 @@ ui <- tagList(
                                          plotOutput("edge_node", height = 1000)
                                          )
                                 )
-                                
+
                                 # End Third Row
                        ),
                        tabPanel("Second Dataset",
@@ -650,16 +633,16 @@ ui <- tagList(
                                          radioButtons("pdf_or_svg_p4_dataset2",
                                                       "Choose an extension:",
                                                       choices = c("pdf", "svg")),
-                                         
+
                                          downloadButton("Download_Network_Exploration_dataset_2", "Download")
-                                         
+
                                          )
                                   ,
                                   column(9,
                                          title = "Module's Correlation to External Traits",
                                          plotOutput("Corr_External_TraitSec", height = 750)
                                   )
-                                  
+
                                   ), # end first row
                                 br(),
                                 br(),
@@ -699,14 +682,14 @@ ui <- tagList(
                                          numericInput("ncomponent_D2", "Number of Components:",
                                                       1, min = 1, max = 10,
                                                       value = 6),
-                                         
+
                                          downloadButton("PLS_VIP_D2", "Download")),
                                   column(6,
                                          h3("PLS"),
                                          plotOutput("PLS_D2"),
                                          h5("CVS:"),
                                          textOutput("CVS_D2"))
-                                  
+
                                 ),
                                 fluidRow(
                                   column(9,
@@ -714,12 +697,12 @@ ui <- tagList(
                                          uiOutput("taxAnnotSec"),
                                          plotOutput("edge_node_D2", height = 1000)
                                   )
-                                  
+
                                 )
            )
   )
            ), # End fourth page
-  
+
   #### PAGE 5 ####
   tabPanel("MULTI-OMICS_ANALYSIS", #Beginning page 5
            id = "MULTI-OMICS_ANALYSIS",
@@ -729,29 +712,29 @@ ui <- tagList(
                h3("Select your preferences: "),
                h5("Choose an option for the first dataset:"),
                uiOutput("SelectModule1"),
-               
+
                hr(),
-               
+
                h5("Choose an option for the first dataset:"),
                uiOutput("SelectModule2"),
-               
+
                hr(),
-               
+
                uiOutput("SelectVariable2"),
-               
+
                hr(),
-               
+
                uiOutput("SelectTaxonomy"),
-               
+
                hr(),
-               
+
                checkboxInput("ShowDrivers", "Show the main drivers of the co-inertia", FALSE),
                downloadButton("Download_Coinertia_drivers", "Download drivers"),
-               
-               radioButtons("pdf_or_svg_p5", 
-                            "Choose an extension:", 
+
+               radioButtons("pdf_or_svg_p5",
+                            "Choose an extension:",
                             choices = c("pdf", "svg")),
-               
+
                downloadButton("Download_Multivariate_Analysis", "Download")
              ),
              column(9,
@@ -788,7 +771,7 @@ ui <- tagList(
                     conditionalPanel("input.selectModule22_p5 == 'Individual_Variables'",
                                      h4("Select some variables to show in the heatmap: "),
                                      uiOutput("selectVariables"))
-                    
+
              )
            ), # End Third Row
            fluidRow( #Fourth Row
@@ -800,7 +783,7 @@ ui <- tagList(
              )
            ) #End Fourth Row
            ), # End Page 5
- 
+
  #### PAGE 6 ####
  tabPanel("REPORT_GENERATION",
           fluidRow(
@@ -832,7 +815,7 @@ ui <- tagList(
                    actionButton("showDist_P6", "How to choose the right distance ?"),
                    textAreaInput("commentSection2", "Add a comment about the data overview (Second Section)", width = "700px", height = "200px"),
                    hr(),
-                   
+
                    h4("Section 3: Network Creation"),
                    column(6,
                           h4("FIRST DATASET:"),
@@ -862,7 +845,7 @@ ui <- tagList(
                           actionButton("showSigned_D2_P6", "What is the difference between a signed and a unsigned Network ?"),
                           radioButtons('corNetwork_D2_P6', "Choose the correlation option for the network (Second dataset): ",
                                        choices= c('pearson', 'spearman', 'bicor', 'sparCC'),
-                                       selected = 'pearson')) 
+                                       selected = 'pearson'))
                      ),
                    textAreaInput("commentSection3", "Add a comment about the network inference (Third Section)", width = "700px", height = "200px"),
                    hr(),
@@ -884,11 +867,11 @@ ui <- tagList(
                                     h4("Section 5: Multi-omics analysis:"),
                                     numericInput("minimalCorrelation", "Choose a minimum correlation input to determine which figures will be printed in the network: ", min = 0.50, max = 1.00, step = 0.01, value = 0.50),
                                     textAreaInput("commentSection5", "Add a comment about the multi-omics analysis (Fith Section)", width = "700px", height = "200px")),
-                   
+
                    actionButton("produceReport", "Produce a Report"),
                    downloadButton("downloadReport", "Report Generation"))
           )),
-  
+
   #### HELP PAGE ####
   tabPanel("HELP", # Beginning Help Page
            fluidRow(
@@ -910,7 +893,7 @@ ui <- tagList(
            ),
            hr(),
            fluidRow(
-             column(4, 
+             column(4,
                     style = "background-color:   #f17e70 ; box-shadow: 5px 10px;",
                     h3("First Step: Upload your datasets ! Filtrate ! Normalize ! Transform !"),
                     h4("If you want to perform a simple WGCNA:"),
@@ -923,8 +906,8 @@ ui <- tagList(
                                  Order, Class, ..., Species but selecting the option 'upload a taxa table'. (see Table 3)"),
                     p("In advance parameters, you can filtrate, normalize, transform your data. You can also remove sample outliers."),
                     h4("If you want to perform a multi-omics analysis:"),
-                    p("MiBiOmics allows to perform analysis on two omics layers to compare, confront and associate different variables describind the same individuals. 
-                      To perform a multi-omics analysis, select the Multi-Omics Analysis fiels in Type of analysis. This time you will have to upload at least 2 counting 
+                    p("MiBiOmics allows to perform analysis on two omics layers to compare, confront and associate different variables describind the same individuals.
+                      To perform a multi-omics analysis, select the Multi-Omics Analysis fiels in Type of analysis. This time you will have to upload at least 2 counting
                       tables (the first one contains the variables of your first omics layer and the second one contains the variables of your second omics layer). You will
                       also need, as before, a annotation table. If one of your Omics layer contains OTUs, you need to upload this counting table first to be able to upload its
                       associated taxonomic annotation. As before, you will also be able to filtrate, normalize and transform both counting tables.")
@@ -939,7 +922,7 @@ ui <- tagList(
                     DT::dataTableOutput("exampleTaxa")
              )
            ),
-           
+
            hr(),
            fluidRow(
              column(5,
@@ -973,7 +956,7 @@ ui <- tagList(
                                  Unfortunately, it is not possible to perform correlation network with datasets larger than 10 000 and we are currently working on
                                  this issue."),
                     h4("If you perform a multi-omics analysis"),
-                    p("Use the tabset called 'second dataset' to perform the network inference on your second omics layer. /!\ The next section, 'Network exploration' can 
+                    p("Use the tabset called 'second dataset' to perform the network inference on your second omics layer. /!\ The next section, 'Network exploration' can
                       only be used once the network inference step has been performed on both datasets.")
                     )
            ),
@@ -995,7 +978,7 @@ ui <- tagList(
                       to be associated to the same external traits. For example the module yellow of your first dataset and the module blue of your second dataset are
                       strongly associated to the sampleSite external trait. They might be used and associated in the multi-omics analysis tab of MiBiOmics.")
              )
-             
+
            ),
            hr(),
            fluidRow(
@@ -1004,35 +987,35 @@ ui <- tagList(
                     h3("Perform a multi-omics analysis (only if the option multi-omics analysis was selected in the first tab) !"),
                     h4("Ordination technique: Co-Inertia Analysis"),
                     p("The co-inertia analysis is performed with the omicade4 R package used to perform multiple co-inertia analysis and created by Meng C, et al. in 2013.
-                      This package is based on the work realized by Stephane Dray, Daniel Chessel and Jean Thioulouse in 2003. With the co-inertia they created a methodoly 
+                      This package is based on the work realized by Stephane Dray, Daniel Chessel and Jean Thioulouse in 2003. With the co-inertia they created a methodoly
                       to associate two datasets and to represent the co-variance between both datasets. In MiBiOmics, the co-inertia is represented in two different ways.
-                      In the first figure (on the top in the multi-omics analysis tab), the samples are placed on the plot according to their values in the co-inertia first 
+                      In the first figure (on the top in the multi-omics analysis tab), the samples are placed on the plot according to their values in the co-inertia first
                       and second axis (read the article Dray et al., 2003 for more details). The closest they are to the maximal correlation line in red, the more they are
-                      correlated according to their expreesions/concentrations/abundances values in both datasets. The second figure represents the co-variance between the 
+                      correlated according to their expreesions/concentrations/abundances values in both datasets. The second figure represents the co-variance between the
                       values of each sample in both datasets. Each sample is represented twice in the plot: the filled circle represents the first datasets and more specifically
                       the position of the sample in the first ordination space, the empty square represents the second datasets and the position of the same sample in the second
-                      ordination space. Both representation of the samples are linked with a line and the length of the line indicates how much the values of the same sample covary 
-                      from one dataset to the over. The longer is the line the less the values of the same sample covary from one dataset to the other. The variables that are the most 
+                      ordination space. Both representation of the samples are linked with a line and the length of the line indicates how much the values of the same sample covary
+                      from one dataset to the over. The longer is the line the less the values of the same sample covary from one dataset to the other. The variables that are the most
                       associated with the covariance of both datasets are also plotted on the co-inertia. They can belong to both datasets. The RV score indicates the quality
                       of the co-inertia. It values varies between 0 and 1 and the closest it is to 1, the best is the covariation between both datasets."),
-                    p("The co-inertia information tabset shows the length of this line for each samples represented with a dendrogramme, and two other figures. This tabsets might help 
+                    p("The co-inertia information tabset shows the length of this line for each samples represented with a dendrogramme, and two other figures. This tabsets might help
                       to isolate the samples with a low covariation and see if it can be associated with a external clinical traits."),
                     h4("Ordination Technique: Procrustes Analysis"),
                     p("Procrustes analysis is realized in MiBiOmics thanks to the vegan R package created by Jari Oksanen. The procrustes method was originally created
                       by J. C. Gower in 1975 and uses the 3D configuration of the datasets ordinations, reorientate and re-scale them to allow the comparison of these differents
-                      ordination in multidimensional space. The procrustes analysis plot can be found in the procrustes analysis tabset and can be interpreted as the co-inertia 
+                      ordination in multidimensional space. The procrustes analysis plot can be found in the procrustes analysis tabset and can be interpreted as the co-inertia
                       analysis plot."),
                     h4("Correlation Network analysis: using WGCNA modules to compare sub-parts of two different networks."),
-                    p("First, the first heatmap represents the correlation between each modules of both networks. The more two modules are correlated the more they might be 
-                      associated to each other. This heatmap needs to be used as a guide to select the module of both network (and both omics layers) to each other. Only one 
+                    p("First, the first heatmap represents the correlation between each modules of both networks. The more two modules are correlated the more they might be
+                      associated to each other. This heatmap needs to be used as a guide to select the module of both network (and both omics layers) to each other. Only one
                       module of each network can be selected to pursue the analysis."),
                     p("Once a module from each network (each omics dataset) is selected, the pairwise correlation between each variables of each modules is performed and represented
-                      in two different manners: a bi-partite networks and a correlation heatmap. In the bi-partite networks, red nodes represents the variables of the first dataset 
+                      in two different manners: a bi-partite networks and a correlation heatmap. In the bi-partite networks, red nodes represents the variables of the first dataset
                       and blue nodes the variables of the second datasets. A line between two nodes indicates an association. The following heatmap represents the correlation values
                       between the variables of the first selected module (first omics layer) and the variables of the second selected module (second omic layer)")
                     ),
              hr()
-             
+
                     )
            ), # End Help Page
  #### ABOUT ####
@@ -1055,11 +1038,9 @@ ui <- tagList(
                    p(""),
                    a(href="http://pbil.univ-lyon1.fr/members/dray/files/articles/dray2003c.pdf", "S. Dray et al., 2003 (co-inertia analysis)")
                    )
-            
+
           )
- ) # end about page 
+ ) # end about page
 
 )
 )
-
-
