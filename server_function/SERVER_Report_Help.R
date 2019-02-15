@@ -2,6 +2,13 @@
 #### SERVER FUNCTIONS : HELP AND ABOUT PAGE ####
 ################################################
 
+
+#### OBSERVE EVENTS ####
+
+
+
+
+
 exampleDATA <- data.frame("OTU1" = c(0,0,1,6,0), "OTU2" = c(2,0,1,0,0), "OTU3" = c(7,0,4,6,0), "OTU4" = c(2,3,0,0,0), "OTU5" = c(7,0,0,0,0), "OTU6" = c(0,0,1,0,0))
 rownames(exampleDATA) <- c("Sample1", "Sample2", "Sample3", "Sample4", "Sample5")
 exampleANNOT <- data.frame("SampleSite" = c("Site1", "Site6", "Site1", "Site5", "Site3"), "AlphaDiversity" = c(0.56,0.72,0.11,0.32,0.06), "Depth" = c(40,32,56,106,12))

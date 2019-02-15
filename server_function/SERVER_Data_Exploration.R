@@ -54,6 +54,7 @@ exprDat_Relative_abundance <- reactive({
   validate(
     need(input$LoadExample == "Yes" || input$LoadExample2 == "Yes" || (input$TaxonFile == TRUE|| input$TaxonFile1 == TRUE), "This plot can only be realised with OTUs")
   )
+  
   exprDat <- exprDat_2()
   
   if (input$SelectVariable_rel_ab != "unordered"){

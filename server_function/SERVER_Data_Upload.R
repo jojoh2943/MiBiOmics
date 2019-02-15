@@ -134,24 +134,7 @@ exprDat <- reactive({
   rownames(exprDat) <- sampleID
   
   
-  if (nrow(exprDat) > 14){
-    gsg = goodSamplesGenes(exprDat, verbose = 3)
-    #If gsg$allOK is TRUE, all genes have passed the cuts.  If not, we remove the offending genes and samples
-    
-    if (!gsg$allOK)
-    {
-      # Optionally, print the gene and sample names that were removed:
-      if (sum(!gsg$goodGenes)>0)
-      {
-        printFlush(paste("Removing genes:", paste(colnames(exprDat)[!gsg$goodGenes], collapse = ", ")));
-      }
-      if (sum(!gsg$goodSamples)>0)
-      {
-        printFlush(paste("Removing samples:", paste(rownames(exprDat)[!gsg$goodSamples], collapse = ", ")));
-      }
-      exprDat <- exprDat[rownames(exprDat)[gsg$goodSamples], colnames(exprDat)[gsg$goodGenes]]
-    }
-  }
+  
   
   ### SELECTED FILTRATION
   if (input$Filtration == "Yes"){
@@ -215,11 +198,14 @@ exprDat <- reactive({
               exprDat <- decostand(exprDat, method = "hellinger")
             }else{
               if (input$TypeTransformation == "CLR"){
-                exprDat = clr(t(exprDat))
-                exprDat <- t(exprDat)
+                exprDat = clr(exprDat)
               }else{
                 if (input$TypeTransformation == "ILR"){
-                  exprDat = pca(exprDat, ncomp = 10, logratio = 'ILR')
+                  exprDat.ilr = ilr(exprDat)
+                  B <- exp(ilrBase(D=ncol(exprDat)))
+                  exprDat = t(apply(exprDat.ilr, 1, function(x){
+                    B[,1]^x[1] * B[,2]^x[2]
+                  }))
                 }
               }
             }
@@ -318,9 +304,11 @@ exprDat_Default <- reactive({
                 #print(exprDat)
               }else{
                 if (input$TypeTransformation == "ILR"){
-                  print("in if")
-                  exprDat = ilr(exprDat)
-                  print(exprDat)
+                  exprDat.ilr = ilr(exprDat)
+                  B <- exp(ilrBase(D=ncol(exprDat)))
+                  exprDat = t(apply(exprDat.ilr, 1, function(x){
+                    B[,1]^x[1] * B[,2]^x[2]
+                  }))
                 }
               }
             }
@@ -420,24 +408,6 @@ exprDatSec <- reactive ({
   }
   rownames(exprDatSec) <- sampleID
   
-  if (nrow(exprDatSec) > 14){
-    gsg = goodSamplesGenes(exprDatSec, verbose = 3)
-    #If gsg$allOK is TRUE, all genes have passed the cuts.  If not, we remove the offending genes and samples
-    
-    if (!gsg$allOK)
-    {
-      # Optionally, print the gene and sample names that were removed:
-      if (sum(!gsg$goodGenes)>0)
-      {
-        printFlush(paste("Removing genes:", paste(colnames(exprDatSec)[!gsg$goodGenes], collapse = ", ")));
-      }
-      if (sum(!gsg$goodSamples)>0)
-      {
-        printFlush(paste("Removing samples:", paste(rownames(exprDatSec)[!gsg$goodSamples], collapse = ", ")));
-      }
-      exprDatSec <- exprDatSec[rownames(exprDatSec)[gsg$goodSamples], colnames(exprDatSec)[gsg$goodGenes]]
-    }
-  }
   
   ### SELECTED FILTRATION
   if (input$Filtration1 == "Yes"){
@@ -506,12 +476,15 @@ exprDatSec <- reactive ({
             }else{
               if (input$TypeTransformation1 == "CLR"){
                 exprDatSec = clr(exprDatSec)
+              }else{
+                if (input$TypeTransformation1 == "ILR"){
+                  exprDatSec.ilr = ilr(exprDatSec)
+                  B <- exp(ilrBase(D=ncol(exprDatSec)))
+                  exprDatSec = t(apply(exprDatSec.ilr, 1, function(x){
+                    B[,1]^x[1] * B[,2]^x[2]
+                  }))
+                }
               }
-              # else{
-              #   if (input$TypeTransformation1 == "ILR"){
-              #     exprDat = pca(exprDat, ncomp = 10, logratio = 'ILR')
-              #   }
-              # }
             }
           }
         }
@@ -545,29 +518,12 @@ exprDatSec_Default <- reactive({
   
   expressionData<-"data/metabolites.txt" #expression file path
   exprDatSec <- read.csv(expressionData, sep = ";", header = TRUE, row.names = 1)
-  exprDatSec <- exprDatSec[which(rownames(exprDatSec) %in% rownames(exprDat_present())),]
+  #exprDatSec <- exprDatSec[which(rownames(exprDatSec) %in% rownames(exprDat_present())),]
   validate(
     need(nrow(exprDatSec) != 0, "The sample names are differents between the datasets.")
   )
   exprDatSec[is.na(exprDatSec)] <- 0
-  if (nrow(exprDatSec) > 14){
-    gsg = goodSamplesGenes(exprDatSec, verbose = 3)
-    #If gsg$allOK is TRUE, all genes have passed the cuts.  If not, we remove the offending genes and samples
-    
-    if (!gsg$allOK)
-    {
-      # Optionally, print the gene and sample names that were removed:
-      if (sum(!gsg$goodGenes)>0)
-      {
-        printFlush(paste("Removing genes:", paste(colnames(exprDatSec)[!gsg$goodGenes], collapse = ", ")));
-      }
-      if (sum(!gsg$goodSamples)>0)
-      {
-        printFlush(paste("Removing samples:", paste(rownames(exprDatSec)[!gsg$goodSamples], collapse = ", ")));
-      }
-      exprDatSec <- exprDatSec[rownames(exprDatSec)[gsg$goodSamples], colnames(exprDatSec)[gsg$goodGenes]]
-    }
-  }
+  
   ### SELECTED FILTRATION
   if (input$Filtration1 == "Yes"){
     if (input$TypeFiltration1 == "prevalence"){
@@ -637,12 +593,15 @@ exprDatSec_Default <- reactive({
             }else{
               if (input$TypeTransformation1 == "CLR"){
                 exprDatSec = clr(exprDatSec)
+              }else{
+                if (input$TypeTransformation1 == "ILR"){
+                  exprDatSec.ilr = ilr(exprDatSec)
+                  B <- exp(ilrBase(D=ncol(exprDatSec)))
+                  exprDatSec = t(apply(exprDatSec.ilr, 1, function(x){
+                    B[,1]^x[1] * B[,2]^x[2]
+                  }))
+                }
               }
-              # else{
-              #   if (input$TypeTransformation1 == "ILR"){
-              #     exprDatSec = pca(exprDatSec, ncomp = 10, logratio = 'ILR')
-              #   }
-              # }
             }
           }
         }
@@ -835,6 +794,8 @@ exprDat_report <- reactive({
 
 #### P2: REACTIVE OBJECTS ####
 
+
+
 exprDat_2 <- reactive({
   if (input$LoadExample == "No" && input$LoadExample2 =="No"){
     validate(
@@ -846,43 +807,12 @@ exprDat_2 <- reactive({
     )
     expr <- exprDat()
     annot <- sampleAnnot()
-    if (input$TypeAnalysis == "multivariate"){
-      exprDatSec <- exprDatSec()
-      #annot<- annot[which(rownames(annot) %in% rownames(exprDatSec)),]
-      expr <- expr[which(rownames(expr) %in% rownames(exprDatSec)),]
-    }
   }else{
     expr <- exprDat_Default()
     annot <- sampleAnnot_Default()
-    if (input$TypeAnalysis == "multivariate"){
-      exprDatSec <- exprDatSec_Default()
-      #annot<- annot[which(rownames(annot) %in% rownames(exprDatSec)),]
-      expr <- expr[which(rownames(expr) %in% rownames(exprDatSec)),]
-    }
   }
-  if (nrow(expr) > 14){
-    gsg = goodSamplesGenes(expr, verbose = 3)
-    #If gsg$allOK is TRUE, all genes have passed the cuts.  If not, we remove the offending genes and samples
-    
-    if (!gsg$allOK)
-    {
-      # Optionally, print the gene and sample names that were removed:
-      if (sum(!gsg$goodGenes)>0)
-      {
-        printFlush(paste("Removing genes:", paste(colnames(expr)[!gsg$goodGenes], collapse = ", ")));
-      }
-      if (sum(!gsg$goodSamples)>0)
-      {
-        printFlush(paste("Removing samples:", paste(rownames(expr)[!gsg$goodSamples], collapse = ", ")));
-      }
-      exprDat1 <- expr[rownames(expr)[gsg$goodSamples], colnames(expr)[gsg$goodGenes]]
-    }else{
-      exprDat1 <- expr
-    }
-  }else{
+
     exprDat1 <- expr
-  }
-  
   
   if (any(rownames(annot) %!in% rownames(expr)) == TRUE ){
     sampleAnnot1 <- annot[which(rownames(annot ) %in% rownames(expr ) ),]
@@ -934,7 +864,6 @@ exprDatSec_3 <- reactive({
   expr <- exprDatSec_2()
   expr <- expr[which(rownames(expr) %in% rownames(sampleAnnot_sec())),]
   expr <- expr[match(rownames(expr), rownames(sampleAnnot_sec())),]
-  print(expr)
   expr
 })
 
@@ -965,6 +894,57 @@ taxTable_Sec <- reactive({
   taxTable <- taxTable[match(rownames(taxTable), colnames(exprDatSec_3())),]
   taxTable$rn <- colnames(exprDatSec_3())
   taxTable
+})
+
+#### P3: REACTIVE OBJECTS ####
+exprDat_WGCNA <- reactive({
+  expr <- exprDat_2()
+  if (nrow(expr) > 14){
+    gsg = goodSamplesGenes(expr, verbose = 3)
+    #If gsg$allOK is TRUE, all genes have passed the cuts.  If not, we remove the offending genes and samples
+
+    if (!gsg$allOK)
+    {
+      # Optionally, print the gene and sample names that were removed:
+      if (sum(!gsg$goodGenes)>0)
+      {
+        printFlush(paste("Removing genes:", paste(colnames(expr)[!gsg$goodGenes], collapse = ", ")));
+      }
+      if (sum(!gsg$goodSamples)>0)
+      {
+        printFlush(paste("Removing samples:", paste(rownames(expr)[!gsg$goodSamples], collapse = ", ")));
+      }
+      exprDat1 <- expr[rownames(expr)[gsg$goodSamples], colnames(expr)[gsg$goodGenes]]
+    }else{
+      exprDat1 <- expr
+    }
+  }else{
+  exprDat1 <- expr
+  }
+  exprDat1
+})
+
+exprDatSec_WGCNA <- reactive({
+  expr <- exprDatSec_3()
+  if (nrow(expr) > 14){
+    gsg = goodSamplesGenes(expr, verbose = 3)
+    #If gsg$allOK is TRUE, all genes have passed the cuts.  If not, we remove the offending genes and samples
+
+    if (!gsg$allOK)
+    {
+      # Optionally, print the gene and sample names that were removed:
+      if (sum(!gsg$goodGenes)>0)
+      {
+        printFlush(paste("Removing genes:", paste(colnames(expr)[!gsg$goodGenes], collapse = ", ")));
+      }
+      if (sum(!gsg$goodSamples)>0)
+      {
+        printFlush(paste("Removing samples:", paste(rownames(expr)[!gsg$goodSamples], collapse = ", ")));
+      }
+      expr <- expr[rownames(expr)[gsg$goodSamples], colnames(expr)[gsg$goodGenes]]
+    }
+  }
+  expr
 })
 
 #### P5: REACTIVE OBJECTS ####

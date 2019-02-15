@@ -9,7 +9,7 @@
 
 # Choose a set of soft-thresholding powers
 sft <- reactive({
-  if (ncol(exprDat_2()) > 2500){
+  if (ncol(exprDat_WGCNA()) > 2500){
     validate(
       need(input$goPower != 0, 'Because your dataset is too large, we will perform each step independantly. Push the STEP 1 button and wait. The operation may take a while.')
     )
@@ -20,19 +20,19 @@ sft <- reactive({
     # Call the network topology analysis function
     sft <- isolate({
       withProgress({
-        pickSoftThreshold(exprDat_2(), powerVector = powers, verbose = 5, networkType = input$signed)
+        pickSoftThreshold(exprDat_WGCNA(), powerVector = powers, verbose = 5, networkType = input$signed)
       }, message = 'Compute Soft Power', value = 0, detail = 'This may take a while')
     })
   }else{
     powers = c(c(1:10), seq(from = 12, to=20, by=2))
-    sft <- pickSoftThreshold(exprDat_2(), powerVector = powers, verbose = 5, networkType = input$signed)
+    sft <- pickSoftThreshold(exprDat_WGCNA(), powerVector = powers, verbose = 5, networkType = input$signed)
   }
   sft
 })
 
 
 selectedDissTOM <- reactive({
-  if (ncol(exprDat_2()) > 2500){
+  if (ncol(exprDat_WGCNA()) > 2500){
     validate(
       need(input$goNet != 0, 'Because your dataset is too large, we will perform each step independantly. Push the STEP 1 button and wait. The operation may take a while.')
     )
@@ -44,12 +44,12 @@ selectedDissTOM <- reactive({
       withProgress({
         softPower <- as.numeric(input$selectPower)
         if (input$corNetwork == 'bicor'){
-          adjacency <- adjacency(exprDat_2(), power = softPower, type = input$signed, corFnc = 'bicor', corOptions = list(use = 'p', maxPOutliers =0.1))
+          adjacency <- adjacency(exprDat_WGCNA(), power = softPower, type = input$signed, corFnc = 'bicor', corOptions = list(use = 'p', maxPOutliers =0.1))
         }else{
           if (input$corNetwork == 'sparCC'){
             adjacency <- X_sparcc()
           }else{
-            adjacency <- adjacency(exprDat_2(), power = softPower, type = input$signed, corOptions= paste("method = '", input$corNetwork,"'", sep = ""))
+            adjacency <- adjacency(exprDat_WGCNA(), power = softPower, type = input$signed, corOptions= paste("method = '", input$corNetwork,"'", sep = ""))
             
           }
         }
@@ -62,12 +62,12 @@ selectedDissTOM <- reactive({
     softPower <- as.numeric(input$selectPower)
     
     if (input$corNetwork == 'bicor'){
-      adjacency <- adjacency(exprDat_2(), power = softPower, type = input$signed, corFnc = 'bicor', corOptions = list(maxPOutliers =0.1))
+      adjacency <- adjacency(exprDat_WGCNA(), power = softPower, type = input$signed, corFnc = 'bicor', corOptions = list(maxPOutliers =0.1))
     }else{
       if (input$corNetwork == 'sparCC'){
         adjacency <- X_sparcc()
       }else{
-        adjacency <- adjacency(exprDat_2(), power = softPower, type = input$signed, corOptions= paste("method = '", input$corNetwork,"'", sep = ""))
+        adjacency <- adjacency(exprDat_WGCNA(), power = softPower, type = input$signed, corOptions= paste("method = '", input$corNetwork,"'", sep = ""))
         
       }
     }
@@ -80,7 +80,7 @@ selectedDissTOM <- reactive({
 
 multiScaling <- reactive({
   
-  if (ncol(exprDat_2()) > 2500){
+  if (ncol(exprDat_WGCNA()) > 2500){
     validate(
       need(input$goNet != 0, 'Because your dataset is too large, we will perform each step independantly. Push the STEP 2 button and wait. The operation may take a while.')
     )
@@ -103,7 +103,7 @@ multiScaling <- reactive({
 })
 
 selectedTree <- reactive({
-  if (ncol(exprDat_2()) > 2500){
+  if (ncol(exprDat_WGCNA()) > 2500){
     if (input$goNet == 0){
       return(0)
     }
@@ -120,7 +120,7 @@ selectedTree <- reactive({
 
 selectedDynamicColor <- reactive({
   minModuleSize = input$selectModuleSize
-  if (ncol(exprDat_2()) > 2500){
+  if (ncol(exprDat_WGCNA()) > 2500){
     validate(
       need(input$goNet != 0, 'Because your dataset is too large, we will perform each step independantly. Push the STEP 2 button and wait. The operation may take a while.')
     )
@@ -146,7 +146,7 @@ selectedDynamicColor <- reactive({
 
 
 selectedMEs <- reactive ({
-  if (ncol(exprDat_2()) > 2500){
+  if (ncol(exprDat_WGCNA()) > 2500){
     validate(
       need(input$goNet != 0, 'Because your dataset is too large, we will perform each step independantly. Push the STEP 2 button and wait. The operation may take a while.')
     )
@@ -155,12 +155,12 @@ selectedMEs <- reactive ({
     }
     isolate({
       withProgress(message = 'Module Eigenvalues...', value = 0, {
-        MEList <- moduleEigengenes(exprDat_2(), colors = selectedDynamicColor(), excludeGrey = TRUE)
+        MEList <- moduleEigengenes(exprDat_WGCNA(), colors = selectedDynamicColor(), excludeGrey = TRUE)
         MEs = MEList$eigengenes
       })
     })
   }else{
-    MEList = moduleEigengenes(exprDat_2(), colors = selectedDynamicColor(), excludeGrey = TRUE)
+    MEList = moduleEigengenes(exprDat_WGCNA(), colors = selectedDynamicColor(), excludeGrey = TRUE)
     MEs = MEList$eigengenes
   }
   MEs
@@ -171,7 +171,7 @@ selectedMETree<- reactive({
   validate(
     need((ncol(selectedMEs())> 1), "Not enough modules")
   )
-  if (ncol(exprDat_2()) > 2500){
+  if (ncol(exprDat_WGCNA()) > 2500){
     validate(
       need(input$goNet != 0, 'Because your dataset is too large, we will perform each step independantly. Push the STEP 2 button and wait. The operation may take a while.')
     )
@@ -196,7 +196,7 @@ selectedMETree<- reactive({
 
 # Choose a set of soft-thresholding powers
 sft2 <- reactive({
-  if (ncol(exprDatSec_3()) > 2500){
+  if (ncol(exprDatSec_WGCNA()) > 2500){
     validate(
       need(input$goPower2 != 0, 'Because your dataset is too large, we will perform each step independantly. Push the STEP 1 button and wait. The operation may take a while.')
     )
@@ -207,19 +207,19 @@ sft2 <- reactive({
     # Call the network topology analysis function
     sft <- isolate({
       withProgress({
-        pickSoftThreshold(exprDatSec_3(), powerVector = powers, verbose = 5, networkType = input$signed2)
+        pickSoftThreshold(exprDatSec_WGCNA(), powerVector = powers, verbose = 5, networkType = input$signed2)
       }, message = 'Compute Soft Power', value = 0, detail = 'This may take a while')
     })
   }else{
     powers = c(c(1:10), seq(from = 12, to=20, by=2))
-    sft <- pickSoftThreshold(exprDatSec_3(), powerVector = powers, verbose = 5, networkType = input$signed2)
+    sft <- pickSoftThreshold(exprDatSec_WGCNA(), powerVector = powers, verbose = 5, networkType = input$signed2)
   }
   sft
 })
 
 
 selectedDissTOM2 <- reactive({
-  if (ncol(exprDatSec_3()) > 2500){
+  if (ncol(exprDatSec_WGCNA()) > 2500){
     if (input$goNet2 == 0){
       return(0)
     }
@@ -228,12 +228,12 @@ selectedDissTOM2 <- reactive({
       withProgress({
         softPower <- as.numeric(input$selectPower2)
         if (input$corNetwork2 == 'bicor'){
-          adjacency <- adjacency(exprDatSec_3(), power = softPower, type = input$signed2, corFnc = 'bicor', corOptions = list(use = 'p', maxPOutliers =0.1))
+          adjacency <- adjacency(exprDatSec_WGCNA(), power = softPower, type = input$signed2, corFnc = 'bicor', corOptions = list(use = 'p', maxPOutliers =0.1))
         }else{
           if (input$corNetwork2 == 'sparCC'){
             adjacency <- X_sparcc()
           }else{
-            adjacency <- adjacency(exprDatSec_3(), power = softPower, type = input$signed2, corOptions= paste("method = '", input$corNetwork2,"'", sep = ""))
+            adjacency <- adjacency(exprDatSec_WGCNA(), power = softPower, type = input$signed2, corOptions= paste("method = '", input$corNetwork2,"'", sep = ""))
             
           }
         }
@@ -246,12 +246,12 @@ selectedDissTOM2 <- reactive({
     softPower <- as.numeric(input$selectPower2)
     
     if (input$corNetwork2 == 'bicor'){
-      adjacency <- adjacency(exprDatSec_3(), power = softPower, type = input$signed2, corFnc = 'bicor', corOptions = list(maxPOutliers =0.1))
+      adjacency <- adjacency(exprDatSec_WGCNA(), power = softPower, type = input$signed2, corFnc = 'bicor', corOptions = list(maxPOutliers =0.1))
     }else{
       if (input$corNetwork2 == 'sparCC'){
         adjacency <- X_sparcc()
       }else{
-        adjacency <- adjacency(exprDatSec_3(), power = softPower, type = input$signed2, corOptions= paste("method = '", input$corNetwork2,"'", sep = ""))
+        adjacency <- adjacency(exprDatSec_WGCNA(), power = softPower, type = input$signed2, corOptions= paste("method = '", input$corNetwork2,"'", sep = ""))
         
       }
     }
@@ -270,7 +270,7 @@ multiScaling2 <- reactive({
 })
 
 selectedTree2 <- reactive({
-  if (ncol(exprDatSec_3()) > 2500){
+  if (ncol(exprDatSec_WGCNA()) > 2500){
     if (input$goNet2 == 0){
       return(0)
     }
@@ -287,7 +287,7 @@ selectedTree2 <- reactive({
 
 selectedDynamicColor2 <- reactive({
   minModuleSize = input$selectModuleSize2
-  if (ncol(exprDatSec_3()) > 2500){
+  if (ncol(exprDatSec_WGCNA()) > 2500){
     if (input$goNet2 == 0){
       return(0)
     }
@@ -310,18 +310,18 @@ selectedDynamicColor2 <- reactive({
 
 
 selectedMEs2 <- reactive ({
-  if (ncol(exprDatSec_3()) > 2500){
+  if (ncol(exprDatSec_WGCNA()) > 2500){
     if (input$goNet2 == 0){
       return(0)
     }
     isolate({
       withProgress(message = 'Module Eigenvalues...', value = 0, {
-        MEList <- moduleEigengenes(exprDatSec_3(), colors = selectedDynamicColor2(), excludeGrey = TRUE)
+        MEList <- moduleEigengenes(exprDatSec_WGCNA(), colors = selectedDynamicColor2(), excludeGrey = TRUE)
         MEList$eigengenes
       })
     })
   }else{
-    MEList = moduleEigengenes(exprDatSec_3(), colors = selectedDynamicColor2(), excludeGrey = TRUE)
+    MEList = moduleEigengenes(exprDatSec_WGCNA(), colors = selectedDynamicColor2(), excludeGrey = TRUE)
     MEs = MEList$eigengenes
   }
   MEs
@@ -331,7 +331,7 @@ selectedMETree2 <- reactive({
   validate(
     need((ncol(selectedMEs2())> 1), "Not enough modules")
   )
-  if (ncol(exprDatSec_3()) > 2500){
+  if (ncol(exprDatSec_WGCNA()) > 2500){
     if (input$goNet2 == 0){
       return(0)
     }
@@ -494,7 +494,7 @@ output$ModuleSize <- renderUI({
                label = "Choose the minimum module size :",
                value = 6, 
                min = 2,
-               max = max(30, round(ncol(exprDat_2())/3))
+               max = max(30, round(ncol(exprDat_WGCNA())/3))
   )
 })
 
@@ -503,7 +503,7 @@ output$ModuleSize2 <- renderUI({
                label = "Choose the minimum module size :",
                value = 6, 
                min = 2,
-               max = max(30, round(ncol(exprDatSec_3())/3))
+               max = max(30, round(ncol(exprDatSec_WGCNA())/3))
   )
 })
 
@@ -512,7 +512,7 @@ output$ModuleSize_P6 <- renderUI({
                label = "Choose the minimum module size (first dataset):",
                value = 6, 
                min = 2,
-               max = max(30, round(ncol(exprDat_2())/3))
+               max = max(30, round(ncol(exprDat_WGCNA())/3))
   )
 })
 
@@ -521,32 +521,32 @@ output$ModuleSize_D2_P6 <- renderUI({
                label = "Choose the minimum module size (Second dataset):",
                value = 6, 
                min = 2,
-               max = max(30, round(ncol(exprDatSec_3())/3))
+               max = max(30, round(ncol(exprDatSec_WGCNA())/3))
   )
 })
 
 # A button to trigger the net creation (only when large datasets are uploaded)
 output$buttonPower <- renderUI({
-  if (ncol(exprDat_2()) > 2500){
+  if (ncol(exprDat_WGCNA()) > 2500){
     actionButton("goPower", "STEP 1: Compute Soft Power Calculation !")
   }
 })
 
 # A button to trigger the net creation (only when large datasets are uploaded)
 output$buttonPower2 <- renderUI({
-  if (ncol(exprDat_2()) > 2500){
+  if (ncol(exprDat_WGCNA()) > 2500){
     actionButton("goPower2", "STEP 1: Compute Soft Power Calculation !")
   }
 })
 
 output$buttonNet <- renderUI({
-  if (ncol(exprDat_2()) > 2500){
+  if (ncol(exprDat_WGCNA()) > 2500){
     actionButton("goNet", "STEP 2: Begin Network Creation !")
   }
 })
 
 output$buttonNet2 <- renderUI({
-  if (ncol(exprDatSec_3()) > 2500){
+  if (ncol(exprDatSec_WGCNA()) > 2500){
     actionButton("goNet2", "STEP 3: Begin Network Creation !")
     
   }

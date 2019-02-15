@@ -12,7 +12,7 @@
 
 module_Relative_abundance <- reactive({
   modGenes = (selectedDynamicColor()== input$selectModule)
-  exprDat <- exprDat_2()[which(rownames(exprDat_2()) %in% rownames(sampleAnnot_2())),]
+  exprDat <- exprDat_WGCNA()[which(rownames(exprDat_WGCNA()) %in% rownames(sampleAnnot_2())),]
   exprDat <- exprDat[match(rownames(exprDat), rownames(sampleAnnot_2())),]
   if (input$LoadExample == "No" && input$LoadExample2 == "No"){
     if (input$TypeAnalysis == "multivariate"){
@@ -45,7 +45,7 @@ module_Relative_abundance <- reactive({
 })
 
 module_Relative_abundanceSec <- reactive({
-  exprDat <- exprDatSec_3()
+  exprDat <- exprDatSec_WGCNA()
   #print(exprDat)
   # validate(
   #   need(input$OmicTable == "OTUs", "Only for OTUs counting table.")
@@ -55,7 +55,7 @@ module_Relative_abundanceSec <- reactive({
   
   
   if (input$selectVariable_RelAbSec != "unordered"){
-    exprDat <- exprDat[order(sampleAnnot_2()[,input$selectVariable_RelAbSec]),]
+    exprDat <- exprDat[order(sampleAnnot_sec()[,input$selectVariable_RelAbSec]),]
   }
   
   selectedExpr <- exprDat[, modGenes]
@@ -115,7 +115,7 @@ sampleAnnot_orderedSec <- reactive({
 
 geneModuleMembership <- reactive({
   modNames = substring(names(selectedMEs()), 3)
-  geneModuleMembership = as.data.frame(cor(exprDat_2(), selectedMEs(), method= input$selectCorrelation, use="na.or.complete"));
+  geneModuleMembership = as.data.frame(cor(exprDat_WGCNA(), selectedMEs(), method= input$selectCorrelation, use="na.or.complete"));
   
   names(geneModuleMembership) = paste("MM", modNames, sep="");
   geneModuleMembership
@@ -123,7 +123,7 @@ geneModuleMembership <- reactive({
 
 geneModuleMembershipSec <- reactive({
   modNames = substring(names(selectedMEs2()), 3)
-  geneModuleMembership = as.data.frame(cor(exprDatSec_3(), selectedMEs2(), method= input$selectCorrelationSec, use="na.or.complete"));
+  geneModuleMembership = as.data.frame(cor(exprDatSec_WGCNA(), selectedMEs2(), method= input$selectCorrelationSec, use="na.or.complete"));
   
   names(geneModuleMembership) = paste("MM", modNames, sep="");
   geneModuleMembership
@@ -142,9 +142,9 @@ geneTraitSignificance <- reactive({
       colnames_used <- c(colnames_used, i)
       modNames = substring(names(selectedMEs()), 3)
       if (i == colnames(sampleAnnot_2())[1]){
-        geneTraitSignificance = as.data.frame(cor(exprDat_2(), env, method= input$selectCorrelation, use="na.or.complete"));
+        geneTraitSignificance = as.data.frame(cor(exprDat_WGCNA(), env, method= input$selectCorrelation, use="na.or.complete"));
       }else{
-        geneTraitSignificance = data.frame(geneTraitSignificance, cor(exprDat_2(), env, method= input$selectCorrelation, use="na.or.complete"));
+        geneTraitSignificance = data.frame(geneTraitSignificance, cor(exprDat_WGCNA(), env, method= input$selectCorrelation, use="na.or.complete"));
       }
     }
   }
@@ -165,9 +165,9 @@ geneTraitSignificanceSec <- reactive({
       colnames_used <- c(colnames_used, i)
       modNames = substring(names(selectedMEs2()), 3)
       if (i == colnames(sampleAnnot_sec())[1]){
-        geneTraitSignificance = as.data.frame(cor(exprDatSec_3(), env, method= input$selectCorrelationSec, use="na.or.complete"));
+        geneTraitSignificance = as.data.frame(cor(exprDatSec_WGCNA(), env, method= input$selectCorrelationSec, use="na.or.complete"));
       }else{
-        geneTraitSignificance = data.frame(geneTraitSignificance, cor(exprDatSec_3(), env, method= input$selectCorrelationSec, use="na.or.complete"));
+        geneTraitSignificance = data.frame(geneTraitSignificance, cor(exprDatSec_WGCNA(), env, method= input$selectCorrelationSec, use="na.or.complete"));
       }
     }
   }
@@ -227,8 +227,8 @@ textModuleMembershipSec <- reactive({
 # Recalculate MEs with color labels
 selectedCondDF <- reactive({
   moduleColors = selectedDynamicColor()
-  nSamples <- nrow(exprDat_2())
-  MEs0 = moduleEigengenes(exprDat_2(), moduleColors)$eigengenes
+  nSamples <- nrow(exprDat_WGCNA())
+  MEs0 = moduleEigengenes(exprDat_WGCNA(), moduleColors)$eigengenes
   MEs = orderMEs(MEs0)
   text_matrix_vector <- c()
   
@@ -279,8 +279,8 @@ selectedCondDF <- reactive({
 # Recalculate MEs with color labels
 selectedCondDFSec <- reactive({
   moduleColors = selectedDynamicColor2()
-  nSamples <- nrow(exprDatSec_3())
-  MEs0 = moduleEigengenes(exprDatSec_3(), moduleColors)$eigengenes
+  nSamples <- nrow(exprDatSec_WGCNA())
+  MEs0 = moduleEigengenes(exprDatSec_WGCNA(), moduleColors)$eigengenes
   MEs = orderMEs(MEs0)
   text_matrix_vector <- c()
   
@@ -331,8 +331,8 @@ selectedCondDFSec <- reactive({
 #### VIP SCORE
 
 markers.data <- reactive({
-  markers <- colnames(exprDat_2())[selectedDynamicColor()==input$colorModule]
-  exprDat_2()[,markers]
+  markers <- colnames(exprDat_WGCNA())[selectedDynamicColor()==input$colorModule]
+  exprDat_WGCNA()[,markers]
   
 })
 
@@ -348,10 +348,10 @@ env.markers.data <- reactive({
 
 fit.object.ncomp <- reactive({
   
-  if (length(colnames(exprDat_2())[selectedDynamicColor()==input$colorModule]) >= 10){
+  if (length(colnames(exprDat_WGCNA())[selectedDynamicColor()==input$colorModule]) >= 10){
     ncomp=10
   }else{
-    ncomp=length(colnames(exprDat_2())[selectedDynamicColor()==input$colorModule])
+    ncomp=length(colnames(exprDat_WGCNA())[selectedDynamicColor()==input$colorModule])
   }
   formulaChar <- paste(input$sampleAnnotSelection, "~.", sep ="")
   fit = plsr(formula(formulaChar), data=env.markers.data(), validation="LOO", method = "oscorespls", ncomp=ncomp)
@@ -387,7 +387,7 @@ vip.df <- reactive({
 
 edge_to_node <- reactive({
   module <- input$colorModule
-  probes <- colnames(exprDat_2())
+  probes <- colnames(exprDat_WGCNA())
   inModule <- is.finite(match(selectedDynamicColor(), module))
   modProbes <- probes[inModule]
   modTOM <- selectedDissTOM()[inModule, inModule]
@@ -422,12 +422,12 @@ df.hive.to.plot <- reactive({
 #### VIP SCORE
 
 markers.data_D2 <- reactive({
-  markers <- colnames(exprDatSec_3())[selectedDynamicColor2()==input$colorModule_D2]
-  exprDatSec_3()[,markers]
+  markers <- colnames(exprDatSec_WGCNA())[selectedDynamicColor2()==input$colorModule_D2]
+  exprDatSec_WGCNA()[,markers]
 })
 
 env.markers.data_D2 <- reactive({
-  sampleAnnot <- sampleAnnot_2()
+  sampleAnnot <- sampleAnnot_sec()
   if (!is.numeric(sampleAnnot[,input$sampleAnnotSelection_D2])){
     sampleAnnot[,input$sampleAnnotSelection_D2] <- as.numeric(as.factor(sampleAnnot[,input$sampleAnnotSelection_D2]))
   }
@@ -437,10 +437,10 @@ env.markers.data_D2 <- reactive({
 })
 
 fit.object.ncomp_D2 <- reactive({
-  if (length(colnames(exprDatSec_3())[selectedDynamicColor2()==input$colorModule_D2]) >= 10){
+  if (length(colnames(exprDatSec_WGCNA())[selectedDynamicColor2()==input$colorModule_D2]) >= 10){
     ncomp=10
   }else{
-    ncomp=length(colnames(exprDatSec_3())[selectedDynamicColor2()==input$colorModule_D2])
+    ncomp=length(colnames(exprDatSec_WGCNA())[selectedDynamicColor2()==input$colorModule_D2])
   }
   formulaChar <- paste(input$sampleAnnotSelection_D2, "~.", sep ="")
   fit = plsr(formula(formulaChar), data=env.markers.data_D2(), validation="LOO", method = "oscorespls", ncomp=ncomp)
@@ -476,7 +476,7 @@ vip.df_D2 <- reactive({
 
 edge_to_node_D2 <- reactive({
   module <- input$colorModule_D2
-  probes <- colnames(exprDatSec_3())
+  probes <- colnames(exprDatSec_WGCNA())
   inModule <- is.finite(match(selectedDynamicColor2(), module))
   modProbes <- probes[inModule]
   modTOM <- selectedDissTOM2()[inModule, inModule]
