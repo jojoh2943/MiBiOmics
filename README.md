@@ -9,4 +9,4 @@ MiBiOmics is available at https://shiny-bird.univ-nantes.fr/jzoppi/app/ but can 
 library(shiny)
 runGitHub("MiBiOmics", "jojoh2943")
 ```
-All the necessary packages will be installed automatically for the usage of MiBiOmics.
+All the necessary packages will be installed automatically for the usage of MiBiOmics. If you don't have the right R and shiny version you can download the conda environment from the file *MiBiOmics.yml* and run Rstudio from this environment.
