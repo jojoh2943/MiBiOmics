@@ -20,8 +20,6 @@ install_packages <- c("shiny", "matrixStats", "Hmisc",
                       "compositions")
 
 
-biocManager_packages <- c("mixOmics")
-
 if (length(setdiff(bioconductor_packages, rownames(installed.packages()))) > 0) {
   source("https://bioconductor.org/biocLite.R")
   biocLite(setdiff(bioconductor_packages, rownames(installed.packages())), suppressUpdates = TRUE)
@@ -31,13 +29,6 @@ if (length(setdiff(install_packages, rownames(installed.packages()))) > 0) {
   install.packages(setdiff(install_packages, rownames(installed.packages())))
 }
 
-
-if (length(setdiff(biocManager_packages, rownames(installed.packages()))) > 0) {
-  source("http://bioconductor.org/biocLite.R")
-  if (!requireNamespace("BiocManager", quietly = TRUE))
-    +     install.packages("BiocManager")
-  BiocManager::install("mixOmics", version = "3.8")
-}
 
 
 #define MAX_NUM_DLLS 10000
@@ -76,5 +67,4 @@ library("network")
 library("rmarkdown")
 library("pls")
 library("sva") #Batch correction
-library("mixOmics") #CLR transformation
 library("plotly")
