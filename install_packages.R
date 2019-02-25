@@ -35,7 +35,7 @@ if (length(setdiff(install_packages, rownames(installed.packages()))) > 0) {
 library("flexdashboard")
 library("metagenomeSeq")
 library("shiny")
-library("V8")
+#library("V8")
 library("shinythemes")
 library("WGCNA")
 library("ggplot2")
