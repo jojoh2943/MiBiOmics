@@ -62,7 +62,6 @@ generateReport <- observeEvent(input$produceReport,{
         datasets[["type"]] <- "S" # Simple without taxon
       }
       if (input$TypeAnalysis == "multivariate"){
-        datasets[["exprDatSec"]] <- exprDatSec()
         if (input$TaxonFile1){
           datasets[["taxaTable"]] <- taxTable_report()
           datasets[["type"]] <- "MT" # Multivariate + Taxon
@@ -193,8 +192,15 @@ generateReport <- observeEvent(input$produceReport,{
     # Copy the report file to a temporary directory before processing it, in
     # case we don't have write permissions to the current working dir (which
     # can happen when deployed).
+    list_Ordination <- list()
+    if (input$selectOrdination_P6 == "PCA"){
+      list_Ordination[[1]] <- "PCA"
+    }else{
+      list_Ordination[[1]] <- "PCoA"
+      list_Ordination[[2]] <- input$selectDist_P6
+    }
     if (input$TypeAnalysis == "simple"){
-      list_input_P6 <- list(dist_PCoA_P2 = input$selectDist_P6, 
+      list_input_P6 <- list(dist_PCoA_P2 = list_Ordination, 
                             method_dendrogramme_P2 = input$selectMethod_P6,
                             power = input$Power_P6,
                             moduleSize = input$ModuleSize_P6,
@@ -204,9 +210,16 @@ generateReport <- observeEvent(input$produceReport,{
                             loadExample = input$LoadExample,
                             typeData_D1 = input$CountingT)
     }else{
-      list_input_P6 <- list(dist_PCoA_P2 = input$selectDist_P6, 
+      list_Ordination_D2 <- list()
+      if (input$selectOrdination_D2_P6 == "PCA"){
+        list_Ordination_D2[[1]] <- "PCA"
+      }else{
+        list_Ordination_D2[[1]] <- "PCoA"
+        list_Ordination_D2[[2]] <- input$selectDist_D2_P6
+      }
+      list_input_P6 <- list(dist_PCoA_P2 = list_Ordination_D2, 
                             method_dendrogramme_P2 = input$selectMethod_P6, 
-                            dist_PCoA_D2_P2 = input$selectDist_D2_P6,
+                            dist_PCoA_D2_P2 = list_Ordination_D2,
                             method_dendrogramme_D2_P2 = input$selectMethod_D2_P6,
                             power = input$Power_P6,
                             power_D2 = input$Power_D2_P6,

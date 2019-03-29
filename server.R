@@ -12,7 +12,7 @@ server <- function(input, output, session) {
 
   #### GENERAL CODE ####
 
-  #### HEADER ####
+  #### HEADER ####  
   js$disableTab("NETWORK_EXPLORATION")
   js$disableTab("MULTI-OMICS_ANALYSIS")
   

@@ -1,0 +1,2435 @@
+---
+title: Report MicroSysMics
+output: 
+  html_document:
+   toc: true
+   theme: united
+params:
+ list_treatment: NA
+ list_input: NA
+ exprDat: NA
+ sampleAnnot: NA
+ taxTable: NA
+---
+
+```{r, echo = FALSE, message = FALSE}
+#define MAX_NUM_DLLS 10000
+library('flexdashboard')
+library('shiny')
+library('shinythemes')
+library('WGCNA')
+library('ggplot2')
+library('ggdendro')
+library('ggrepel')
+library('dendextend')
+library('pheatmap')
+library('reshape2')
+library('gridExtra')
+library('RColorBrewer')
+library('dynamicTreeCut')
+library('omicade4')
+library('ade4')
+library('data.table')
+library('vegan')
+library('gridExtra')
+library('tools')
+library('DT')
+library('plotly')
+library('iheatmapr')
+library('threejs')
+library('shinyjs')
+library('cowplot')
+library('igraph')
+library('visNetwork')
+library('compositions')
+'%!in%' <- function(x,y)!('%in%'(x,y))
+euc.dist <- function(x1, x2) sqrt(sum((x1 - x2) ^ 2))
+normalize <- function(x) {
+  return ((x - min(x)) / (max(x) - min(x)))
+}
+```
+# Data Import and Treatment:
+For this analysis 3 files were imported: a counting table, a taxonomic annotation table describing the OTUs of the counting table and an annotation table
+A filtration on the first counting table was realized based on prevalence. A metabolite/OTU/gene is kept in the analysis if it is present in at least 10 % of the samples.
+
+A CLR tranformation on the first counting table was realized.
+A look at the counting table:
+```{r, echo = FALSE, message = FALSE, warning = FALSE, include = FALSE}
+exprDat <- params$exprDat
+sampleAnnot <- params$sampleAnnot
+list_treatment <- params$list_treatment
+list_input <- params$list_input
+taxTable <- params$taxTable
+```
+The following samples were removed from the analysis: None 
+ 
+
+ 
+ 
+
+# Data Overview
+```{r, echo = FALSE, message = FALSE, fig.height = 15, fig.width = 15, include = FALSE}
+dendrogramme = hclust(dist(exprDat), method = list_input[['method_dendrogramme_P2']])
+
+
+ddata_dendro <- dendro_data(dendrogramme)
+labs <- label(ddata_dendro)
+Samples = labs$label
+conditionRow = match(Samples, rownames(sampleAnnot))
+dataCondition = sampleAnnot[conditionRow, ]
+labs <- data.frame(labs, dataCondition)
+colnames(labs) <- c('x', 'y', 'label', colnames(dataCondition))
+info_dendrogramme <- labs
+
+
+```
+
+
+## Sample Dendrogramme (Fist dataset) {.tabset .tabset-fade .tabset-pills}
+A sample dendrogramme colored according to the metadata
+ 
+### Dendrogramme  Year 
+
+```{r, echo = FALSE, message = FALSE, warning=FALSE, comment=FALSE, fig.height = 15, fig.width = 15}
+
+ ggdendrogram(dendrogramme, label = FALSE) +
+  geom_text(data = info_dendrogramme,
+             aes_string(label = colnames(info_dendrogramme[3]), x = colnames(info_dendrogramme[1]), y = 0, colour =" Year "),
+            angle = 75,
+             vjust = 0,
+             nudge_y = -0.1,
+             size = 3) +
+             labs(title=paste('Sample Dendrogramme realized with the method:', list_input[['method_dendrogramme_P2']])) +
+   ylim(-0.15, NA)
+ 
+
+ ```
+ 
+### Dendrogramme  Y.grid 
+
+```{r, echo = FALSE, message = FALSE, warning=FALSE, comment=FALSE, fig.height = 15, fig.width = 15}
+
+ ggdendrogram(dendrogramme, label = FALSE) +
+  geom_text(data = info_dendrogramme,
+             aes_string(label = colnames(info_dendrogramme[3]), x = colnames(info_dendrogramme[1]), y = 0, colour =" Y.grid "),
+            angle = 75,
+             vjust = 0,
+             nudge_y = -0.1,
+             size = 3) +
+             labs(title=paste('Sample Dendrogramme realized with the method:', list_input[['method_dendrogramme_P2']])) +
+   ylim(-0.15, NA)
+ 
+
+ ```
+ 
+### Dendrogramme  X.grid 
+
+```{r, echo = FALSE, message = FALSE, warning=FALSE, comment=FALSE, fig.height = 15, fig.width = 15}
+
+ ggdendrogram(dendrogramme, label = FALSE) +
+  geom_text(data = info_dendrogramme,
+             aes_string(label = colnames(info_dendrogramme[3]), x = colnames(info_dendrogramme[1]), y = 0, colour =" X.grid "),
+            angle = 75,
+             vjust = 0,
+             nudge_y = -0.1,
+             size = 3) +
+             labs(title=paste('Sample Dendrogramme realized with the method:', list_input[['method_dendrogramme_P2']])) +
+   ylim(-0.15, NA)
+ 
+
+ ```
+ 
+### Dendrogramme  Lat 
+
+```{r, echo = FALSE, message = FALSE, warning=FALSE, comment=FALSE, fig.height = 15, fig.width = 15}
+
+ ggdendrogram(dendrogramme, label = FALSE) +
+  geom_text(data = info_dendrogramme,
+             aes_string(label = colnames(info_dendrogramme[3]), x = colnames(info_dendrogramme[1]), y = 0, colour =" Lat "),
+            angle = 75,
+             vjust = 0,
+             nudge_y = -0.1,
+             size = 3) +
+             labs(title=paste('Sample Dendrogramme realized with the method:', list_input[['method_dendrogramme_P2']])) +
+   ylim(-0.15, NA)
+ 
+
+ ```
+ 
+### Dendrogramme  Long 
+
+```{r, echo = FALSE, message = FALSE, warning=FALSE, comment=FALSE, fig.height = 15, fig.width = 15}
+
+ ggdendrogram(dendrogramme, label = FALSE) +
+  geom_text(data = info_dendrogramme,
+             aes_string(label = colnames(info_dendrogramme[3]), x = colnames(info_dendrogramme[1]), y = 0, colour =" Long "),
+            angle = 75,
+             vjust = 0,
+             nudge_y = -0.1,
+             size = 3) +
+             labs(title=paste('Sample Dendrogramme realized with the method:', list_input[['method_dendrogramme_P2']])) +
+   ylim(-0.15, NA)
+ 
+
+ ```
+ 
+### Dendrogramme  YgridCal 
+
+```{r, echo = FALSE, message = FALSE, warning=FALSE, comment=FALSE, fig.height = 15, fig.width = 15}
+
+ ggdendrogram(dendrogramme, label = FALSE) +
+  geom_text(data = info_dendrogramme,
+             aes_string(label = colnames(info_dendrogramme[3]), x = colnames(info_dendrogramme[1]), y = 0, colour =" YgridCal "),
+            angle = 75,
+             vjust = 0,
+             nudge_y = -0.1,
+             size = 3) +
+             labs(title=paste('Sample Dendrogramme realized with the method:', list_input[['method_dendrogramme_P2']])) +
+   ylim(-0.15, NA)
+ 
+
+ ```
+ 
+### Dendrogramme  XgridCal 
+
+```{r, echo = FALSE, message = FALSE, warning=FALSE, comment=FALSE, fig.height = 15, fig.width = 15}
+
+ ggdendrogram(dendrogramme, label = FALSE) +
+  geom_text(data = info_dendrogramme,
+             aes_string(label = colnames(info_dendrogramme[3]), x = colnames(info_dendrogramme[1]), y = 0, colour =" XgridCal "),
+            angle = 75,
+             vjust = 0,
+             nudge_y = -0.1,
+             size = 3) +
+             labs(title=paste('Sample Dendrogramme realized with the method:', list_input[['method_dendrogramme_P2']])) +
+   ylim(-0.15, NA)
+ 
+
+ ```
+ 
+### Dendrogramme  PAR 
+
+```{r, echo = FALSE, message = FALSE, warning=FALSE, comment=FALSE, fig.height = 15, fig.width = 15}
+
+ ggdendrogram(dendrogramme, label = FALSE) +
+  geom_text(data = info_dendrogramme,
+             aes_string(label = colnames(info_dendrogramme[3]), x = colnames(info_dendrogramme[1]), y = 0, colour =" PAR "),
+            angle = 75,
+             vjust = 0,
+             nudge_y = -0.1,
+             size = 3) +
+             labs(title=paste('Sample Dendrogramme realized with the method:', list_input[['method_dendrogramme_P2']])) +
+   ylim(-0.15, NA)
+ 
+
+ ```
+ 
+### Dendrogramme  Salinity 
+
+```{r, echo = FALSE, message = FALSE, warning=FALSE, comment=FALSE, fig.height = 15, fig.width = 15}
+
+ ggdendrogram(dendrogramme, label = FALSE) +
+  geom_text(data = info_dendrogramme,
+             aes_string(label = colnames(info_dendrogramme[3]), x = colnames(info_dendrogramme[1]), y = 0, colour =" Salinity "),
+            angle = 75,
+             vjust = 0,
+             nudge_y = -0.1,
+             size = 3) +
+             labs(title=paste('Sample Dendrogramme realized with the method:', list_input[['method_dendrogramme_P2']])) +
+   ylim(-0.15, NA)
+ 
+
+ ```
+ 
+### Dendrogramme  SST 
+
+```{r, echo = FALSE, message = FALSE, warning=FALSE, comment=FALSE, fig.height = 15, fig.width = 15}
+
+ ggdendrogram(dendrogramme, label = FALSE) +
+  geom_text(data = info_dendrogramme,
+             aes_string(label = colnames(info_dendrogramme[3]), x = colnames(info_dendrogramme[1]), y = 0, colour =" SST "),
+            angle = 75,
+             vjust = 0,
+             nudge_y = -0.1,
+             size = 3) +
+             labs(title=paste('Sample Dendrogramme realized with the method:', list_input[['method_dendrogramme_P2']])) +
+   ylim(-0.15, NA)
+ 
+
+ ```
+ 
+### Dendrogramme  Flu.Chl 
+
+```{r, echo = FALSE, message = FALSE, warning=FALSE, comment=FALSE, fig.height = 15, fig.width = 15}
+
+ ggdendrogram(dendrogramme, label = FALSE) +
+  geom_text(data = info_dendrogramme,
+             aes_string(label = colnames(info_dendrogramme[3]), x = colnames(info_dendrogramme[1]), y = 0, colour =" Flu.Chl "),
+            angle = 75,
+             vjust = 0,
+             nudge_y = -0.1,
+             size = 3) +
+             labs(title=paste('Sample Dendrogramme realized with the method:', list_input[['method_dendrogramme_P2']])) +
+   ylim(-0.15, NA)
+ 
+
+ ```
+ 
+### Dendrogramme  MLD 
+
+```{r, echo = FALSE, message = FALSE, warning=FALSE, comment=FALSE, fig.height = 15, fig.width = 15}
+
+ ggdendrogram(dendrogramme, label = FALSE) +
+  geom_text(data = info_dendrogramme,
+             aes_string(label = colnames(info_dendrogramme[3]), x = colnames(info_dendrogramme[1]), y = 0, colour =" MLD "),
+            angle = 75,
+             vjust = 0,
+             nudge_y = -0.1,
+             size = 3) +
+             labs(title=paste('Sample Dendrogramme realized with the method:', list_input[['method_dendrogramme_P2']])) +
+   ylim(-0.15, NA)
+ 
+
+ ```
+ 
+### Dendrogramme  NCP 
+
+```{r, echo = FALSE, message = FALSE, warning=FALSE, comment=FALSE, fig.height = 15, fig.width = 15}
+
+ ggdendrogram(dendrogramme, label = FALSE) +
+  geom_text(data = info_dendrogramme,
+             aes_string(label = colnames(info_dendrogramme[3]), x = colnames(info_dendrogramme[1]), y = 0, colour =" NCP "),
+            angle = 75,
+             vjust = 0,
+             nudge_y = -0.1,
+             size = 3) +
+             labs(title=paste('Sample Dendrogramme realized with the method:', list_input[['method_dendrogramme_P2']])) +
+   ylim(-0.15, NA)
+ 
+
+ ```
+ 
+### Dendrogramme  Biological.O2 
+
+```{r, echo = FALSE, message = FALSE, warning=FALSE, comment=FALSE, fig.height = 15, fig.width = 15}
+
+ ggdendrogram(dendrogramme, label = FALSE) +
+  geom_text(data = info_dendrogramme,
+             aes_string(label = colnames(info_dendrogramme[3]), x = colnames(info_dendrogramme[1]), y = 0, colour =" Biological.O2 "),
+            angle = 75,
+             vjust = 0,
+             nudge_y = -0.1,
+             size = 3) +
+             labs(title=paste('Sample Dendrogramme realized with the method:', list_input[['method_dendrogramme_P2']])) +
+   ylim(-0.15, NA)
+ 
+
+ ```
+ 
+### Dendrogramme  Station.Type 
+
+```{r, echo = FALSE, message = FALSE, warning=FALSE, comment=FALSE, fig.height = 15, fig.width = 15}
+
+ ggdendrogram(dendrogramme, label = FALSE) +
+  geom_text(data = info_dendrogramme,
+             aes_string(label = colnames(info_dendrogramme[3]), x = colnames(info_dendrogramme[1]), y = 0, colour =" Station.Type "),
+            angle = 75,
+             vjust = 0,
+             nudge_y = -0.1,
+             size = 3) +
+             labs(title=paste('Sample Dendrogramme realized with the method:', list_input[['method_dendrogramme_P2']])) +
+   ylim(-0.15, NA)
+ 
+
+ ```
+
+
+
+```{r, echo = FALSE, message = FALSE, warning = FALSE, include = FALSE}
+list_Ordination <- list_input[['dist_PCoA_P2']]
+if (list_Ordination[[1]] == 'PCA'){
+dudi_PCoA <- dudi.pca(exprDat, scannf = FALSE, nf = 2)
+}else{
+D1_dist <- vegdist(exprDat, method = list_Ordination[[2]])
+dudi_PCoA <- dudi.pco(D1_dist, scannf = FALSE, nf = 2)
+}
+PCoA <- data.frame(dudi_PCoA$li[,1:2], sampleAnnot)
+```
+## Ordination (First Dataset) {.tabset .tabset-fade .tabset-pills}
+A PCoA representing the variability of the first dataset
+
+### Year
+
+```{r, echo = FALSE, message= FALSE, fig.height= 15, fig.width = 15, warning = FALSE}
+ggplot(data = PCoA,
+aes_string(x = colnames(PCoA)[1], y = colnames(PCoA)[2], col = 'Year')) +
+geom_point(size = 2) +
+labs( x = sprintf('Axis 1 [%s%% Variance]', 100 * round(dudi_PCoA$eig[1] / sum(dudi_PCoA$eig), 2)),
+y = sprintf('Axis 2 [%s%% Variance]', 100 * round(dudi_PCoA$eig[2] / sum(dudi_PCoA$eig), 2)))
+```
+
+### Y.grid
+
+```{r, echo = FALSE, message= FALSE, fig.height= 15, fig.width = 15, warning = FALSE}
+ggplot(data = PCoA,
+aes_string(x = colnames(PCoA)[1], y = colnames(PCoA)[2], col = 'Y.grid')) +
+geom_point(size = 2) +
+labs( x = sprintf('Axis 1 [%s%% Variance]', 100 * round(dudi_PCoA$eig[1] / sum(dudi_PCoA$eig), 2)),
+y = sprintf('Axis 2 [%s%% Variance]', 100 * round(dudi_PCoA$eig[2] / sum(dudi_PCoA$eig), 2)))
+```
+
+### X.grid
+
+```{r, echo = FALSE, message= FALSE, fig.height= 15, fig.width = 15, warning = FALSE}
+ggplot(data = PCoA,
+aes_string(x = colnames(PCoA)[1], y = colnames(PCoA)[2], col = 'X.grid')) +
+geom_point(size = 2) +
+labs( x = sprintf('Axis 1 [%s%% Variance]', 100 * round(dudi_PCoA$eig[1] / sum(dudi_PCoA$eig), 2)),
+y = sprintf('Axis 2 [%s%% Variance]', 100 * round(dudi_PCoA$eig[2] / sum(dudi_PCoA$eig), 2)))
+```
+
+### Lat
+
+```{r, echo = FALSE, message= FALSE, fig.height= 15, fig.width = 15, warning = FALSE}
+ggplot(data = PCoA,
+aes_string(x = colnames(PCoA)[1], y = colnames(PCoA)[2], col = 'Lat')) +
+geom_point(size = 2) +
+labs( x = sprintf('Axis 1 [%s%% Variance]', 100 * round(dudi_PCoA$eig[1] / sum(dudi_PCoA$eig), 2)),
+y = sprintf('Axis 2 [%s%% Variance]', 100 * round(dudi_PCoA$eig[2] / sum(dudi_PCoA$eig), 2)))
+```
+
+### Long
+
+```{r, echo = FALSE, message= FALSE, fig.height= 15, fig.width = 15, warning = FALSE}
+ggplot(data = PCoA,
+aes_string(x = colnames(PCoA)[1], y = colnames(PCoA)[2], col = 'Long')) +
+geom_point(size = 2) +
+labs( x = sprintf('Axis 1 [%s%% Variance]', 100 * round(dudi_PCoA$eig[1] / sum(dudi_PCoA$eig), 2)),
+y = sprintf('Axis 2 [%s%% Variance]', 100 * round(dudi_PCoA$eig[2] / sum(dudi_PCoA$eig), 2)))
+```
+
+### YgridCal
+
+```{r, echo = FALSE, message= FALSE, fig.height= 15, fig.width = 15, warning = FALSE}
+ggplot(data = PCoA,
+aes_string(x = colnames(PCoA)[1], y = colnames(PCoA)[2], col = 'YgridCal')) +
+geom_point(size = 2) +
+labs( x = sprintf('Axis 1 [%s%% Variance]', 100 * round(dudi_PCoA$eig[1] / sum(dudi_PCoA$eig), 2)),
+y = sprintf('Axis 2 [%s%% Variance]', 100 * round(dudi_PCoA$eig[2] / sum(dudi_PCoA$eig), 2)))
+```
+
+### XgridCal
+
+```{r, echo = FALSE, message= FALSE, fig.height= 15, fig.width = 15, warning = FALSE}
+ggplot(data = PCoA,
+aes_string(x = colnames(PCoA)[1], y = colnames(PCoA)[2], col = 'XgridCal')) +
+geom_point(size = 2) +
+labs( x = sprintf('Axis 1 [%s%% Variance]', 100 * round(dudi_PCoA$eig[1] / sum(dudi_PCoA$eig), 2)),
+y = sprintf('Axis 2 [%s%% Variance]', 100 * round(dudi_PCoA$eig[2] / sum(dudi_PCoA$eig), 2)))
+```
+
+### PAR
+
+```{r, echo = FALSE, message= FALSE, fig.height= 15, fig.width = 15, warning = FALSE}
+ggplot(data = PCoA,
+aes_string(x = colnames(PCoA)[1], y = colnames(PCoA)[2], col = 'PAR')) +
+geom_point(size = 2) +
+labs( x = sprintf('Axis 1 [%s%% Variance]', 100 * round(dudi_PCoA$eig[1] / sum(dudi_PCoA$eig), 2)),
+y = sprintf('Axis 2 [%s%% Variance]', 100 * round(dudi_PCoA$eig[2] / sum(dudi_PCoA$eig), 2)))
+```
+
+### Salinity
+
+```{r, echo = FALSE, message= FALSE, fig.height= 15, fig.width = 15, warning = FALSE}
+ggplot(data = PCoA,
+aes_string(x = colnames(PCoA)[1], y = colnames(PCoA)[2], col = 'Salinity')) +
+geom_point(size = 2) +
+labs( x = sprintf('Axis 1 [%s%% Variance]', 100 * round(dudi_PCoA$eig[1] / sum(dudi_PCoA$eig), 2)),
+y = sprintf('Axis 2 [%s%% Variance]', 100 * round(dudi_PCoA$eig[2] / sum(dudi_PCoA$eig), 2)))
+```
+
+### SST
+
+```{r, echo = FALSE, message= FALSE, fig.height= 15, fig.width = 15, warning = FALSE}
+ggplot(data = PCoA,
+aes_string(x = colnames(PCoA)[1], y = colnames(PCoA)[2], col = 'SST')) +
+geom_point(size = 2) +
+labs( x = sprintf('Axis 1 [%s%% Variance]', 100 * round(dudi_PCoA$eig[1] / sum(dudi_PCoA$eig), 2)),
+y = sprintf('Axis 2 [%s%% Variance]', 100 * round(dudi_PCoA$eig[2] / sum(dudi_PCoA$eig), 2)))
+```
+
+### Flu.Chl
+
+```{r, echo = FALSE, message= FALSE, fig.height= 15, fig.width = 15, warning = FALSE}
+ggplot(data = PCoA,
+aes_string(x = colnames(PCoA)[1], y = colnames(PCoA)[2], col = 'Flu.Chl')) +
+geom_point(size = 2) +
+labs( x = sprintf('Axis 1 [%s%% Variance]', 100 * round(dudi_PCoA$eig[1] / sum(dudi_PCoA$eig), 2)),
+y = sprintf('Axis 2 [%s%% Variance]', 100 * round(dudi_PCoA$eig[2] / sum(dudi_PCoA$eig), 2)))
+```
+
+### MLD
+
+```{r, echo = FALSE, message= FALSE, fig.height= 15, fig.width = 15, warning = FALSE}
+ggplot(data = PCoA,
+aes_string(x = colnames(PCoA)[1], y = colnames(PCoA)[2], col = 'MLD')) +
+geom_point(size = 2) +
+labs( x = sprintf('Axis 1 [%s%% Variance]', 100 * round(dudi_PCoA$eig[1] / sum(dudi_PCoA$eig), 2)),
+y = sprintf('Axis 2 [%s%% Variance]', 100 * round(dudi_PCoA$eig[2] / sum(dudi_PCoA$eig), 2)))
+```
+
+### NCP
+
+```{r, echo = FALSE, message= FALSE, fig.height= 15, fig.width = 15, warning = FALSE}
+ggplot(data = PCoA,
+aes_string(x = colnames(PCoA)[1], y = colnames(PCoA)[2], col = 'NCP')) +
+geom_point(size = 2) +
+labs( x = sprintf('Axis 1 [%s%% Variance]', 100 * round(dudi_PCoA$eig[1] / sum(dudi_PCoA$eig), 2)),
+y = sprintf('Axis 2 [%s%% Variance]', 100 * round(dudi_PCoA$eig[2] / sum(dudi_PCoA$eig), 2)))
+```
+
+### Biological.O2
+
+```{r, echo = FALSE, message= FALSE, fig.height= 15, fig.width = 15, warning = FALSE}
+ggplot(data = PCoA,
+aes_string(x = colnames(PCoA)[1], y = colnames(PCoA)[2], col = 'Biological.O2')) +
+geom_point(size = 2) +
+labs( x = sprintf('Axis 1 [%s%% Variance]', 100 * round(dudi_PCoA$eig[1] / sum(dudi_PCoA$eig), 2)),
+y = sprintf('Axis 2 [%s%% Variance]', 100 * round(dudi_PCoA$eig[2] / sum(dudi_PCoA$eig), 2)))
+```
+
+### Station.Type
+
+```{r, echo = FALSE, message= FALSE, fig.height= 15, fig.width = 15, warning = FALSE}
+ggplot(data = PCoA,
+aes_string(x = colnames(PCoA)[1], y = colnames(PCoA)[2], col = 'Station.Type')) +
+geom_point(size = 2) +
+labs( x = sprintf('Axis 1 [%s%% Variance]', 100 * round(dudi_PCoA$eig[1] / sum(dudi_PCoA$eig), 2)),
+y = sprintf('Axis 2 [%s%% Variance]', 100 * round(dudi_PCoA$eig[2] / sum(dudi_PCoA$eig), 2)))
+```
+
+## Relative Abundance (First dataset) {.tabset .tabset-fade .tabset-pills} 
+
+### Kingdom
+
+```{r, echo = FALSE, message= FALSE, warning = FALSE, fig.height= 15, fig.width = 15} 
+  taxTable_relAb <- taxTable
+  taxTable_relAb$rn <- colnames(exprDat)
+if (list_treatment[['transformation']] == "CLR"){
+exprDat_rel_ab <- clrInv(exprDat)
+}else{
+exprDat_rel_ab <- as.data.frame(t(apply(exprDat, 1, function(x) x / sum(x))))
+}
+  exprDat_rel_ab_setTD <- setDT(as.data.frame(t(exprDat_rel_ab)), keep.rownames = TRUE)
+  exprDat_rel_ab_setTD <- merge(exprDat_rel_ab_setTD, taxTable_relAb)
+  exprDat_Relative_abundance <- melt(exprDat_rel_ab_setTD)
+  ggplot(exprDat_Relative_abundance, aes_string(x = 'variable', y = 'value', fill = 'Kingdom')) +
+    geom_bar(stat = 'identity') +
+    labs(x = 'Samples', 
+         y = 'Relative Abundance', 
+         title = paste('Relative abundance at the Kingdom Taxonomic level', sep = '')) +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+### Phylum
+
+```{r, echo = FALSE, message= FALSE, warning = FALSE, fig.height= 15, fig.width = 15} 
+  taxTable_relAb <- taxTable
+  taxTable_relAb$rn <- colnames(exprDat)
+if (list_treatment[['transformation']] == "CLR"){
+exprDat_rel_ab <- clrInv(exprDat)
+}else{
+exprDat_rel_ab <- as.data.frame(t(apply(exprDat, 1, function(x) x / sum(x))))
+}
+  exprDat_rel_ab_setTD <- setDT(as.data.frame(t(exprDat_rel_ab)), keep.rownames = TRUE)
+  exprDat_rel_ab_setTD <- merge(exprDat_rel_ab_setTD, taxTable_relAb)
+  exprDat_Relative_abundance <- melt(exprDat_rel_ab_setTD)
+  ggplot(exprDat_Relative_abundance, aes_string(x = 'variable', y = 'value', fill = 'Phylum')) +
+    geom_bar(stat = 'identity') +
+    labs(x = 'Samples', 
+         y = 'Relative Abundance', 
+         title = paste('Relative abundance at the Phylum Taxonomic level', sep = '')) +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+### Class
+
+```{r, echo = FALSE, message= FALSE, warning = FALSE, fig.height= 15, fig.width = 15} 
+  taxTable_relAb <- taxTable
+  taxTable_relAb$rn <- colnames(exprDat)
+if (list_treatment[['transformation']] == "CLR"){
+exprDat_rel_ab <- clrInv(exprDat)
+}else{
+exprDat_rel_ab <- as.data.frame(t(apply(exprDat, 1, function(x) x / sum(x))))
+}
+  exprDat_rel_ab_setTD <- setDT(as.data.frame(t(exprDat_rel_ab)), keep.rownames = TRUE)
+  exprDat_rel_ab_setTD <- merge(exprDat_rel_ab_setTD, taxTable_relAb)
+  exprDat_Relative_abundance <- melt(exprDat_rel_ab_setTD)
+  ggplot(exprDat_Relative_abundance, aes_string(x = 'variable', y = 'value', fill = 'Class')) +
+    geom_bar(stat = 'identity') +
+    labs(x = 'Samples', 
+         y = 'Relative Abundance', 
+         title = paste('Relative abundance at the Class Taxonomic level', sep = '')) +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+### Order
+
+```{r, echo = FALSE, message= FALSE, warning = FALSE, fig.height= 15, fig.width = 15} 
+  taxTable_relAb <- taxTable
+  taxTable_relAb$rn <- colnames(exprDat)
+if (list_treatment[['transformation']] == "CLR"){
+exprDat_rel_ab <- clrInv(exprDat)
+}else{
+exprDat_rel_ab <- as.data.frame(t(apply(exprDat, 1, function(x) x / sum(x))))
+}
+  exprDat_rel_ab_setTD <- setDT(as.data.frame(t(exprDat_rel_ab)), keep.rownames = TRUE)
+  exprDat_rel_ab_setTD <- merge(exprDat_rel_ab_setTD, taxTable_relAb)
+  exprDat_Relative_abundance <- melt(exprDat_rel_ab_setTD)
+  ggplot(exprDat_Relative_abundance, aes_string(x = 'variable', y = 'value', fill = 'Order')) +
+    geom_bar(stat = 'identity') +
+    labs(x = 'Samples', 
+         y = 'Relative Abundance', 
+         title = paste('Relative abundance at the Order Taxonomic level', sep = '')) +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+### Family
+
+```{r, echo = FALSE, message= FALSE, warning = FALSE, fig.height= 15, fig.width = 15} 
+  taxTable_relAb <- taxTable
+  taxTable_relAb$rn <- colnames(exprDat)
+if (list_treatment[['transformation']] == "CLR"){
+exprDat_rel_ab <- clrInv(exprDat)
+}else{
+exprDat_rel_ab <- as.data.frame(t(apply(exprDat, 1, function(x) x / sum(x))))
+}
+  exprDat_rel_ab_setTD <- setDT(as.data.frame(t(exprDat_rel_ab)), keep.rownames = TRUE)
+  exprDat_rel_ab_setTD <- merge(exprDat_rel_ab_setTD, taxTable_relAb)
+  exprDat_Relative_abundance <- melt(exprDat_rel_ab_setTD)
+  ggplot(exprDat_Relative_abundance, aes_string(x = 'variable', y = 'value', fill = 'Family')) +
+    geom_bar(stat = 'identity') +
+    labs(x = 'Samples', 
+         y = 'Relative Abundance', 
+         title = paste('Relative abundance at the Family Taxonomic level', sep = '')) +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+### Genus
+
+```{r, echo = FALSE, message= FALSE, warning = FALSE, fig.height= 15, fig.width = 15} 
+  taxTable_relAb <- taxTable
+  taxTable_relAb$rn <- colnames(exprDat)
+if (list_treatment[['transformation']] == "CLR"){
+exprDat_rel_ab <- clrInv(exprDat)
+}else{
+exprDat_rel_ab <- as.data.frame(t(apply(exprDat, 1, function(x) x / sum(x))))
+}
+  exprDat_rel_ab_setTD <- setDT(as.data.frame(t(exprDat_rel_ab)), keep.rownames = TRUE)
+  exprDat_rel_ab_setTD <- merge(exprDat_rel_ab_setTD, taxTable_relAb)
+  exprDat_Relative_abundance <- melt(exprDat_rel_ab_setTD)
+  ggplot(exprDat_Relative_abundance, aes_string(x = 'variable', y = 'value', fill = 'Genus')) +
+    geom_bar(stat = 'identity') +
+    labs(x = 'Samples', 
+         y = 'Relative Abundance', 
+         title = paste('Relative abundance at the Genus Taxonomic level', sep = '')) +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+ 
+ 
+
+# Section 3: Network Creation
+In this section, a correlation network is realized based on the WGCNA method. A set of parameters was selected for this analysis:
+
+1) A soft power of 9 was chosen for the network inference (for the first dataset). The soft power parameter is part of the thresholding step
+and helps in the determination of the network topology.
+
+2) The minimal module size also shapes the network topology. A size of 20 was chosen (for the first dataset). Its determination depends on the nature of the data, the initial question raised by 
+the experiment. Small module sizes are chosen when the user is looking for small communities or small pathways with a few number of genes. Large
+module size are used when only general trends of correlation, large shifts in the expression need to be highlighted.
+
+3) A signed was chosen for the analysis (for the first dataset). In signed network, the sign of the relationship between two variables is taken into
+account, while in unsigned network only the strength of the relationship is considered.
+
+4) The bicor correlation was used in the analysis to infer the network (for the first dataset). The correlation will influence the type of relationship
+observed between two variables in the network. For example, a network realized with the pearson correlation will only account for the linear relationship
+ 
+
+## First Dataset: 
+
+
+```{r, echo = FALSE, message = FALSE, include = FALSE}
+if (nrow(exprDat) > 14){
+  gsg = goodSamplesGenes(exprDat, verbose = 3)
+   if (!gsg$allOK){
+      exprDat <- exprDat[rownames(exprDat)[gsg$goodSamples], colnames(exprDat)[gsg$goodGenes]]
+   }else{
+     exprDat <- exprDat
+   }
+}
+powers = c(c(1:10), seq(from = 12, to=20, by=2))
+# Call the network topology analysis function
+sft <- pickSoftThreshold(exprDat, powerVector = powers, verbose = 5, networkType = list_input[['signed']])
+softPower <- as.numeric(list_input[['power']])
+if (list_input[['cor_P3']] == 'bicor'){
+   adjacency <- adjacency(exprDat, power = softPower, type = list_input[['signed']], corFnc = 'bicor', corOptions = list(use = 'p', maxPOutliers =0.1))
+}else{
+   adjacency <- adjacency(exprDat, power = softPower, type = list_input[['signed']], corOptions = paste("method ='", list_input[['cor_P3']], "'", sep = "")) 
+}
+TOM = TOMsimilarity(adjacency, TOMType = list_input[['signed']])
+dissTOM <- 1-TOM
+cmd1 <- cmdscale(as.dist(dissTOM),3)
+geneTree <- hclust(as.dist(dissTOM), method = 'average')
+minModuleSize = list_input[['moduleSize']]
+dynamicMods <- cutreeDynamic(dendro = geneTree, distM = dissTOM,
+                        deepSplit = 2, pamRespectsDendro = FALSE,
+                        minClusterSize = minModuleSize)
+dynamicColors = labels2colors(dynamicMods)
+MEList = moduleEigengenes(exprDat, colors = dynamicColors, excludeGrey = TRUE)
+MEs = MEList$eigengenes
+MEDiss = 1-cor(MEs)
+if (ncol(MEs) > 1){
+  METree = hclust(as.dist(MEDiss), method = "average") 
+}
+```
+ 
+
+### Scale Free Topology and Soft Power: 
+
+```{r, echo = FALSE, message = FALSE, fig.height = 10, fig.width = 10}
+ggplot(data =sft$fitIndices, aes(x = Power, y = -sign(slope)*SFT.R.sq )) + 
+  geom_text(aes(label = Power, color = "tomato3"), show.legend =  FALSE) +
+  geom_hline(yintercept = 0.9) +
+  labs(y = "Scale Free Topology", x = "Soft Threshold (Power)", title = "Scale Independence") +
+  theme(legend.position = "none")
+``` 
+ 
+
+### Clustering of module eigengenes and Module Information 
+
+ Once the network is created, it is divided in smaller subnetworks called modules which represent groups of highly correlated variables
+ WGCNA allows the exploration and the in-depth analysis of these modules. It is possible to determine associations with these groups of variables
+ and to compare these associations to an external traits.
+
+
+ The following plot represent the clustering of the module eigengenes. It helps to measure the similarity/dissimilarity between two modules. 
+
+```{r, echo = FALSE, message = FALSE, fig.height = 10, fig.width = 10}
+if (ncol(MEs) > 1){
+  ggdendrogram(METree) + 
+    labs(y = "Height", title = "Clustering of module eigengenes")
+}
+```
+
+
+```{r, echo = FALSE, message = FALSE}
+datatable(as.data.frame(table(dynamicColors)),
+ class = 'cell-border stripe',
+ rownames = FALSE, 
+ options = list(pageLength = 8, dom = 'tip'),
+ colnames = c('Module Color' = 'dynamicColors', 'Number of element' = 'Freq'))
+```
+
+
+### Variables Dendrogramme with module colors
+
+ The following plot is a representation of the variables dendrogramme to measure the similarity/dissimilarity between them with, at the bottom,
+ the module color of each variables. The modules (subpart of the networks representing the highly correlated variables) are represented with colors
+ to ease the exploration and the description of these groups of variables.
+
+```{r, echo = FALSE, message = FALSE, fig.height = 10, fig.width = 15}
+plotDendroAndColors(geneTree, dynamicColors, "Dynamic Tree Cut",
+            dendroLabels = FALSE, hang = 0.03,
+            addGuide = TRUE, guideHang = 0.05,
+            main = "Gene dendrogram and module colors")
+```
+
+
+ 
+ 
+
+# Section 4: Module exploration
+
+
+```{r, echo = FALSE, message = FALSE, include = FALSE}
+taxTable_rn <- setDT(taxTable, keep.rownames = TRUE)
+```
+
+## Modules correlation to external traits
+
+The following plot represent the correlation between each external trait and each module of the WGCNA network. The heatmap can help finding
+ modules specific to a specific traits, find the groups of variables associated with a shift in the concentration of one parameter.
+
+
+```{r, echo = FALSE, message = FALSE, fig.height = 30, fig.width = 30, warning = FALSE}
+nSamples <- nrow(exprDat)
+text_matrix_vector <- c()
+for (condition in 1:(ncol(sampleAnnot))){
+  condition_name <- colnames(sampleAnnot)[condition]
+  if (is.numeric(sampleAnnot[,condition_name])){
+      moduleTraitCor = cor(MEs, sampleAnnot[,condition_name], use = "p", method = list_input[['cor_P4']])
+  }else{
+      sampleAnnot2 <- sampleAnnot
+      sampleAnnot2[,condition_name] <- as.factor(sampleAnnot2[, condition_name])
+      sampleAnnot2[,condition_name] <- as.numeric(sampleAnnot2[,condition_name])
+      moduleTraitCor = cor(MEs, sampleAnnot2[,condition_name], use = "p", method = list_input[['cor_P4']])
+  }
+  moduleTraitPvalue = corPvalueStudent(moduleTraitCor, nSamples)
+  colnames(moduleTraitCor) <- c(condition_name)
+  # Will display correlations and their p-values
+  textMatrix = paste(signif(moduleTraitCor, 2), "
+(",
+        signif(moduleTraitPvalue, 1), ")", sep = "")
+  text_matrix_vector <- c(text_matrix_vector, textMatrix)
+  dim(textMatrix) = dim(moduleTraitCor)
+  # create dataframe containing the correlation and the color
+  if(condition == 1){
+    Condition_df <- data.frame(moduleTraitCor)
+  }else{
+     Condition_df <- data.frame(Condition_df, moduleTraitCor)
+  }
+  melted_moduleTraitCor <- melt(moduleTraitCor)
+  melted_moduleTraitCor <- data.frame(melted_moduleTraitCor, as.data.frame(substr(names(MEs), 3, 40)))
+  colnames(melted_moduleTraitCor)[4] <- "color"
+}
+Condition_df <- setDT(Condition_df, keep.rownames = TRUE)[]
+melted_condition_df <- melt(Condition_df, id = 1)
+melted_condition_df$label <- as.data.frame(text_matrix_vector)
+print(ggplot(data = melted_condition_df, aes(x = rn, y = variable, fill = value)) + 
+     geom_tile(color = "white") +
+     scale_fill_gradient2(low = "blue", high = "red", mid = "white", 
+                          midpoint = 0, limit = c(-1,1), space = "Lab", 
+                          name=paste("Module
+ Conditions 
+Correlation"))+
+     theme_minimal() +
+     theme(axis.text.x = element_text(angle = 45, vjust = 1,
+                                      size = 10, hjust = 1))+
+     geom_text(aes(label = label), color = "black", size = 3) +
+     coord_fixed() +
+     xlab('Module') +
+     ylab(''))
+```
+
+
+## Samples contribution to the module eigengenes
+
+The following plots explain how each sample participate in the formation of a specific module. In some cases, when only one sample contribute
+ to the formation of a module, it can be deduce that the module is representative of the expression of this outlier: it can highlight a group
+ of correlated variables really specific in their expression to a sample. Sometimes, a group of samples may contribute to the formation of a
+ module and these samples are representative of one specific condition in the dataset.
+
+
+```{r, echo = FALSE, message = FALSE, fig.height = 10, fig.width = 10}
+MEs1 <- data.frame(MEs, rownames(sampleAnnot))
+colnames(MEs1) <- c(colnames(MEs), "sampleName")
+for (module in 1:length(MEs)){
+  module_name <- substring(names(MEs)[module], 3)
+
+  MODS <- paste("ME", module_name, sep = "")
+  print(ggplot(data = MEs1, aes_string(x = "sampleName", y = MODS )) +
+    geom_bar(stat = "identity", fill = module_name) +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1)))
+}
+```
+
+
+```{r, echo = FALSE, message = FALSE, include = FALSE}
+
+modNames = substring(names(MEs), 3)
+geneModuleMembership = as.data.frame(cor(exprDat, MEs, method= list_input[['cor_P4']], use="na.or.complete"))
+names(geneModuleMembership) = paste("MM", modNames, sep="")
+colnames_used <- c()
+for (i in names(sampleAnnot)) {
+  if(length(unique(sampleAnnot[,i])) > 1){
+    if (is.numeric(sampleAnnot[,i])){
+      env = as.data.frame(sampleAnnot[,i]) 
+    }else{
+      env = as.data.frame(as.numeric(as.factor(sampleAnnot[,i])))
+    }
+    colnames(env) = i
+    colnames_used <- c(colnames_used, i)
+    if (i == colnames(sampleAnnot)[1]){
+      geneTraitSignificance = as.data.frame(cor(exprDat, env, method= list_input[['cor_P4']], use="na.or.complete"))
+    }else{
+      geneTraitSignificance = data.frame(geneTraitSignificance, cor(exprDat, env, method= list_input[['cor_P4']], use="na.or.complete"))
+    }
+  }
+}
+geneModuleMembership[rowSums(is.na(geneModuleMembership)) != ncol(geneModuleMembership), ] # Remove rows containing only NAs values
+geneTraitSignificance[rowSums(is.na(geneTraitSignificance)) != ncol(geneTraitSignificance), ]
+```
+
+
+## Module Membership vs Trait Significance {.tabset .tabset-fade .tabset-pills} 
+
+
+
+
+### Module Membership vs Trait Year Significance
+
+```{r, echo = FALSE, message= FALSE, fig.height= 10, fig.width = 10, warning = FALSE}
+colnames(geneTraitSignificance) <- paste("GS.", colnames_used, sep = "")
+for (module in 1:length(MEs)){
+  module_name <- substring(names(MEs)[module], 3)
+  column = paste("MM",module_name, sep = "")
+  column2 = "GS.Year"
+  moduleGenes = (dynamicColors==module_name)
+  a <- abs(geneModuleMembership[moduleGenes, column])
+  b <- abs(geneTraitSignificance[moduleGenes, column2])
+  TraitModuleMembership <- data.frame(a,b)
+  colnames(TraitModuleMembership) <- c("moduleMembership", "TraitSignificance")
+  pv = corPvalueStudent(cor(abs(geneModuleMembership[moduleGenes, column]), abs(geneTraitSignificance[moduleGenes, column2]), method= list_input[['cor_P4']], use="na.or.complete"), length(geneTraitSignificance[moduleGenes, column2]))
+  Correlation <- cor(abs(geneModuleMembership[moduleGenes, column]), abs(geneTraitSignificance[moduleGenes, column2]))
+  text_trait_module_membership = paste("Corr = ", round(Correlation, 2), "
+P-val = ", pv)
+   print(ggplot(TraitModuleMembership, aes(x = moduleMembership, y = TraitSignificance)) +
+     geom_point(color = module_name) +
+     geom_smooth(method=lm, color = "white") +
+     labs(x = paste("Module Membership in", module_name, "module"), y = "OTU significance for Year",
+          title = paste("Module membership vs. gene significance
+", text_trait_module_membership ,sep = "")) +
+     geom_density_2d(color = '#E69F00'))
+}
+```
+
+
+
+### Module Membership vs Trait Y.grid Significance
+
+```{r, echo = FALSE, message= FALSE, fig.height= 10, fig.width = 10, warning = FALSE}
+colnames(geneTraitSignificance) <- paste("GS.", colnames_used, sep = "")
+for (module in 1:length(MEs)){
+  module_name <- substring(names(MEs)[module], 3)
+  column = paste("MM",module_name, sep = "")
+  column2 = "GS.Y.grid"
+  moduleGenes = (dynamicColors==module_name)
+  a <- abs(geneModuleMembership[moduleGenes, column])
+  b <- abs(geneTraitSignificance[moduleGenes, column2])
+  TraitModuleMembership <- data.frame(a,b)
+  colnames(TraitModuleMembership) <- c("moduleMembership", "TraitSignificance")
+  pv = corPvalueStudent(cor(abs(geneModuleMembership[moduleGenes, column]), abs(geneTraitSignificance[moduleGenes, column2]), method= list_input[['cor_P4']], use="na.or.complete"), length(geneTraitSignificance[moduleGenes, column2]))
+  Correlation <- cor(abs(geneModuleMembership[moduleGenes, column]), abs(geneTraitSignificance[moduleGenes, column2]))
+  text_trait_module_membership = paste("Corr = ", round(Correlation, 2), "
+P-val = ", pv)
+   print(ggplot(TraitModuleMembership, aes(x = moduleMembership, y = TraitSignificance)) +
+     geom_point(color = module_name) +
+     geom_smooth(method=lm, color = "white") +
+     labs(x = paste("Module Membership in", module_name, "module"), y = "OTU significance for Y.grid",
+          title = paste("Module membership vs. gene significance
+", text_trait_module_membership ,sep = "")) +
+     geom_density_2d(color = '#E69F00'))
+}
+```
+
+
+
+### Module Membership vs Trait X.grid Significance
+
+```{r, echo = FALSE, message= FALSE, fig.height= 10, fig.width = 10, warning = FALSE}
+colnames(geneTraitSignificance) <- paste("GS.", colnames_used, sep = "")
+for (module in 1:length(MEs)){
+  module_name <- substring(names(MEs)[module], 3)
+  column = paste("MM",module_name, sep = "")
+  column2 = "GS.X.grid"
+  moduleGenes = (dynamicColors==module_name)
+  a <- abs(geneModuleMembership[moduleGenes, column])
+  b <- abs(geneTraitSignificance[moduleGenes, column2])
+  TraitModuleMembership <- data.frame(a,b)
+  colnames(TraitModuleMembership) <- c("moduleMembership", "TraitSignificance")
+  pv = corPvalueStudent(cor(abs(geneModuleMembership[moduleGenes, column]), abs(geneTraitSignificance[moduleGenes, column2]), method= list_input[['cor_P4']], use="na.or.complete"), length(geneTraitSignificance[moduleGenes, column2]))
+  Correlation <- cor(abs(geneModuleMembership[moduleGenes, column]), abs(geneTraitSignificance[moduleGenes, column2]))
+  text_trait_module_membership = paste("Corr = ", round(Correlation, 2), "
+P-val = ", pv)
+   print(ggplot(TraitModuleMembership, aes(x = moduleMembership, y = TraitSignificance)) +
+     geom_point(color = module_name) +
+     geom_smooth(method=lm, color = "white") +
+     labs(x = paste("Module Membership in", module_name, "module"), y = "OTU significance for X.grid",
+          title = paste("Module membership vs. gene significance
+", text_trait_module_membership ,sep = "")) +
+     geom_density_2d(color = '#E69F00'))
+}
+```
+
+
+
+### Module Membership vs Trait Lat Significance
+
+```{r, echo = FALSE, message= FALSE, fig.height= 10, fig.width = 10, warning = FALSE}
+colnames(geneTraitSignificance) <- paste("GS.", colnames_used, sep = "")
+for (module in 1:length(MEs)){
+  module_name <- substring(names(MEs)[module], 3)
+  column = paste("MM",module_name, sep = "")
+  column2 = "GS.Lat"
+  moduleGenes = (dynamicColors==module_name)
+  a <- abs(geneModuleMembership[moduleGenes, column])
+  b <- abs(geneTraitSignificance[moduleGenes, column2])
+  TraitModuleMembership <- data.frame(a,b)
+  colnames(TraitModuleMembership) <- c("moduleMembership", "TraitSignificance")
+  pv = corPvalueStudent(cor(abs(geneModuleMembership[moduleGenes, column]), abs(geneTraitSignificance[moduleGenes, column2]), method= list_input[['cor_P4']], use="na.or.complete"), length(geneTraitSignificance[moduleGenes, column2]))
+  Correlation <- cor(abs(geneModuleMembership[moduleGenes, column]), abs(geneTraitSignificance[moduleGenes, column2]))
+  text_trait_module_membership = paste("Corr = ", round(Correlation, 2), "
+P-val = ", pv)
+   print(ggplot(TraitModuleMembership, aes(x = moduleMembership, y = TraitSignificance)) +
+     geom_point(color = module_name) +
+     geom_smooth(method=lm, color = "white") +
+     labs(x = paste("Module Membership in", module_name, "module"), y = "OTU significance for Lat",
+          title = paste("Module membership vs. gene significance
+", text_trait_module_membership ,sep = "")) +
+     geom_density_2d(color = '#E69F00'))
+}
+```
+
+
+
+### Module Membership vs Trait Long Significance
+
+```{r, echo = FALSE, message= FALSE, fig.height= 10, fig.width = 10, warning = FALSE}
+colnames(geneTraitSignificance) <- paste("GS.", colnames_used, sep = "")
+for (module in 1:length(MEs)){
+  module_name <- substring(names(MEs)[module], 3)
+  column = paste("MM",module_name, sep = "")
+  column2 = "GS.Long"
+  moduleGenes = (dynamicColors==module_name)
+  a <- abs(geneModuleMembership[moduleGenes, column])
+  b <- abs(geneTraitSignificance[moduleGenes, column2])
+  TraitModuleMembership <- data.frame(a,b)
+  colnames(TraitModuleMembership) <- c("moduleMembership", "TraitSignificance")
+  pv = corPvalueStudent(cor(abs(geneModuleMembership[moduleGenes, column]), abs(geneTraitSignificance[moduleGenes, column2]), method= list_input[['cor_P4']], use="na.or.complete"), length(geneTraitSignificance[moduleGenes, column2]))
+  Correlation <- cor(abs(geneModuleMembership[moduleGenes, column]), abs(geneTraitSignificance[moduleGenes, column2]))
+  text_trait_module_membership = paste("Corr = ", round(Correlation, 2), "
+P-val = ", pv)
+   print(ggplot(TraitModuleMembership, aes(x = moduleMembership, y = TraitSignificance)) +
+     geom_point(color = module_name) +
+     geom_smooth(method=lm, color = "white") +
+     labs(x = paste("Module Membership in", module_name, "module"), y = "OTU significance for Long",
+          title = paste("Module membership vs. gene significance
+", text_trait_module_membership ,sep = "")) +
+     geom_density_2d(color = '#E69F00'))
+}
+```
+
+
+
+### Module Membership vs Trait YgridCal Significance
+
+```{r, echo = FALSE, message= FALSE, fig.height= 10, fig.width = 10, warning = FALSE}
+colnames(geneTraitSignificance) <- paste("GS.", colnames_used, sep = "")
+for (module in 1:length(MEs)){
+  module_name <- substring(names(MEs)[module], 3)
+  column = paste("MM",module_name, sep = "")
+  column2 = "GS.YgridCal"
+  moduleGenes = (dynamicColors==module_name)
+  a <- abs(geneModuleMembership[moduleGenes, column])
+  b <- abs(geneTraitSignificance[moduleGenes, column2])
+  TraitModuleMembership <- data.frame(a,b)
+  colnames(TraitModuleMembership) <- c("moduleMembership", "TraitSignificance")
+  pv = corPvalueStudent(cor(abs(geneModuleMembership[moduleGenes, column]), abs(geneTraitSignificance[moduleGenes, column2]), method= list_input[['cor_P4']], use="na.or.complete"), length(geneTraitSignificance[moduleGenes, column2]))
+  Correlation <- cor(abs(geneModuleMembership[moduleGenes, column]), abs(geneTraitSignificance[moduleGenes, column2]))
+  text_trait_module_membership = paste("Corr = ", round(Correlation, 2), "
+P-val = ", pv)
+   print(ggplot(TraitModuleMembership, aes(x = moduleMembership, y = TraitSignificance)) +
+     geom_point(color = module_name) +
+     geom_smooth(method=lm, color = "white") +
+     labs(x = paste("Module Membership in", module_name, "module"), y = "OTU significance for YgridCal",
+          title = paste("Module membership vs. gene significance
+", text_trait_module_membership ,sep = "")) +
+     geom_density_2d(color = '#E69F00'))
+}
+```
+
+
+
+### Module Membership vs Trait XgridCal Significance
+
+```{r, echo = FALSE, message= FALSE, fig.height= 10, fig.width = 10, warning = FALSE}
+colnames(geneTraitSignificance) <- paste("GS.", colnames_used, sep = "")
+for (module in 1:length(MEs)){
+  module_name <- substring(names(MEs)[module], 3)
+  column = paste("MM",module_name, sep = "")
+  column2 = "GS.XgridCal"
+  moduleGenes = (dynamicColors==module_name)
+  a <- abs(geneModuleMembership[moduleGenes, column])
+  b <- abs(geneTraitSignificance[moduleGenes, column2])
+  TraitModuleMembership <- data.frame(a,b)
+  colnames(TraitModuleMembership) <- c("moduleMembership", "TraitSignificance")
+  pv = corPvalueStudent(cor(abs(geneModuleMembership[moduleGenes, column]), abs(geneTraitSignificance[moduleGenes, column2]), method= list_input[['cor_P4']], use="na.or.complete"), length(geneTraitSignificance[moduleGenes, column2]))
+  Correlation <- cor(abs(geneModuleMembership[moduleGenes, column]), abs(geneTraitSignificance[moduleGenes, column2]))
+  text_trait_module_membership = paste("Corr = ", round(Correlation, 2), "
+P-val = ", pv)
+   print(ggplot(TraitModuleMembership, aes(x = moduleMembership, y = TraitSignificance)) +
+     geom_point(color = module_name) +
+     geom_smooth(method=lm, color = "white") +
+     labs(x = paste("Module Membership in", module_name, "module"), y = "OTU significance for XgridCal",
+          title = paste("Module membership vs. gene significance
+", text_trait_module_membership ,sep = "")) +
+     geom_density_2d(color = '#E69F00'))
+}
+```
+
+
+
+### Module Membership vs Trait PAR Significance
+
+```{r, echo = FALSE, message= FALSE, fig.height= 10, fig.width = 10, warning = FALSE}
+colnames(geneTraitSignificance) <- paste("GS.", colnames_used, sep = "")
+for (module in 1:length(MEs)){
+  module_name <- substring(names(MEs)[module], 3)
+  column = paste("MM",module_name, sep = "")
+  column2 = "GS.PAR"
+  moduleGenes = (dynamicColors==module_name)
+  a <- abs(geneModuleMembership[moduleGenes, column])
+  b <- abs(geneTraitSignificance[moduleGenes, column2])
+  TraitModuleMembership <- data.frame(a,b)
+  colnames(TraitModuleMembership) <- c("moduleMembership", "TraitSignificance")
+  pv = corPvalueStudent(cor(abs(geneModuleMembership[moduleGenes, column]), abs(geneTraitSignificance[moduleGenes, column2]), method= list_input[['cor_P4']], use="na.or.complete"), length(geneTraitSignificance[moduleGenes, column2]))
+  Correlation <- cor(abs(geneModuleMembership[moduleGenes, column]), abs(geneTraitSignificance[moduleGenes, column2]))
+  text_trait_module_membership = paste("Corr = ", round(Correlation, 2), "
+P-val = ", pv)
+   print(ggplot(TraitModuleMembership, aes(x = moduleMembership, y = TraitSignificance)) +
+     geom_point(color = module_name) +
+     geom_smooth(method=lm, color = "white") +
+     labs(x = paste("Module Membership in", module_name, "module"), y = "OTU significance for PAR",
+          title = paste("Module membership vs. gene significance
+", text_trait_module_membership ,sep = "")) +
+     geom_density_2d(color = '#E69F00'))
+}
+```
+
+
+
+### Module Membership vs Trait Salinity Significance
+
+```{r, echo = FALSE, message= FALSE, fig.height= 10, fig.width = 10, warning = FALSE}
+colnames(geneTraitSignificance) <- paste("GS.", colnames_used, sep = "")
+for (module in 1:length(MEs)){
+  module_name <- substring(names(MEs)[module], 3)
+  column = paste("MM",module_name, sep = "")
+  column2 = "GS.Salinity"
+  moduleGenes = (dynamicColors==module_name)
+  a <- abs(geneModuleMembership[moduleGenes, column])
+  b <- abs(geneTraitSignificance[moduleGenes, column2])
+  TraitModuleMembership <- data.frame(a,b)
+  colnames(TraitModuleMembership) <- c("moduleMembership", "TraitSignificance")
+  pv = corPvalueStudent(cor(abs(geneModuleMembership[moduleGenes, column]), abs(geneTraitSignificance[moduleGenes, column2]), method= list_input[['cor_P4']], use="na.or.complete"), length(geneTraitSignificance[moduleGenes, column2]))
+  Correlation <- cor(abs(geneModuleMembership[moduleGenes, column]), abs(geneTraitSignificance[moduleGenes, column2]))
+  text_trait_module_membership = paste("Corr = ", round(Correlation, 2), "
+P-val = ", pv)
+   print(ggplot(TraitModuleMembership, aes(x = moduleMembership, y = TraitSignificance)) +
+     geom_point(color = module_name) +
+     geom_smooth(method=lm, color = "white") +
+     labs(x = paste("Module Membership in", module_name, "module"), y = "OTU significance for Salinity",
+          title = paste("Module membership vs. gene significance
+", text_trait_module_membership ,sep = "")) +
+     geom_density_2d(color = '#E69F00'))
+}
+```
+
+
+
+### Module Membership vs Trait SST Significance
+
+```{r, echo = FALSE, message= FALSE, fig.height= 10, fig.width = 10, warning = FALSE}
+colnames(geneTraitSignificance) <- paste("GS.", colnames_used, sep = "")
+for (module in 1:length(MEs)){
+  module_name <- substring(names(MEs)[module], 3)
+  column = paste("MM",module_name, sep = "")
+  column2 = "GS.SST"
+  moduleGenes = (dynamicColors==module_name)
+  a <- abs(geneModuleMembership[moduleGenes, column])
+  b <- abs(geneTraitSignificance[moduleGenes, column2])
+  TraitModuleMembership <- data.frame(a,b)
+  colnames(TraitModuleMembership) <- c("moduleMembership", "TraitSignificance")
+  pv = corPvalueStudent(cor(abs(geneModuleMembership[moduleGenes, column]), abs(geneTraitSignificance[moduleGenes, column2]), method= list_input[['cor_P4']], use="na.or.complete"), length(geneTraitSignificance[moduleGenes, column2]))
+  Correlation <- cor(abs(geneModuleMembership[moduleGenes, column]), abs(geneTraitSignificance[moduleGenes, column2]))
+  text_trait_module_membership = paste("Corr = ", round(Correlation, 2), "
+P-val = ", pv)
+   print(ggplot(TraitModuleMembership, aes(x = moduleMembership, y = TraitSignificance)) +
+     geom_point(color = module_name) +
+     geom_smooth(method=lm, color = "white") +
+     labs(x = paste("Module Membership in", module_name, "module"), y = "OTU significance for SST",
+          title = paste("Module membership vs. gene significance
+", text_trait_module_membership ,sep = "")) +
+     geom_density_2d(color = '#E69F00'))
+}
+```
+
+
+
+### Module Membership vs Trait Flu.Chl Significance
+
+```{r, echo = FALSE, message= FALSE, fig.height= 10, fig.width = 10, warning = FALSE}
+colnames(geneTraitSignificance) <- paste("GS.", colnames_used, sep = "")
+for (module in 1:length(MEs)){
+  module_name <- substring(names(MEs)[module], 3)
+  column = paste("MM",module_name, sep = "")
+  column2 = "GS.Flu.Chl"
+  moduleGenes = (dynamicColors==module_name)
+  a <- abs(geneModuleMembership[moduleGenes, column])
+  b <- abs(geneTraitSignificance[moduleGenes, column2])
+  TraitModuleMembership <- data.frame(a,b)
+  colnames(TraitModuleMembership) <- c("moduleMembership", "TraitSignificance")
+  pv = corPvalueStudent(cor(abs(geneModuleMembership[moduleGenes, column]), abs(geneTraitSignificance[moduleGenes, column2]), method= list_input[['cor_P4']], use="na.or.complete"), length(geneTraitSignificance[moduleGenes, column2]))
+  Correlation <- cor(abs(geneModuleMembership[moduleGenes, column]), abs(geneTraitSignificance[moduleGenes, column2]))
+  text_trait_module_membership = paste("Corr = ", round(Correlation, 2), "
+P-val = ", pv)
+   print(ggplot(TraitModuleMembership, aes(x = moduleMembership, y = TraitSignificance)) +
+     geom_point(color = module_name) +
+     geom_smooth(method=lm, color = "white") +
+     labs(x = paste("Module Membership in", module_name, "module"), y = "OTU significance for Flu.Chl",
+          title = paste("Module membership vs. gene significance
+", text_trait_module_membership ,sep = "")) +
+     geom_density_2d(color = '#E69F00'))
+}
+```
+
+
+
+### Module Membership vs Trait MLD Significance
+
+```{r, echo = FALSE, message= FALSE, fig.height= 10, fig.width = 10, warning = FALSE}
+colnames(geneTraitSignificance) <- paste("GS.", colnames_used, sep = "")
+for (module in 1:length(MEs)){
+  module_name <- substring(names(MEs)[module], 3)
+  column = paste("MM",module_name, sep = "")
+  column2 = "GS.MLD"
+  moduleGenes = (dynamicColors==module_name)
+  a <- abs(geneModuleMembership[moduleGenes, column])
+  b <- abs(geneTraitSignificance[moduleGenes, column2])
+  TraitModuleMembership <- data.frame(a,b)
+  colnames(TraitModuleMembership) <- c("moduleMembership", "TraitSignificance")
+  pv = corPvalueStudent(cor(abs(geneModuleMembership[moduleGenes, column]), abs(geneTraitSignificance[moduleGenes, column2]), method= list_input[['cor_P4']], use="na.or.complete"), length(geneTraitSignificance[moduleGenes, column2]))
+  Correlation <- cor(abs(geneModuleMembership[moduleGenes, column]), abs(geneTraitSignificance[moduleGenes, column2]))
+  text_trait_module_membership = paste("Corr = ", round(Correlation, 2), "
+P-val = ", pv)
+   print(ggplot(TraitModuleMembership, aes(x = moduleMembership, y = TraitSignificance)) +
+     geom_point(color = module_name) +
+     geom_smooth(method=lm, color = "white") +
+     labs(x = paste("Module Membership in", module_name, "module"), y = "OTU significance for MLD",
+          title = paste("Module membership vs. gene significance
+", text_trait_module_membership ,sep = "")) +
+     geom_density_2d(color = '#E69F00'))
+}
+```
+
+
+
+### Module Membership vs Trait NCP Significance
+
+```{r, echo = FALSE, message= FALSE, fig.height= 10, fig.width = 10, warning = FALSE}
+colnames(geneTraitSignificance) <- paste("GS.", colnames_used, sep = "")
+for (module in 1:length(MEs)){
+  module_name <- substring(names(MEs)[module], 3)
+  column = paste("MM",module_name, sep = "")
+  column2 = "GS.NCP"
+  moduleGenes = (dynamicColors==module_name)
+  a <- abs(geneModuleMembership[moduleGenes, column])
+  b <- abs(geneTraitSignificance[moduleGenes, column2])
+  TraitModuleMembership <- data.frame(a,b)
+  colnames(TraitModuleMembership) <- c("moduleMembership", "TraitSignificance")
+  pv = corPvalueStudent(cor(abs(geneModuleMembership[moduleGenes, column]), abs(geneTraitSignificance[moduleGenes, column2]), method= list_input[['cor_P4']], use="na.or.complete"), length(geneTraitSignificance[moduleGenes, column2]))
+  Correlation <- cor(abs(geneModuleMembership[moduleGenes, column]), abs(geneTraitSignificance[moduleGenes, column2]))
+  text_trait_module_membership = paste("Corr = ", round(Correlation, 2), "
+P-val = ", pv)
+   print(ggplot(TraitModuleMembership, aes(x = moduleMembership, y = TraitSignificance)) +
+     geom_point(color = module_name) +
+     geom_smooth(method=lm, color = "white") +
+     labs(x = paste("Module Membership in", module_name, "module"), y = "OTU significance for NCP",
+          title = paste("Module membership vs. gene significance
+", text_trait_module_membership ,sep = "")) +
+     geom_density_2d(color = '#E69F00'))
+}
+```
+
+
+
+### Module Membership vs Trait Biological.O2 Significance
+
+```{r, echo = FALSE, message= FALSE, fig.height= 10, fig.width = 10, warning = FALSE}
+colnames(geneTraitSignificance) <- paste("GS.", colnames_used, sep = "")
+for (module in 1:length(MEs)){
+  module_name <- substring(names(MEs)[module], 3)
+  column = paste("MM",module_name, sep = "")
+  column2 = "GS.Biological.O2"
+  moduleGenes = (dynamicColors==module_name)
+  a <- abs(geneModuleMembership[moduleGenes, column])
+  b <- abs(geneTraitSignificance[moduleGenes, column2])
+  TraitModuleMembership <- data.frame(a,b)
+  colnames(TraitModuleMembership) <- c("moduleMembership", "TraitSignificance")
+  pv = corPvalueStudent(cor(abs(geneModuleMembership[moduleGenes, column]), abs(geneTraitSignificance[moduleGenes, column2]), method= list_input[['cor_P4']], use="na.or.complete"), length(geneTraitSignificance[moduleGenes, column2]))
+  Correlation <- cor(abs(geneModuleMembership[moduleGenes, column]), abs(geneTraitSignificance[moduleGenes, column2]))
+  text_trait_module_membership = paste("Corr = ", round(Correlation, 2), "
+P-val = ", pv)
+   print(ggplot(TraitModuleMembership, aes(x = moduleMembership, y = TraitSignificance)) +
+     geom_point(color = module_name) +
+     geom_smooth(method=lm, color = "white") +
+     labs(x = paste("Module Membership in", module_name, "module"), y = "OTU significance for Biological.O2",
+          title = paste("Module membership vs. gene significance
+", text_trait_module_membership ,sep = "")) +
+     geom_density_2d(color = '#E69F00'))
+}
+```
+
+
+
+### Module Membership vs Trait Station.Type Significance
+
+```{r, echo = FALSE, message= FALSE, fig.height= 10, fig.width = 10, warning = FALSE}
+colnames(geneTraitSignificance) <- paste("GS.", colnames_used, sep = "")
+for (module in 1:length(MEs)){
+  module_name <- substring(names(MEs)[module], 3)
+  column = paste("MM",module_name, sep = "")
+  column2 = "GS.Station.Type"
+  moduleGenes = (dynamicColors==module_name)
+  a <- abs(geneModuleMembership[moduleGenes, column])
+  b <- abs(geneTraitSignificance[moduleGenes, column2])
+  TraitModuleMembership <- data.frame(a,b)
+  colnames(TraitModuleMembership) <- c("moduleMembership", "TraitSignificance")
+  pv = corPvalueStudent(cor(abs(geneModuleMembership[moduleGenes, column]), abs(geneTraitSignificance[moduleGenes, column2]), method= list_input[['cor_P4']], use="na.or.complete"), length(geneTraitSignificance[moduleGenes, column2]))
+  Correlation <- cor(abs(geneModuleMembership[moduleGenes, column]), abs(geneTraitSignificance[moduleGenes, column2]))
+  text_trait_module_membership = paste("Corr = ", round(Correlation, 2), "
+P-val = ", pv)
+   print(ggplot(TraitModuleMembership, aes(x = moduleMembership, y = TraitSignificance)) +
+     geom_point(color = module_name) +
+     geom_smooth(method=lm, color = "white") +
+     labs(x = paste("Module Membership in", module_name, "module"), y = "OTU significance for Station.Type",
+          title = paste("Module membership vs. gene significance
+", text_trait_module_membership ,sep = "")) +
+     geom_density_2d(color = '#E69F00'))
+}
+```
+
+
+## Relative abundance of each module {.tabset .tabset-fade .tabset-pills} 
+### Relative abundance of modules at the Kingdom level
+
+```{r, echo = FALSE, message= FALSE, fig.height= 15, fig.width = 15, warning = FALSE}
+for (module in 1:length(MEs)){
+  module_name <- substring(names(MEs)[module], 3)
+  modGenes = dynamicColors == module_name 
+  selectedExpr <- exprDat[,modGenes]
+if (list_treatment[['transformation']] == "CLR"){
+exprDat_rel_ab <- clrInv(selectedExpr)
+}else{
+exprDat_rel_ab <- as.data.frame(t(apply(selectedExpr, 1, function(x) x / sum(x))))
+}
+  exprDat_rel_ab_setTD <- setDT(as.data.frame(t(exprDat_rel_ab)), keep.rownames = TRUE)
+  exprDat_rel_ab_setTD <- merge(exprDat_rel_ab_setTD, taxTable_relAb, by = "rn")
+  exprDat_rel_ab_setTD$rn <- as.character(exprDat_rel_ab_setTD$rn)
+  exprDat_rel_ab_setTD$rn <- factor(exprDat_rel_ab_setTD$rn, levels = unique(exprDat_rel_ab_setTD$rn))
+  melted_exprDat_rel_ab <- melt(exprDat_rel_ab_setTD)
+
+  if (!is.na(unique(melted_exprDat_rel_ab$Kingdom)[1] )){
+  print(ggplot(melted_exprDat_rel_ab, aes_string(x = "variable", y = "value", fill ="Kingdom")) +
+    geom_bar(stat = "identity") +
+    labs(x = "Samples", y = "Relative Abundance", title = paste("Relative abundance at the Kingdom Taxonomic level of the ", module_name, " module.")) +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1)))
+  }else{
+    if (length(unique(melted_exprDat_rel_ab$Kingdom) ) > 1 ){
+      print(ggplot(melted_exprDat_rel_ab, aes_string(x = "variable", y = "value", fill ="Kingdom")) +
+        geom_bar(stat = "identity") +
+        labs(x = "Samples", y = "Relative Abundance", title = paste("Relative abundance at the Kingdom Taxonomic level of the ", module_name, " module.")) +
+        theme(axis.text.x = element_text(angle = 90, hjust = 1)))
+  }
+  }
+}
+```
+
+### Relative abundance of modules at the Phylum level
+
+```{r, echo = FALSE, message= FALSE, fig.height= 15, fig.width = 15, warning = FALSE}
+for (module in 1:length(MEs)){
+  module_name <- substring(names(MEs)[module], 3)
+  modGenes = dynamicColors == module_name 
+  selectedExpr <- exprDat[,modGenes]
+if (list_treatment[['transformation']] == "CLR"){
+exprDat_rel_ab <- clrInv(selectedExpr)
+}else{
+exprDat_rel_ab <- as.data.frame(t(apply(selectedExpr, 1, function(x) x / sum(x))))
+}
+  exprDat_rel_ab_setTD <- setDT(as.data.frame(t(exprDat_rel_ab)), keep.rownames = TRUE)
+  exprDat_rel_ab_setTD <- merge(exprDat_rel_ab_setTD, taxTable_relAb, by = "rn")
+  exprDat_rel_ab_setTD$rn <- as.character(exprDat_rel_ab_setTD$rn)
+  exprDat_rel_ab_setTD$rn <- factor(exprDat_rel_ab_setTD$rn, levels = unique(exprDat_rel_ab_setTD$rn))
+  melted_exprDat_rel_ab <- melt(exprDat_rel_ab_setTD)
+
+  if (!is.na(unique(melted_exprDat_rel_ab$Phylum)[1] )){
+  print(ggplot(melted_exprDat_rel_ab, aes_string(x = "variable", y = "value", fill ="Phylum")) +
+    geom_bar(stat = "identity") +
+    labs(x = "Samples", y = "Relative Abundance", title = paste("Relative abundance at the Phylum Taxonomic level of the ", module_name, " module.")) +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1)))
+  }else{
+    if (length(unique(melted_exprDat_rel_ab$Phylum) ) > 1 ){
+      print(ggplot(melted_exprDat_rel_ab, aes_string(x = "variable", y = "value", fill ="Phylum")) +
+        geom_bar(stat = "identity") +
+        labs(x = "Samples", y = "Relative Abundance", title = paste("Relative abundance at the Phylum Taxonomic level of the ", module_name, " module.")) +
+        theme(axis.text.x = element_text(angle = 90, hjust = 1)))
+  }
+  }
+}
+```
+
+### Relative abundance of modules at the Class level
+
+```{r, echo = FALSE, message= FALSE, fig.height= 15, fig.width = 15, warning = FALSE}
+for (module in 1:length(MEs)){
+  module_name <- substring(names(MEs)[module], 3)
+  modGenes = dynamicColors == module_name 
+  selectedExpr <- exprDat[,modGenes]
+if (list_treatment[['transformation']] == "CLR"){
+exprDat_rel_ab <- clrInv(selectedExpr)
+}else{
+exprDat_rel_ab <- as.data.frame(t(apply(selectedExpr, 1, function(x) x / sum(x))))
+}
+  exprDat_rel_ab_setTD <- setDT(as.data.frame(t(exprDat_rel_ab)), keep.rownames = TRUE)
+  exprDat_rel_ab_setTD <- merge(exprDat_rel_ab_setTD, taxTable_relAb, by = "rn")
+  exprDat_rel_ab_setTD$rn <- as.character(exprDat_rel_ab_setTD$rn)
+  exprDat_rel_ab_setTD$rn <- factor(exprDat_rel_ab_setTD$rn, levels = unique(exprDat_rel_ab_setTD$rn))
+  melted_exprDat_rel_ab <- melt(exprDat_rel_ab_setTD)
+
+  if (!is.na(unique(melted_exprDat_rel_ab$Class)[1] )){
+  print(ggplot(melted_exprDat_rel_ab, aes_string(x = "variable", y = "value", fill ="Class")) +
+    geom_bar(stat = "identity") +
+    labs(x = "Samples", y = "Relative Abundance", title = paste("Relative abundance at the Class Taxonomic level of the ", module_name, " module.")) +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1)))
+  }else{
+    if (length(unique(melted_exprDat_rel_ab$Class) ) > 1 ){
+      print(ggplot(melted_exprDat_rel_ab, aes_string(x = "variable", y = "value", fill ="Class")) +
+        geom_bar(stat = "identity") +
+        labs(x = "Samples", y = "Relative Abundance", title = paste("Relative abundance at the Class Taxonomic level of the ", module_name, " module.")) +
+        theme(axis.text.x = element_text(angle = 90, hjust = 1)))
+  }
+  }
+}
+```
+
+### Relative abundance of modules at the Order level
+
+```{r, echo = FALSE, message= FALSE, fig.height= 15, fig.width = 15, warning = FALSE}
+for (module in 1:length(MEs)){
+  module_name <- substring(names(MEs)[module], 3)
+  modGenes = dynamicColors == module_name 
+  selectedExpr <- exprDat[,modGenes]
+if (list_treatment[['transformation']] == "CLR"){
+exprDat_rel_ab <- clrInv(selectedExpr)
+}else{
+exprDat_rel_ab <- as.data.frame(t(apply(selectedExpr, 1, function(x) x / sum(x))))
+}
+  exprDat_rel_ab_setTD <- setDT(as.data.frame(t(exprDat_rel_ab)), keep.rownames = TRUE)
+  exprDat_rel_ab_setTD <- merge(exprDat_rel_ab_setTD, taxTable_relAb, by = "rn")
+  exprDat_rel_ab_setTD$rn <- as.character(exprDat_rel_ab_setTD$rn)
+  exprDat_rel_ab_setTD$rn <- factor(exprDat_rel_ab_setTD$rn, levels = unique(exprDat_rel_ab_setTD$rn))
+  melted_exprDat_rel_ab <- melt(exprDat_rel_ab_setTD)
+
+  if (!is.na(unique(melted_exprDat_rel_ab$Order)[1] )){
+  print(ggplot(melted_exprDat_rel_ab, aes_string(x = "variable", y = "value", fill ="Order")) +
+    geom_bar(stat = "identity") +
+    labs(x = "Samples", y = "Relative Abundance", title = paste("Relative abundance at the Order Taxonomic level of the ", module_name, " module.")) +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1)))
+  }else{
+    if (length(unique(melted_exprDat_rel_ab$Order) ) > 1 ){
+      print(ggplot(melted_exprDat_rel_ab, aes_string(x = "variable", y = "value", fill ="Order")) +
+        geom_bar(stat = "identity") +
+        labs(x = "Samples", y = "Relative Abundance", title = paste("Relative abundance at the Order Taxonomic level of the ", module_name, " module.")) +
+        theme(axis.text.x = element_text(angle = 90, hjust = 1)))
+  }
+  }
+}
+```
+
+### Relative abundance of modules at the Family level
+
+```{r, echo = FALSE, message= FALSE, fig.height= 15, fig.width = 15, warning = FALSE}
+for (module in 1:length(MEs)){
+  module_name <- substring(names(MEs)[module], 3)
+  modGenes = dynamicColors == module_name 
+  selectedExpr <- exprDat[,modGenes]
+if (list_treatment[['transformation']] == "CLR"){
+exprDat_rel_ab <- clrInv(selectedExpr)
+}else{
+exprDat_rel_ab <- as.data.frame(t(apply(selectedExpr, 1, function(x) x / sum(x))))
+}
+  exprDat_rel_ab_setTD <- setDT(as.data.frame(t(exprDat_rel_ab)), keep.rownames = TRUE)
+  exprDat_rel_ab_setTD <- merge(exprDat_rel_ab_setTD, taxTable_relAb, by = "rn")
+  exprDat_rel_ab_setTD$rn <- as.character(exprDat_rel_ab_setTD$rn)
+  exprDat_rel_ab_setTD$rn <- factor(exprDat_rel_ab_setTD$rn, levels = unique(exprDat_rel_ab_setTD$rn))
+  melted_exprDat_rel_ab <- melt(exprDat_rel_ab_setTD)
+
+  if (!is.na(unique(melted_exprDat_rel_ab$Family)[1] )){
+  print(ggplot(melted_exprDat_rel_ab, aes_string(x = "variable", y = "value", fill ="Family")) +
+    geom_bar(stat = "identity") +
+    labs(x = "Samples", y = "Relative Abundance", title = paste("Relative abundance at the Family Taxonomic level of the ", module_name, " module.")) +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1)))
+  }else{
+    if (length(unique(melted_exprDat_rel_ab$Family) ) > 1 ){
+      print(ggplot(melted_exprDat_rel_ab, aes_string(x = "variable", y = "value", fill ="Family")) +
+        geom_bar(stat = "identity") +
+        labs(x = "Samples", y = "Relative Abundance", title = paste("Relative abundance at the Family Taxonomic level of the ", module_name, " module.")) +
+        theme(axis.text.x = element_text(angle = 90, hjust = 1)))
+  }
+  }
+}
+```
+
+### Relative abundance of modules at the Genus level
+
+```{r, echo = FALSE, message= FALSE, fig.height= 15, fig.width = 15, warning = FALSE}
+for (module in 1:length(MEs)){
+  module_name <- substring(names(MEs)[module], 3)
+  modGenes = dynamicColors == module_name 
+  selectedExpr <- exprDat[,modGenes]
+if (list_treatment[['transformation']] == "CLR"){
+exprDat_rel_ab <- clrInv(selectedExpr)
+}else{
+exprDat_rel_ab <- as.data.frame(t(apply(selectedExpr, 1, function(x) x / sum(x))))
+}
+  exprDat_rel_ab_setTD <- setDT(as.data.frame(t(exprDat_rel_ab)), keep.rownames = TRUE)
+  exprDat_rel_ab_setTD <- merge(exprDat_rel_ab_setTD, taxTable_relAb, by = "rn")
+  exprDat_rel_ab_setTD$rn <- as.character(exprDat_rel_ab_setTD$rn)
+  exprDat_rel_ab_setTD$rn <- factor(exprDat_rel_ab_setTD$rn, levels = unique(exprDat_rel_ab_setTD$rn))
+  melted_exprDat_rel_ab <- melt(exprDat_rel_ab_setTD)
+
+  if (!is.na(unique(melted_exprDat_rel_ab$Genus)[1] )){
+  print(ggplot(melted_exprDat_rel_ab, aes_string(x = "variable", y = "value", fill ="Genus")) +
+    geom_bar(stat = "identity") +
+    labs(x = "Samples", y = "Relative Abundance", title = paste("Relative abundance at the Genus Taxonomic level of the ", module_name, " module.")) +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1)))
+  }else{
+    if (length(unique(melted_exprDat_rel_ab$Genus) ) > 1 ){
+      print(ggplot(melted_exprDat_rel_ab, aes_string(x = "variable", y = "value", fill ="Genus")) +
+        geom_bar(stat = "identity") +
+        labs(x = "Samples", y = "Relative Abundance", title = paste("Relative abundance at the Genus Taxonomic level of the ", module_name, " module.")) +
+        theme(axis.text.x = element_text(angle = 90, hjust = 1)))
+  }
+  }
+}
+```
+
+
+## HIVE PLOTS AND PLS (per traits) {.tabset .tabset-fade .tabset-pills} 
+
+
+
+
+### HIVE PLOT representing correlation to Year Trait
+
+```{r, echo = FALSE, message = FALSE, , fig.height= 20, fig.width = 20}
+for (module in 1:length(MEs)){
+ModuleName <- substring(names(MEs)[module], 3)
+markers <- colnames(exprDat)[dynamicColors==ModuleName]
+markers.data <- exprDat[,markers]
+if (!is.numeric(sampleAnnot[,"Year"])){
+  sampleAnnot[,"Year"] <- as.numeric(as.factor(sampleAnnot[,"Year"]))
+}
+env = as.data.frame(sampleAnnot[,"Year"])
+colnames(env) = "Year"
+markers.data.env <- data.frame(cbind(markers.data, env))
+if (length(colnames(exprDat)[dynamicColors==ModuleName]) >= 10){
+  ncomp=10
+}else{
+  ncomp=length(colnames(exprDat)[dynamicColors==ModuleName])
+}
+formulaChar <- paste("Year", "~.", sep ="") 
+fit = plsr(formula(formulaChar), data=markers.data.env, validation="LOO", method = "oscorespls", ncomp=ncomp)
+cverr <- RMSEP(fit)$val[1,,]
+imin <- which.min(cverr) - 1
+myComp <- as.integer(imin)
+if (myComp != 0){ 
+myFit = plsr(formula(formulaChar), data=markers.data.env, validation="LOO", method = "oscorespls", ncomp=myComp)
+cvs = round( cor(myFit$val$pred[,,myComp], markers.data.env[["Year"]][!is.na(markers.data.env[["Year"]])]), digits=3);
+vip = vector("numeric", ncol(markers.data)); for(j in 1:ncol(markers.data))  vip[j] <- VIPjh(myFit, j, myComp)
+vip = round(vip, digits=2)
+o = order(vip, decreasing=TRUE)
+vip.df <- data.frame(Marker = colnames(markers.data), VIP = vip, Temp.Cor = geneTraitSignificance[colnames(markers.data),])
+colnames(vip.df) <- c("Marker", "VIP", c(colnames(sampleAnnot)))
+probes <- colnames(exprDat)
+inModule <- is.finite(match(dynamicColors, ModuleName))
+modProbes <- probes[inModule]
+modTOM <- dissTOM[inModule, inModule]
+dimnames(modTOM) <- list(modProbes, modProbes)
+cyt <- exportNetworkToCytoscape(modTOM, edgeFile = NULL, nodeFile = NULL, weighted = TRUE, nodeNames = modProbes, nodeAttr = dynamicColors[inModule])
+col <- 2 + as.numeric(1)
+if (col != 12 && ModuleName != "white"){ 
+Annot <- taxTable[which(taxTable[["rn"]] %in% rownames(vip.df)), ]
+df.hive.plot <- data.frame(label = rownames(vip.df), x1 = vip.df[["VIP"]], x2 = rep(0, nrow(vip.df)), y1 = rep(0, nrow(vip.df)), y2 = vip.df[[col]], annotation = Annot)
+edgeData <- cyt$`edgeData`
+df.hive.to.plot <- vector_geom_curve(edgeData, df.hive.plot)
+print(cvs)
+plot(myFit, ncomp=myComp, asp=1, line=TRUE)
+  print(ggplot() +
+    geom_point(data = df.hive.plot, aes(x1, y1, color = annotation.Family, size = 3)) + # x1 is the VIP
+    geom_text(data = df.hive.plot, vjust = 0.5, angle = 45, aes(x1, y1, label = annotation.Family)) +
+    geom_point(data = df.hive.plot, aes(x2, abs(y2), color = annotation.Family, size = 3)) + # y2 is the correlation to the pH at time of filtering
+    geom_text(data = df.hive.plot, hjust = 0.5, angle = 45, aes(x2,abs(y2), label = annotation.Family)) + 
+    geom_curve(data = df.hive.to.plot, curvature = 0.2, color = "grey ", size = 0.2,aes(x = vector_x, y = vector_y, xend = vector_xend, yend = abs(vector_yend))) +
+    theme_gdocs() +
+    scale_colour_tableau(palette = "Tableau 20") +
+    labs(x = paste("VIP module", ModuleName, " "), y = paste("Spearman Correlation to", "Year"), colour = "Annotation.Family"))
+}
+}
+}
+```
+
+
+
+### HIVE PLOT representing correlation to Y.grid Trait
+
+```{r, echo = FALSE, message = FALSE, , fig.height= 20, fig.width = 20}
+for (module in 1:length(MEs)){
+ModuleName <- substring(names(MEs)[module], 3)
+markers <- colnames(exprDat)[dynamicColors==ModuleName]
+markers.data <- exprDat[,markers]
+if (!is.numeric(sampleAnnot[,"Y.grid"])){
+  sampleAnnot[,"Y.grid"] <- as.numeric(as.factor(sampleAnnot[,"Y.grid"]))
+}
+env = as.data.frame(sampleAnnot[,"Y.grid"])
+colnames(env) = "Y.grid"
+markers.data.env <- data.frame(cbind(markers.data, env))
+if (length(colnames(exprDat)[dynamicColors==ModuleName]) >= 10){
+  ncomp=10
+}else{
+  ncomp=length(colnames(exprDat)[dynamicColors==ModuleName])
+}
+formulaChar <- paste("Y.grid", "~.", sep ="") 
+fit = plsr(formula(formulaChar), data=markers.data.env, validation="LOO", method = "oscorespls", ncomp=ncomp)
+cverr <- RMSEP(fit)$val[1,,]
+imin <- which.min(cverr) - 1
+myComp <- as.integer(imin)
+if (myComp != 0){ 
+myFit = plsr(formula(formulaChar), data=markers.data.env, validation="LOO", method = "oscorespls", ncomp=myComp)
+cvs = round( cor(myFit$val$pred[,,myComp], markers.data.env[["Y.grid"]][!is.na(markers.data.env[["Y.grid"]])]), digits=3);
+vip = vector("numeric", ncol(markers.data)); for(j in 1:ncol(markers.data))  vip[j] <- VIPjh(myFit, j, myComp)
+vip = round(vip, digits=2)
+o = order(vip, decreasing=TRUE)
+vip.df <- data.frame(Marker = colnames(markers.data), VIP = vip, Temp.Cor = geneTraitSignificance[colnames(markers.data),])
+colnames(vip.df) <- c("Marker", "VIP", c(colnames(sampleAnnot)))
+probes <- colnames(exprDat)
+inModule <- is.finite(match(dynamicColors, ModuleName))
+modProbes <- probes[inModule]
+modTOM <- dissTOM[inModule, inModule]
+dimnames(modTOM) <- list(modProbes, modProbes)
+cyt <- exportNetworkToCytoscape(modTOM, edgeFile = NULL, nodeFile = NULL, weighted = TRUE, nodeNames = modProbes, nodeAttr = dynamicColors[inModule])
+col <- 2 + as.numeric(2)
+if (col != 12 && ModuleName != "white"){ 
+Annot <- taxTable[which(taxTable[["rn"]] %in% rownames(vip.df)), ]
+df.hive.plot <- data.frame(label = rownames(vip.df), x1 = vip.df[["VIP"]], x2 = rep(0, nrow(vip.df)), y1 = rep(0, nrow(vip.df)), y2 = vip.df[[col]], annotation = Annot)
+edgeData <- cyt$`edgeData`
+df.hive.to.plot <- vector_geom_curve(edgeData, df.hive.plot)
+print(cvs)
+plot(myFit, ncomp=myComp, asp=1, line=TRUE)
+  print(ggplot() +
+    geom_point(data = df.hive.plot, aes(x1, y1, color = annotation.Family, size = 3)) + # x1 is the VIP
+    geom_text(data = df.hive.plot, vjust = 0.5, angle = 45, aes(x1, y1, label = annotation.Family)) +
+    geom_point(data = df.hive.plot, aes(x2, abs(y2), color = annotation.Family, size = 3)) + # y2 is the correlation to the pH at time of filtering
+    geom_text(data = df.hive.plot, hjust = 0.5, angle = 45, aes(x2,abs(y2), label = annotation.Family)) + 
+    geom_curve(data = df.hive.to.plot, curvature = 0.2, color = "grey ", size = 0.2,aes(x = vector_x, y = vector_y, xend = vector_xend, yend = abs(vector_yend))) +
+    theme_gdocs() +
+    scale_colour_tableau(palette = "Tableau 20") +
+    labs(x = paste("VIP module", ModuleName, " "), y = paste("Spearman Correlation to", "Y.grid"), colour = "Annotation.Family"))
+}
+}
+}
+```
+
+
+
+### HIVE PLOT representing correlation to X.grid Trait
+
+```{r, echo = FALSE, message = FALSE, , fig.height= 20, fig.width = 20}
+for (module in 1:length(MEs)){
+ModuleName <- substring(names(MEs)[module], 3)
+markers <- colnames(exprDat)[dynamicColors==ModuleName]
+markers.data <- exprDat[,markers]
+if (!is.numeric(sampleAnnot[,"X.grid"])){
+  sampleAnnot[,"X.grid"] <- as.numeric(as.factor(sampleAnnot[,"X.grid"]))
+}
+env = as.data.frame(sampleAnnot[,"X.grid"])
+colnames(env) = "X.grid"
+markers.data.env <- data.frame(cbind(markers.data, env))
+if (length(colnames(exprDat)[dynamicColors==ModuleName]) >= 10){
+  ncomp=10
+}else{
+  ncomp=length(colnames(exprDat)[dynamicColors==ModuleName])
+}
+formulaChar <- paste("X.grid", "~.", sep ="") 
+fit = plsr(formula(formulaChar), data=markers.data.env, validation="LOO", method = "oscorespls", ncomp=ncomp)
+cverr <- RMSEP(fit)$val[1,,]
+imin <- which.min(cverr) - 1
+myComp <- as.integer(imin)
+if (myComp != 0){ 
+myFit = plsr(formula(formulaChar), data=markers.data.env, validation="LOO", method = "oscorespls", ncomp=myComp)
+cvs = round( cor(myFit$val$pred[,,myComp], markers.data.env[["X.grid"]][!is.na(markers.data.env[["X.grid"]])]), digits=3);
+vip = vector("numeric", ncol(markers.data)); for(j in 1:ncol(markers.data))  vip[j] <- VIPjh(myFit, j, myComp)
+vip = round(vip, digits=2)
+o = order(vip, decreasing=TRUE)
+vip.df <- data.frame(Marker = colnames(markers.data), VIP = vip, Temp.Cor = geneTraitSignificance[colnames(markers.data),])
+colnames(vip.df) <- c("Marker", "VIP", c(colnames(sampleAnnot)))
+probes <- colnames(exprDat)
+inModule <- is.finite(match(dynamicColors, ModuleName))
+modProbes <- probes[inModule]
+modTOM <- dissTOM[inModule, inModule]
+dimnames(modTOM) <- list(modProbes, modProbes)
+cyt <- exportNetworkToCytoscape(modTOM, edgeFile = NULL, nodeFile = NULL, weighted = TRUE, nodeNames = modProbes, nodeAttr = dynamicColors[inModule])
+col <- 2 + as.numeric(3)
+if (col != 12 && ModuleName != "white"){ 
+Annot <- taxTable[which(taxTable[["rn"]] %in% rownames(vip.df)), ]
+df.hive.plot <- data.frame(label = rownames(vip.df), x1 = vip.df[["VIP"]], x2 = rep(0, nrow(vip.df)), y1 = rep(0, nrow(vip.df)), y2 = vip.df[[col]], annotation = Annot)
+edgeData <- cyt$`edgeData`
+df.hive.to.plot <- vector_geom_curve(edgeData, df.hive.plot)
+print(cvs)
+plot(myFit, ncomp=myComp, asp=1, line=TRUE)
+  print(ggplot() +
+    geom_point(data = df.hive.plot, aes(x1, y1, color = annotation.Family, size = 3)) + # x1 is the VIP
+    geom_text(data = df.hive.plot, vjust = 0.5, angle = 45, aes(x1, y1, label = annotation.Family)) +
+    geom_point(data = df.hive.plot, aes(x2, abs(y2), color = annotation.Family, size = 3)) + # y2 is the correlation to the pH at time of filtering
+    geom_text(data = df.hive.plot, hjust = 0.5, angle = 45, aes(x2,abs(y2), label = annotation.Family)) + 
+    geom_curve(data = df.hive.to.plot, curvature = 0.2, color = "grey ", size = 0.2,aes(x = vector_x, y = vector_y, xend = vector_xend, yend = abs(vector_yend))) +
+    theme_gdocs() +
+    scale_colour_tableau(palette = "Tableau 20") +
+    labs(x = paste("VIP module", ModuleName, " "), y = paste("Spearman Correlation to", "X.grid"), colour = "Annotation.Family"))
+}
+}
+}
+```
+
+
+
+### HIVE PLOT representing correlation to Lat Trait
+
+```{r, echo = FALSE, message = FALSE, , fig.height= 20, fig.width = 20}
+for (module in 1:length(MEs)){
+ModuleName <- substring(names(MEs)[module], 3)
+markers <- colnames(exprDat)[dynamicColors==ModuleName]
+markers.data <- exprDat[,markers]
+if (!is.numeric(sampleAnnot[,"Lat"])){
+  sampleAnnot[,"Lat"] <- as.numeric(as.factor(sampleAnnot[,"Lat"]))
+}
+env = as.data.frame(sampleAnnot[,"Lat"])
+colnames(env) = "Lat"
+markers.data.env <- data.frame(cbind(markers.data, env))
+if (length(colnames(exprDat)[dynamicColors==ModuleName]) >= 10){
+  ncomp=10
+}else{
+  ncomp=length(colnames(exprDat)[dynamicColors==ModuleName])
+}
+formulaChar <- paste("Lat", "~.", sep ="") 
+fit = plsr(formula(formulaChar), data=markers.data.env, validation="LOO", method = "oscorespls", ncomp=ncomp)
+cverr <- RMSEP(fit)$val[1,,]
+imin <- which.min(cverr) - 1
+myComp <- as.integer(imin)
+if (myComp != 0){ 
+myFit = plsr(formula(formulaChar), data=markers.data.env, validation="LOO", method = "oscorespls", ncomp=myComp)
+cvs = round( cor(myFit$val$pred[,,myComp], markers.data.env[["Lat"]][!is.na(markers.data.env[["Lat"]])]), digits=3);
+vip = vector("numeric", ncol(markers.data)); for(j in 1:ncol(markers.data))  vip[j] <- VIPjh(myFit, j, myComp)
+vip = round(vip, digits=2)
+o = order(vip, decreasing=TRUE)
+vip.df <- data.frame(Marker = colnames(markers.data), VIP = vip, Temp.Cor = geneTraitSignificance[colnames(markers.data),])
+colnames(vip.df) <- c("Marker", "VIP", c(colnames(sampleAnnot)))
+probes <- colnames(exprDat)
+inModule <- is.finite(match(dynamicColors, ModuleName))
+modProbes <- probes[inModule]
+modTOM <- dissTOM[inModule, inModule]
+dimnames(modTOM) <- list(modProbes, modProbes)
+cyt <- exportNetworkToCytoscape(modTOM, edgeFile = NULL, nodeFile = NULL, weighted = TRUE, nodeNames = modProbes, nodeAttr = dynamicColors[inModule])
+col <- 2 + as.numeric(4)
+if (col != 12 && ModuleName != "white"){ 
+Annot <- taxTable[which(taxTable[["rn"]] %in% rownames(vip.df)), ]
+df.hive.plot <- data.frame(label = rownames(vip.df), x1 = vip.df[["VIP"]], x2 = rep(0, nrow(vip.df)), y1 = rep(0, nrow(vip.df)), y2 = vip.df[[col]], annotation = Annot)
+edgeData <- cyt$`edgeData`
+df.hive.to.plot <- vector_geom_curve(edgeData, df.hive.plot)
+print(cvs)
+plot(myFit, ncomp=myComp, asp=1, line=TRUE)
+  print(ggplot() +
+    geom_point(data = df.hive.plot, aes(x1, y1, color = annotation.Family, size = 3)) + # x1 is the VIP
+    geom_text(data = df.hive.plot, vjust = 0.5, angle = 45, aes(x1, y1, label = annotation.Family)) +
+    geom_point(data = df.hive.plot, aes(x2, abs(y2), color = annotation.Family, size = 3)) + # y2 is the correlation to the pH at time of filtering
+    geom_text(data = df.hive.plot, hjust = 0.5, angle = 45, aes(x2,abs(y2), label = annotation.Family)) + 
+    geom_curve(data = df.hive.to.plot, curvature = 0.2, color = "grey ", size = 0.2,aes(x = vector_x, y = vector_y, xend = vector_xend, yend = abs(vector_yend))) +
+    theme_gdocs() +
+    scale_colour_tableau(palette = "Tableau 20") +
+    labs(x = paste("VIP module", ModuleName, " "), y = paste("Spearman Correlation to", "Lat"), colour = "Annotation.Family"))
+}
+}
+}
+```
+
+
+
+### HIVE PLOT representing correlation to Long Trait
+
+```{r, echo = FALSE, message = FALSE, , fig.height= 20, fig.width = 20}
+for (module in 1:length(MEs)){
+ModuleName <- substring(names(MEs)[module], 3)
+markers <- colnames(exprDat)[dynamicColors==ModuleName]
+markers.data <- exprDat[,markers]
+if (!is.numeric(sampleAnnot[,"Long"])){
+  sampleAnnot[,"Long"] <- as.numeric(as.factor(sampleAnnot[,"Long"]))
+}
+env = as.data.frame(sampleAnnot[,"Long"])
+colnames(env) = "Long"
+markers.data.env <- data.frame(cbind(markers.data, env))
+if (length(colnames(exprDat)[dynamicColors==ModuleName]) >= 10){
+  ncomp=10
+}else{
+  ncomp=length(colnames(exprDat)[dynamicColors==ModuleName])
+}
+formulaChar <- paste("Long", "~.", sep ="") 
+fit = plsr(formula(formulaChar), data=markers.data.env, validation="LOO", method = "oscorespls", ncomp=ncomp)
+cverr <- RMSEP(fit)$val[1,,]
+imin <- which.min(cverr) - 1
+myComp <- as.integer(imin)
+if (myComp != 0){ 
+myFit = plsr(formula(formulaChar), data=markers.data.env, validation="LOO", method = "oscorespls", ncomp=myComp)
+cvs = round( cor(myFit$val$pred[,,myComp], markers.data.env[["Long"]][!is.na(markers.data.env[["Long"]])]), digits=3);
+vip = vector("numeric", ncol(markers.data)); for(j in 1:ncol(markers.data))  vip[j] <- VIPjh(myFit, j, myComp)
+vip = round(vip, digits=2)
+o = order(vip, decreasing=TRUE)
+vip.df <- data.frame(Marker = colnames(markers.data), VIP = vip, Temp.Cor = geneTraitSignificance[colnames(markers.data),])
+colnames(vip.df) <- c("Marker", "VIP", c(colnames(sampleAnnot)))
+probes <- colnames(exprDat)
+inModule <- is.finite(match(dynamicColors, ModuleName))
+modProbes <- probes[inModule]
+modTOM <- dissTOM[inModule, inModule]
+dimnames(modTOM) <- list(modProbes, modProbes)
+cyt <- exportNetworkToCytoscape(modTOM, edgeFile = NULL, nodeFile = NULL, weighted = TRUE, nodeNames = modProbes, nodeAttr = dynamicColors[inModule])
+col <- 2 + as.numeric(5)
+if (col != 12 && ModuleName != "white"){ 
+Annot <- taxTable[which(taxTable[["rn"]] %in% rownames(vip.df)), ]
+df.hive.plot <- data.frame(label = rownames(vip.df), x1 = vip.df[["VIP"]], x2 = rep(0, nrow(vip.df)), y1 = rep(0, nrow(vip.df)), y2 = vip.df[[col]], annotation = Annot)
+edgeData <- cyt$`edgeData`
+df.hive.to.plot <- vector_geom_curve(edgeData, df.hive.plot)
+print(cvs)
+plot(myFit, ncomp=myComp, asp=1, line=TRUE)
+  print(ggplot() +
+    geom_point(data = df.hive.plot, aes(x1, y1, color = annotation.Family, size = 3)) + # x1 is the VIP
+    geom_text(data = df.hive.plot, vjust = 0.5, angle = 45, aes(x1, y1, label = annotation.Family)) +
+    geom_point(data = df.hive.plot, aes(x2, abs(y2), color = annotation.Family, size = 3)) + # y2 is the correlation to the pH at time of filtering
+    geom_text(data = df.hive.plot, hjust = 0.5, angle = 45, aes(x2,abs(y2), label = annotation.Family)) + 
+    geom_curve(data = df.hive.to.plot, curvature = 0.2, color = "grey ", size = 0.2,aes(x = vector_x, y = vector_y, xend = vector_xend, yend = abs(vector_yend))) +
+    theme_gdocs() +
+    scale_colour_tableau(palette = "Tableau 20") +
+    labs(x = paste("VIP module", ModuleName, " "), y = paste("Spearman Correlation to", "Long"), colour = "Annotation.Family"))
+}
+}
+}
+```
+
+
+
+### HIVE PLOT representing correlation to YgridCal Trait
+
+```{r, echo = FALSE, message = FALSE, , fig.height= 20, fig.width = 20}
+for (module in 1:length(MEs)){
+ModuleName <- substring(names(MEs)[module], 3)
+markers <- colnames(exprDat)[dynamicColors==ModuleName]
+markers.data <- exprDat[,markers]
+if (!is.numeric(sampleAnnot[,"YgridCal"])){
+  sampleAnnot[,"YgridCal"] <- as.numeric(as.factor(sampleAnnot[,"YgridCal"]))
+}
+env = as.data.frame(sampleAnnot[,"YgridCal"])
+colnames(env) = "YgridCal"
+markers.data.env <- data.frame(cbind(markers.data, env))
+if (length(colnames(exprDat)[dynamicColors==ModuleName]) >= 10){
+  ncomp=10
+}else{
+  ncomp=length(colnames(exprDat)[dynamicColors==ModuleName])
+}
+formulaChar <- paste("YgridCal", "~.", sep ="") 
+fit = plsr(formula(formulaChar), data=markers.data.env, validation="LOO", method = "oscorespls", ncomp=ncomp)
+cverr <- RMSEP(fit)$val[1,,]
+imin <- which.min(cverr) - 1
+myComp <- as.integer(imin)
+if (myComp != 0){ 
+myFit = plsr(formula(formulaChar), data=markers.data.env, validation="LOO", method = "oscorespls", ncomp=myComp)
+cvs = round( cor(myFit$val$pred[,,myComp], markers.data.env[["YgridCal"]][!is.na(markers.data.env[["YgridCal"]])]), digits=3);
+vip = vector("numeric", ncol(markers.data)); for(j in 1:ncol(markers.data))  vip[j] <- VIPjh(myFit, j, myComp)
+vip = round(vip, digits=2)
+o = order(vip, decreasing=TRUE)
+vip.df <- data.frame(Marker = colnames(markers.data), VIP = vip, Temp.Cor = geneTraitSignificance[colnames(markers.data),])
+colnames(vip.df) <- c("Marker", "VIP", c(colnames(sampleAnnot)))
+probes <- colnames(exprDat)
+inModule <- is.finite(match(dynamicColors, ModuleName))
+modProbes <- probes[inModule]
+modTOM <- dissTOM[inModule, inModule]
+dimnames(modTOM) <- list(modProbes, modProbes)
+cyt <- exportNetworkToCytoscape(modTOM, edgeFile = NULL, nodeFile = NULL, weighted = TRUE, nodeNames = modProbes, nodeAttr = dynamicColors[inModule])
+col <- 2 + as.numeric(6)
+if (col != 12 && ModuleName != "white"){ 
+Annot <- taxTable[which(taxTable[["rn"]] %in% rownames(vip.df)), ]
+df.hive.plot <- data.frame(label = rownames(vip.df), x1 = vip.df[["VIP"]], x2 = rep(0, nrow(vip.df)), y1 = rep(0, nrow(vip.df)), y2 = vip.df[[col]], annotation = Annot)
+edgeData <- cyt$`edgeData`
+df.hive.to.plot <- vector_geom_curve(edgeData, df.hive.plot)
+print(cvs)
+plot(myFit, ncomp=myComp, asp=1, line=TRUE)
+  print(ggplot() +
+    geom_point(data = df.hive.plot, aes(x1, y1, color = annotation.Family, size = 3)) + # x1 is the VIP
+    geom_text(data = df.hive.plot, vjust = 0.5, angle = 45, aes(x1, y1, label = annotation.Family)) +
+    geom_point(data = df.hive.plot, aes(x2, abs(y2), color = annotation.Family, size = 3)) + # y2 is the correlation to the pH at time of filtering
+    geom_text(data = df.hive.plot, hjust = 0.5, angle = 45, aes(x2,abs(y2), label = annotation.Family)) + 
+    geom_curve(data = df.hive.to.plot, curvature = 0.2, color = "grey ", size = 0.2,aes(x = vector_x, y = vector_y, xend = vector_xend, yend = abs(vector_yend))) +
+    theme_gdocs() +
+    scale_colour_tableau(palette = "Tableau 20") +
+    labs(x = paste("VIP module", ModuleName, " "), y = paste("Spearman Correlation to", "YgridCal"), colour = "Annotation.Family"))
+}
+}
+}
+```
+
+
+
+### HIVE PLOT representing correlation to XgridCal Trait
+
+```{r, echo = FALSE, message = FALSE, , fig.height= 20, fig.width = 20}
+for (module in 1:length(MEs)){
+ModuleName <- substring(names(MEs)[module], 3)
+markers <- colnames(exprDat)[dynamicColors==ModuleName]
+markers.data <- exprDat[,markers]
+if (!is.numeric(sampleAnnot[,"XgridCal"])){
+  sampleAnnot[,"XgridCal"] <- as.numeric(as.factor(sampleAnnot[,"XgridCal"]))
+}
+env = as.data.frame(sampleAnnot[,"XgridCal"])
+colnames(env) = "XgridCal"
+markers.data.env <- data.frame(cbind(markers.data, env))
+if (length(colnames(exprDat)[dynamicColors==ModuleName]) >= 10){
+  ncomp=10
+}else{
+  ncomp=length(colnames(exprDat)[dynamicColors==ModuleName])
+}
+formulaChar <- paste("XgridCal", "~.", sep ="") 
+fit = plsr(formula(formulaChar), data=markers.data.env, validation="LOO", method = "oscorespls", ncomp=ncomp)
+cverr <- RMSEP(fit)$val[1,,]
+imin <- which.min(cverr) - 1
+myComp <- as.integer(imin)
+if (myComp != 0){ 
+myFit = plsr(formula(formulaChar), data=markers.data.env, validation="LOO", method = "oscorespls", ncomp=myComp)
+cvs = round( cor(myFit$val$pred[,,myComp], markers.data.env[["XgridCal"]][!is.na(markers.data.env[["XgridCal"]])]), digits=3);
+vip = vector("numeric", ncol(markers.data)); for(j in 1:ncol(markers.data))  vip[j] <- VIPjh(myFit, j, myComp)
+vip = round(vip, digits=2)
+o = order(vip, decreasing=TRUE)
+vip.df <- data.frame(Marker = colnames(markers.data), VIP = vip, Temp.Cor = geneTraitSignificance[colnames(markers.data),])
+colnames(vip.df) <- c("Marker", "VIP", c(colnames(sampleAnnot)))
+probes <- colnames(exprDat)
+inModule <- is.finite(match(dynamicColors, ModuleName))
+modProbes <- probes[inModule]
+modTOM <- dissTOM[inModule, inModule]
+dimnames(modTOM) <- list(modProbes, modProbes)
+cyt <- exportNetworkToCytoscape(modTOM, edgeFile = NULL, nodeFile = NULL, weighted = TRUE, nodeNames = modProbes, nodeAttr = dynamicColors[inModule])
+col <- 2 + as.numeric(7)
+if (col != 12 && ModuleName != "white"){ 
+Annot <- taxTable[which(taxTable[["rn"]] %in% rownames(vip.df)), ]
+df.hive.plot <- data.frame(label = rownames(vip.df), x1 = vip.df[["VIP"]], x2 = rep(0, nrow(vip.df)), y1 = rep(0, nrow(vip.df)), y2 = vip.df[[col]], annotation = Annot)
+edgeData <- cyt$`edgeData`
+df.hive.to.plot <- vector_geom_curve(edgeData, df.hive.plot)
+print(cvs)
+plot(myFit, ncomp=myComp, asp=1, line=TRUE)
+  print(ggplot() +
+    geom_point(data = df.hive.plot, aes(x1, y1, color = annotation.Family, size = 3)) + # x1 is the VIP
+    geom_text(data = df.hive.plot, vjust = 0.5, angle = 45, aes(x1, y1, label = annotation.Family)) +
+    geom_point(data = df.hive.plot, aes(x2, abs(y2), color = annotation.Family, size = 3)) + # y2 is the correlation to the pH at time of filtering
+    geom_text(data = df.hive.plot, hjust = 0.5, angle = 45, aes(x2,abs(y2), label = annotation.Family)) + 
+    geom_curve(data = df.hive.to.plot, curvature = 0.2, color = "grey ", size = 0.2,aes(x = vector_x, y = vector_y, xend = vector_xend, yend = abs(vector_yend))) +
+    theme_gdocs() +
+    scale_colour_tableau(palette = "Tableau 20") +
+    labs(x = paste("VIP module", ModuleName, " "), y = paste("Spearman Correlation to", "XgridCal"), colour = "Annotation.Family"))
+}
+}
+}
+```
+
+
+
+### HIVE PLOT representing correlation to PAR Trait
+
+```{r, echo = FALSE, message = FALSE, , fig.height= 20, fig.width = 20}
+for (module in 1:length(MEs)){
+ModuleName <- substring(names(MEs)[module], 3)
+markers <- colnames(exprDat)[dynamicColors==ModuleName]
+markers.data <- exprDat[,markers]
+if (!is.numeric(sampleAnnot[,"PAR"])){
+  sampleAnnot[,"PAR"] <- as.numeric(as.factor(sampleAnnot[,"PAR"]))
+}
+env = as.data.frame(sampleAnnot[,"PAR"])
+colnames(env) = "PAR"
+markers.data.env <- data.frame(cbind(markers.data, env))
+if (length(colnames(exprDat)[dynamicColors==ModuleName]) >= 10){
+  ncomp=10
+}else{
+  ncomp=length(colnames(exprDat)[dynamicColors==ModuleName])
+}
+formulaChar <- paste("PAR", "~.", sep ="") 
+fit = plsr(formula(formulaChar), data=markers.data.env, validation="LOO", method = "oscorespls", ncomp=ncomp)
+cverr <- RMSEP(fit)$val[1,,]
+imin <- which.min(cverr) - 1
+myComp <- as.integer(imin)
+if (myComp != 0){ 
+myFit = plsr(formula(formulaChar), data=markers.data.env, validation="LOO", method = "oscorespls", ncomp=myComp)
+cvs = round( cor(myFit$val$pred[,,myComp], markers.data.env[["PAR"]][!is.na(markers.data.env[["PAR"]])]), digits=3);
+vip = vector("numeric", ncol(markers.data)); for(j in 1:ncol(markers.data))  vip[j] <- VIPjh(myFit, j, myComp)
+vip = round(vip, digits=2)
+o = order(vip, decreasing=TRUE)
+vip.df <- data.frame(Marker = colnames(markers.data), VIP = vip, Temp.Cor = geneTraitSignificance[colnames(markers.data),])
+colnames(vip.df) <- c("Marker", "VIP", c(colnames(sampleAnnot)))
+probes <- colnames(exprDat)
+inModule <- is.finite(match(dynamicColors, ModuleName))
+modProbes <- probes[inModule]
+modTOM <- dissTOM[inModule, inModule]
+dimnames(modTOM) <- list(modProbes, modProbes)
+cyt <- exportNetworkToCytoscape(modTOM, edgeFile = NULL, nodeFile = NULL, weighted = TRUE, nodeNames = modProbes, nodeAttr = dynamicColors[inModule])
+col <- 2 + as.numeric(8)
+if (col != 12 && ModuleName != "white"){ 
+Annot <- taxTable[which(taxTable[["rn"]] %in% rownames(vip.df)), ]
+df.hive.plot <- data.frame(label = rownames(vip.df), x1 = vip.df[["VIP"]], x2 = rep(0, nrow(vip.df)), y1 = rep(0, nrow(vip.df)), y2 = vip.df[[col]], annotation = Annot)
+edgeData <- cyt$`edgeData`
+df.hive.to.plot <- vector_geom_curve(edgeData, df.hive.plot)
+print(cvs)
+plot(myFit, ncomp=myComp, asp=1, line=TRUE)
+  print(ggplot() +
+    geom_point(data = df.hive.plot, aes(x1, y1, color = annotation.Family, size = 3)) + # x1 is the VIP
+    geom_text(data = df.hive.plot, vjust = 0.5, angle = 45, aes(x1, y1, label = annotation.Family)) +
+    geom_point(data = df.hive.plot, aes(x2, abs(y2), color = annotation.Family, size = 3)) + # y2 is the correlation to the pH at time of filtering
+    geom_text(data = df.hive.plot, hjust = 0.5, angle = 45, aes(x2,abs(y2), label = annotation.Family)) + 
+    geom_curve(data = df.hive.to.plot, curvature = 0.2, color = "grey ", size = 0.2,aes(x = vector_x, y = vector_y, xend = vector_xend, yend = abs(vector_yend))) +
+    theme_gdocs() +
+    scale_colour_tableau(palette = "Tableau 20") +
+    labs(x = paste("VIP module", ModuleName, " "), y = paste("Spearman Correlation to", "PAR"), colour = "Annotation.Family"))
+}
+}
+}
+```
+
+
+
+### HIVE PLOT representing correlation to Salinity Trait
+
+```{r, echo = FALSE, message = FALSE, , fig.height= 20, fig.width = 20}
+for (module in 1:length(MEs)){
+ModuleName <- substring(names(MEs)[module], 3)
+markers <- colnames(exprDat)[dynamicColors==ModuleName]
+markers.data <- exprDat[,markers]
+if (!is.numeric(sampleAnnot[,"Salinity"])){
+  sampleAnnot[,"Salinity"] <- as.numeric(as.factor(sampleAnnot[,"Salinity"]))
+}
+env = as.data.frame(sampleAnnot[,"Salinity"])
+colnames(env) = "Salinity"
+markers.data.env <- data.frame(cbind(markers.data, env))
+if (length(colnames(exprDat)[dynamicColors==ModuleName]) >= 10){
+  ncomp=10
+}else{
+  ncomp=length(colnames(exprDat)[dynamicColors==ModuleName])
+}
+formulaChar <- paste("Salinity", "~.", sep ="") 
+fit = plsr(formula(formulaChar), data=markers.data.env, validation="LOO", method = "oscorespls", ncomp=ncomp)
+cverr <- RMSEP(fit)$val[1,,]
+imin <- which.min(cverr) - 1
+myComp <- as.integer(imin)
+if (myComp != 0){ 
+myFit = plsr(formula(formulaChar), data=markers.data.env, validation="LOO", method = "oscorespls", ncomp=myComp)
+cvs = round( cor(myFit$val$pred[,,myComp], markers.data.env[["Salinity"]][!is.na(markers.data.env[["Salinity"]])]), digits=3);
+vip = vector("numeric", ncol(markers.data)); for(j in 1:ncol(markers.data))  vip[j] <- VIPjh(myFit, j, myComp)
+vip = round(vip, digits=2)
+o = order(vip, decreasing=TRUE)
+vip.df <- data.frame(Marker = colnames(markers.data), VIP = vip, Temp.Cor = geneTraitSignificance[colnames(markers.data),])
+colnames(vip.df) <- c("Marker", "VIP", c(colnames(sampleAnnot)))
+probes <- colnames(exprDat)
+inModule <- is.finite(match(dynamicColors, ModuleName))
+modProbes <- probes[inModule]
+modTOM <- dissTOM[inModule, inModule]
+dimnames(modTOM) <- list(modProbes, modProbes)
+cyt <- exportNetworkToCytoscape(modTOM, edgeFile = NULL, nodeFile = NULL, weighted = TRUE, nodeNames = modProbes, nodeAttr = dynamicColors[inModule])
+col <- 2 + as.numeric(9)
+if (col != 12 && ModuleName != "white"){ 
+Annot <- taxTable[which(taxTable[["rn"]] %in% rownames(vip.df)), ]
+df.hive.plot <- data.frame(label = rownames(vip.df), x1 = vip.df[["VIP"]], x2 = rep(0, nrow(vip.df)), y1 = rep(0, nrow(vip.df)), y2 = vip.df[[col]], annotation = Annot)
+edgeData <- cyt$`edgeData`
+df.hive.to.plot <- vector_geom_curve(edgeData, df.hive.plot)
+print(cvs)
+plot(myFit, ncomp=myComp, asp=1, line=TRUE)
+  print(ggplot() +
+    geom_point(data = df.hive.plot, aes(x1, y1, color = annotation.Family, size = 3)) + # x1 is the VIP
+    geom_text(data = df.hive.plot, vjust = 0.5, angle = 45, aes(x1, y1, label = annotation.Family)) +
+    geom_point(data = df.hive.plot, aes(x2, abs(y2), color = annotation.Family, size = 3)) + # y2 is the correlation to the pH at time of filtering
+    geom_text(data = df.hive.plot, hjust = 0.5, angle = 45, aes(x2,abs(y2), label = annotation.Family)) + 
+    geom_curve(data = df.hive.to.plot, curvature = 0.2, color = "grey ", size = 0.2,aes(x = vector_x, y = vector_y, xend = vector_xend, yend = abs(vector_yend))) +
+    theme_gdocs() +
+    scale_colour_tableau(palette = "Tableau 20") +
+    labs(x = paste("VIP module", ModuleName, " "), y = paste("Spearman Correlation to", "Salinity"), colour = "Annotation.Family"))
+}
+}
+}
+```
+
+
+
+### HIVE PLOT representing correlation to SST Trait
+
+```{r, echo = FALSE, message = FALSE, , fig.height= 20, fig.width = 20}
+for (module in 1:length(MEs)){
+ModuleName <- substring(names(MEs)[module], 3)
+markers <- colnames(exprDat)[dynamicColors==ModuleName]
+markers.data <- exprDat[,markers]
+if (!is.numeric(sampleAnnot[,"SST"])){
+  sampleAnnot[,"SST"] <- as.numeric(as.factor(sampleAnnot[,"SST"]))
+}
+env = as.data.frame(sampleAnnot[,"SST"])
+colnames(env) = "SST"
+markers.data.env <- data.frame(cbind(markers.data, env))
+if (length(colnames(exprDat)[dynamicColors==ModuleName]) >= 10){
+  ncomp=10
+}else{
+  ncomp=length(colnames(exprDat)[dynamicColors==ModuleName])
+}
+formulaChar <- paste("SST", "~.", sep ="") 
+fit = plsr(formula(formulaChar), data=markers.data.env, validation="LOO", method = "oscorespls", ncomp=ncomp)
+cverr <- RMSEP(fit)$val[1,,]
+imin <- which.min(cverr) - 1
+myComp <- as.integer(imin)
+if (myComp != 0){ 
+myFit = plsr(formula(formulaChar), data=markers.data.env, validation="LOO", method = "oscorespls", ncomp=myComp)
+cvs = round( cor(myFit$val$pred[,,myComp], markers.data.env[["SST"]][!is.na(markers.data.env[["SST"]])]), digits=3);
+vip = vector("numeric", ncol(markers.data)); for(j in 1:ncol(markers.data))  vip[j] <- VIPjh(myFit, j, myComp)
+vip = round(vip, digits=2)
+o = order(vip, decreasing=TRUE)
+vip.df <- data.frame(Marker = colnames(markers.data), VIP = vip, Temp.Cor = geneTraitSignificance[colnames(markers.data),])
+colnames(vip.df) <- c("Marker", "VIP", c(colnames(sampleAnnot)))
+probes <- colnames(exprDat)
+inModule <- is.finite(match(dynamicColors, ModuleName))
+modProbes <- probes[inModule]
+modTOM <- dissTOM[inModule, inModule]
+dimnames(modTOM) <- list(modProbes, modProbes)
+cyt <- exportNetworkToCytoscape(modTOM, edgeFile = NULL, nodeFile = NULL, weighted = TRUE, nodeNames = modProbes, nodeAttr = dynamicColors[inModule])
+col <- 2 + as.numeric(10)
+if (col != 12 && ModuleName != "white"){ 
+Annot <- taxTable[which(taxTable[["rn"]] %in% rownames(vip.df)), ]
+df.hive.plot <- data.frame(label = rownames(vip.df), x1 = vip.df[["VIP"]], x2 = rep(0, nrow(vip.df)), y1 = rep(0, nrow(vip.df)), y2 = vip.df[[col]], annotation = Annot)
+edgeData <- cyt$`edgeData`
+df.hive.to.plot <- vector_geom_curve(edgeData, df.hive.plot)
+print(cvs)
+plot(myFit, ncomp=myComp, asp=1, line=TRUE)
+  print(ggplot() +
+    geom_point(data = df.hive.plot, aes(x1, y1, color = annotation.Family, size = 3)) + # x1 is the VIP
+    geom_text(data = df.hive.plot, vjust = 0.5, angle = 45, aes(x1, y1, label = annotation.Family)) +
+    geom_point(data = df.hive.plot, aes(x2, abs(y2), color = annotation.Family, size = 3)) + # y2 is the correlation to the pH at time of filtering
+    geom_text(data = df.hive.plot, hjust = 0.5, angle = 45, aes(x2,abs(y2), label = annotation.Family)) + 
+    geom_curve(data = df.hive.to.plot, curvature = 0.2, color = "grey ", size = 0.2,aes(x = vector_x, y = vector_y, xend = vector_xend, yend = abs(vector_yend))) +
+    theme_gdocs() +
+    scale_colour_tableau(palette = "Tableau 20") +
+    labs(x = paste("VIP module", ModuleName, " "), y = paste("Spearman Correlation to", "SST"), colour = "Annotation.Family"))
+}
+}
+}
+```
+
+
+
+### HIVE PLOT representing correlation to Flu.Chl Trait
+
+```{r, echo = FALSE, message = FALSE, , fig.height= 20, fig.width = 20}
+for (module in 1:length(MEs)){
+ModuleName <- substring(names(MEs)[module], 3)
+markers <- colnames(exprDat)[dynamicColors==ModuleName]
+markers.data <- exprDat[,markers]
+if (!is.numeric(sampleAnnot[,"Flu.Chl"])){
+  sampleAnnot[,"Flu.Chl"] <- as.numeric(as.factor(sampleAnnot[,"Flu.Chl"]))
+}
+env = as.data.frame(sampleAnnot[,"Flu.Chl"])
+colnames(env) = "Flu.Chl"
+markers.data.env <- data.frame(cbind(markers.data, env))
+if (length(colnames(exprDat)[dynamicColors==ModuleName]) >= 10){
+  ncomp=10
+}else{
+  ncomp=length(colnames(exprDat)[dynamicColors==ModuleName])
+}
+formulaChar <- paste("Flu.Chl", "~.", sep ="") 
+fit = plsr(formula(formulaChar), data=markers.data.env, validation="LOO", method = "oscorespls", ncomp=ncomp)
+cverr <- RMSEP(fit)$val[1,,]
+imin <- which.min(cverr) - 1
+myComp <- as.integer(imin)
+if (myComp != 0){ 
+myFit = plsr(formula(formulaChar), data=markers.data.env, validation="LOO", method = "oscorespls", ncomp=myComp)
+cvs = round( cor(myFit$val$pred[,,myComp], markers.data.env[["Flu.Chl"]][!is.na(markers.data.env[["Flu.Chl"]])]), digits=3);
+vip = vector("numeric", ncol(markers.data)); for(j in 1:ncol(markers.data))  vip[j] <- VIPjh(myFit, j, myComp)
+vip = round(vip, digits=2)
+o = order(vip, decreasing=TRUE)
+vip.df <- data.frame(Marker = colnames(markers.data), VIP = vip, Temp.Cor = geneTraitSignificance[colnames(markers.data),])
+colnames(vip.df) <- c("Marker", "VIP", c(colnames(sampleAnnot)))
+probes <- colnames(exprDat)
+inModule <- is.finite(match(dynamicColors, ModuleName))
+modProbes <- probes[inModule]
+modTOM <- dissTOM[inModule, inModule]
+dimnames(modTOM) <- list(modProbes, modProbes)
+cyt <- exportNetworkToCytoscape(modTOM, edgeFile = NULL, nodeFile = NULL, weighted = TRUE, nodeNames = modProbes, nodeAttr = dynamicColors[inModule])
+col <- 2 + as.numeric(11)
+if (col != 12 && ModuleName != "white"){ 
+Annot <- taxTable[which(taxTable[["rn"]] %in% rownames(vip.df)), ]
+df.hive.plot <- data.frame(label = rownames(vip.df), x1 = vip.df[["VIP"]], x2 = rep(0, nrow(vip.df)), y1 = rep(0, nrow(vip.df)), y2 = vip.df[[col]], annotation = Annot)
+edgeData <- cyt$`edgeData`
+df.hive.to.plot <- vector_geom_curve(edgeData, df.hive.plot)
+print(cvs)
+plot(myFit, ncomp=myComp, asp=1, line=TRUE)
+  print(ggplot() +
+    geom_point(data = df.hive.plot, aes(x1, y1, color = annotation.Family, size = 3)) + # x1 is the VIP
+    geom_text(data = df.hive.plot, vjust = 0.5, angle = 45, aes(x1, y1, label = annotation.Family)) +
+    geom_point(data = df.hive.plot, aes(x2, abs(y2), color = annotation.Family, size = 3)) + # y2 is the correlation to the pH at time of filtering
+    geom_text(data = df.hive.plot, hjust = 0.5, angle = 45, aes(x2,abs(y2), label = annotation.Family)) + 
+    geom_curve(data = df.hive.to.plot, curvature = 0.2, color = "grey ", size = 0.2,aes(x = vector_x, y = vector_y, xend = vector_xend, yend = abs(vector_yend))) +
+    theme_gdocs() +
+    scale_colour_tableau(palette = "Tableau 20") +
+    labs(x = paste("VIP module", ModuleName, " "), y = paste("Spearman Correlation to", "Flu.Chl"), colour = "Annotation.Family"))
+}
+}
+}
+```
+
+
+
+### HIVE PLOT representing correlation to MLD Trait
+
+```{r, echo = FALSE, message = FALSE, , fig.height= 20, fig.width = 20}
+for (module in 1:length(MEs)){
+ModuleName <- substring(names(MEs)[module], 3)
+markers <- colnames(exprDat)[dynamicColors==ModuleName]
+markers.data <- exprDat[,markers]
+if (!is.numeric(sampleAnnot[,"MLD"])){
+  sampleAnnot[,"MLD"] <- as.numeric(as.factor(sampleAnnot[,"MLD"]))
+}
+env = as.data.frame(sampleAnnot[,"MLD"])
+colnames(env) = "MLD"
+markers.data.env <- data.frame(cbind(markers.data, env))
+if (length(colnames(exprDat)[dynamicColors==ModuleName]) >= 10){
+  ncomp=10
+}else{
+  ncomp=length(colnames(exprDat)[dynamicColors==ModuleName])
+}
+formulaChar <- paste("MLD", "~.", sep ="") 
+fit = plsr(formula(formulaChar), data=markers.data.env, validation="LOO", method = "oscorespls", ncomp=ncomp)
+cverr <- RMSEP(fit)$val[1,,]
+imin <- which.min(cverr) - 1
+myComp <- as.integer(imin)
+if (myComp != 0){ 
+myFit = plsr(formula(formulaChar), data=markers.data.env, validation="LOO", method = "oscorespls", ncomp=myComp)
+cvs = round( cor(myFit$val$pred[,,myComp], markers.data.env[["MLD"]][!is.na(markers.data.env[["MLD"]])]), digits=3);
+vip = vector("numeric", ncol(markers.data)); for(j in 1:ncol(markers.data))  vip[j] <- VIPjh(myFit, j, myComp)
+vip = round(vip, digits=2)
+o = order(vip, decreasing=TRUE)
+vip.df <- data.frame(Marker = colnames(markers.data), VIP = vip, Temp.Cor = geneTraitSignificance[colnames(markers.data),])
+colnames(vip.df) <- c("Marker", "VIP", c(colnames(sampleAnnot)))
+probes <- colnames(exprDat)
+inModule <- is.finite(match(dynamicColors, ModuleName))
+modProbes <- probes[inModule]
+modTOM <- dissTOM[inModule, inModule]
+dimnames(modTOM) <- list(modProbes, modProbes)
+cyt <- exportNetworkToCytoscape(modTOM, edgeFile = NULL, nodeFile = NULL, weighted = TRUE, nodeNames = modProbes, nodeAttr = dynamicColors[inModule])
+col <- 2 + as.numeric(12)
+if (col != 12 && ModuleName != "white"){ 
+Annot <- taxTable[which(taxTable[["rn"]] %in% rownames(vip.df)), ]
+df.hive.plot <- data.frame(label = rownames(vip.df), x1 = vip.df[["VIP"]], x2 = rep(0, nrow(vip.df)), y1 = rep(0, nrow(vip.df)), y2 = vip.df[[col]], annotation = Annot)
+edgeData <- cyt$`edgeData`
+df.hive.to.plot <- vector_geom_curve(edgeData, df.hive.plot)
+print(cvs)
+plot(myFit, ncomp=myComp, asp=1, line=TRUE)
+  print(ggplot() +
+    geom_point(data = df.hive.plot, aes(x1, y1, color = annotation.Family, size = 3)) + # x1 is the VIP
+    geom_text(data = df.hive.plot, vjust = 0.5, angle = 45, aes(x1, y1, label = annotation.Family)) +
+    geom_point(data = df.hive.plot, aes(x2, abs(y2), color = annotation.Family, size = 3)) + # y2 is the correlation to the pH at time of filtering
+    geom_text(data = df.hive.plot, hjust = 0.5, angle = 45, aes(x2,abs(y2), label = annotation.Family)) + 
+    geom_curve(data = df.hive.to.plot, curvature = 0.2, color = "grey ", size = 0.2,aes(x = vector_x, y = vector_y, xend = vector_xend, yend = abs(vector_yend))) +
+    theme_gdocs() +
+    scale_colour_tableau(palette = "Tableau 20") +
+    labs(x = paste("VIP module", ModuleName, " "), y = paste("Spearman Correlation to", "MLD"), colour = "Annotation.Family"))
+}
+}
+}
+```
+
+
+
+### HIVE PLOT representing correlation to NCP Trait
+
+```{r, echo = FALSE, message = FALSE, , fig.height= 20, fig.width = 20}
+for (module in 1:length(MEs)){
+ModuleName <- substring(names(MEs)[module], 3)
+markers <- colnames(exprDat)[dynamicColors==ModuleName]
+markers.data <- exprDat[,markers]
+if (!is.numeric(sampleAnnot[,"NCP"])){
+  sampleAnnot[,"NCP"] <- as.numeric(as.factor(sampleAnnot[,"NCP"]))
+}
+env = as.data.frame(sampleAnnot[,"NCP"])
+colnames(env) = "NCP"
+markers.data.env <- data.frame(cbind(markers.data, env))
+if (length(colnames(exprDat)[dynamicColors==ModuleName]) >= 10){
+  ncomp=10
+}else{
+  ncomp=length(colnames(exprDat)[dynamicColors==ModuleName])
+}
+formulaChar <- paste("NCP", "~.", sep ="") 
+fit = plsr(formula(formulaChar), data=markers.data.env, validation="LOO", method = "oscorespls", ncomp=ncomp)
+cverr <- RMSEP(fit)$val[1,,]
+imin <- which.min(cverr) - 1
+myComp <- as.integer(imin)
+if (myComp != 0){ 
+myFit = plsr(formula(formulaChar), data=markers.data.env, validation="LOO", method = "oscorespls", ncomp=myComp)
+cvs = round( cor(myFit$val$pred[,,myComp], markers.data.env[["NCP"]][!is.na(markers.data.env[["NCP"]])]), digits=3);
+vip = vector("numeric", ncol(markers.data)); for(j in 1:ncol(markers.data))  vip[j] <- VIPjh(myFit, j, myComp)
+vip = round(vip, digits=2)
+o = order(vip, decreasing=TRUE)
+vip.df <- data.frame(Marker = colnames(markers.data), VIP = vip, Temp.Cor = geneTraitSignificance[colnames(markers.data),])
+colnames(vip.df) <- c("Marker", "VIP", c(colnames(sampleAnnot)))
+probes <- colnames(exprDat)
+inModule <- is.finite(match(dynamicColors, ModuleName))
+modProbes <- probes[inModule]
+modTOM <- dissTOM[inModule, inModule]
+dimnames(modTOM) <- list(modProbes, modProbes)
+cyt <- exportNetworkToCytoscape(modTOM, edgeFile = NULL, nodeFile = NULL, weighted = TRUE, nodeNames = modProbes, nodeAttr = dynamicColors[inModule])
+col <- 2 + as.numeric(13)
+if (col != 12 && ModuleName != "white"){ 
+Annot <- taxTable[which(taxTable[["rn"]] %in% rownames(vip.df)), ]
+df.hive.plot <- data.frame(label = rownames(vip.df), x1 = vip.df[["VIP"]], x2 = rep(0, nrow(vip.df)), y1 = rep(0, nrow(vip.df)), y2 = vip.df[[col]], annotation = Annot)
+edgeData <- cyt$`edgeData`
+df.hive.to.plot <- vector_geom_curve(edgeData, df.hive.plot)
+print(cvs)
+plot(myFit, ncomp=myComp, asp=1, line=TRUE)
+  print(ggplot() +
+    geom_point(data = df.hive.plot, aes(x1, y1, color = annotation.Family, size = 3)) + # x1 is the VIP
+    geom_text(data = df.hive.plot, vjust = 0.5, angle = 45, aes(x1, y1, label = annotation.Family)) +
+    geom_point(data = df.hive.plot, aes(x2, abs(y2), color = annotation.Family, size = 3)) + # y2 is the correlation to the pH at time of filtering
+    geom_text(data = df.hive.plot, hjust = 0.5, angle = 45, aes(x2,abs(y2), label = annotation.Family)) + 
+    geom_curve(data = df.hive.to.plot, curvature = 0.2, color = "grey ", size = 0.2,aes(x = vector_x, y = vector_y, xend = vector_xend, yend = abs(vector_yend))) +
+    theme_gdocs() +
+    scale_colour_tableau(palette = "Tableau 20") +
+    labs(x = paste("VIP module", ModuleName, " "), y = paste("Spearman Correlation to", "NCP"), colour = "Annotation.Family"))
+}
+}
+}
+```
+
+
+
+### HIVE PLOT representing correlation to Biological.O2 Trait
+
+```{r, echo = FALSE, message = FALSE, , fig.height= 20, fig.width = 20}
+for (module in 1:length(MEs)){
+ModuleName <- substring(names(MEs)[module], 3)
+markers <- colnames(exprDat)[dynamicColors==ModuleName]
+markers.data <- exprDat[,markers]
+if (!is.numeric(sampleAnnot[,"Biological.O2"])){
+  sampleAnnot[,"Biological.O2"] <- as.numeric(as.factor(sampleAnnot[,"Biological.O2"]))
+}
+env = as.data.frame(sampleAnnot[,"Biological.O2"])
+colnames(env) = "Biological.O2"
+markers.data.env <- data.frame(cbind(markers.data, env))
+if (length(colnames(exprDat)[dynamicColors==ModuleName]) >= 10){
+  ncomp=10
+}else{
+  ncomp=length(colnames(exprDat)[dynamicColors==ModuleName])
+}
+formulaChar <- paste("Biological.O2", "~.", sep ="") 
+fit = plsr(formula(formulaChar), data=markers.data.env, validation="LOO", method = "oscorespls", ncomp=ncomp)
+cverr <- RMSEP(fit)$val[1,,]
+imin <- which.min(cverr) - 1
+myComp <- as.integer(imin)
+if (myComp != 0){ 
+myFit = plsr(formula(formulaChar), data=markers.data.env, validation="LOO", method = "oscorespls", ncomp=myComp)
+cvs = round( cor(myFit$val$pred[,,myComp], markers.data.env[["Biological.O2"]][!is.na(markers.data.env[["Biological.O2"]])]), digits=3);
+vip = vector("numeric", ncol(markers.data)); for(j in 1:ncol(markers.data))  vip[j] <- VIPjh(myFit, j, myComp)
+vip = round(vip, digits=2)
+o = order(vip, decreasing=TRUE)
+vip.df <- data.frame(Marker = colnames(markers.data), VIP = vip, Temp.Cor = geneTraitSignificance[colnames(markers.data),])
+colnames(vip.df) <- c("Marker", "VIP", c(colnames(sampleAnnot)))
+probes <- colnames(exprDat)
+inModule <- is.finite(match(dynamicColors, ModuleName))
+modProbes <- probes[inModule]
+modTOM <- dissTOM[inModule, inModule]
+dimnames(modTOM) <- list(modProbes, modProbes)
+cyt <- exportNetworkToCytoscape(modTOM, edgeFile = NULL, nodeFile = NULL, weighted = TRUE, nodeNames = modProbes, nodeAttr = dynamicColors[inModule])
+col <- 2 + as.numeric(14)
+if (col != 12 && ModuleName != "white"){ 
+Annot <- taxTable[which(taxTable[["rn"]] %in% rownames(vip.df)), ]
+df.hive.plot <- data.frame(label = rownames(vip.df), x1 = vip.df[["VIP"]], x2 = rep(0, nrow(vip.df)), y1 = rep(0, nrow(vip.df)), y2 = vip.df[[col]], annotation = Annot)
+edgeData <- cyt$`edgeData`
+df.hive.to.plot <- vector_geom_curve(edgeData, df.hive.plot)
+print(cvs)
+plot(myFit, ncomp=myComp, asp=1, line=TRUE)
+  print(ggplot() +
+    geom_point(data = df.hive.plot, aes(x1, y1, color = annotation.Family, size = 3)) + # x1 is the VIP
+    geom_text(data = df.hive.plot, vjust = 0.5, angle = 45, aes(x1, y1, label = annotation.Family)) +
+    geom_point(data = df.hive.plot, aes(x2, abs(y2), color = annotation.Family, size = 3)) + # y2 is the correlation to the pH at time of filtering
+    geom_text(data = df.hive.plot, hjust = 0.5, angle = 45, aes(x2,abs(y2), label = annotation.Family)) + 
+    geom_curve(data = df.hive.to.plot, curvature = 0.2, color = "grey ", size = 0.2,aes(x = vector_x, y = vector_y, xend = vector_xend, yend = abs(vector_yend))) +
+    theme_gdocs() +
+    scale_colour_tableau(palette = "Tableau 20") +
+    labs(x = paste("VIP module", ModuleName, " "), y = paste("Spearman Correlation to", "Biological.O2"), colour = "Annotation.Family"))
+}
+}
+}
+```
+
+
+
+### HIVE PLOT representing correlation to Station.Type Trait
+
+```{r, echo = FALSE, message = FALSE, , fig.height= 20, fig.width = 20}
+for (module in 1:length(MEs)){
+ModuleName <- substring(names(MEs)[module], 3)
+markers <- colnames(exprDat)[dynamicColors==ModuleName]
+markers.data <- exprDat[,markers]
+if (!is.numeric(sampleAnnot[,"Station.Type"])){
+  sampleAnnot[,"Station.Type"] <- as.numeric(as.factor(sampleAnnot[,"Station.Type"]))
+}
+env = as.data.frame(sampleAnnot[,"Station.Type"])
+colnames(env) = "Station.Type"
+markers.data.env <- data.frame(cbind(markers.data, env))
+if (length(colnames(exprDat)[dynamicColors==ModuleName]) >= 10){
+  ncomp=10
+}else{
+  ncomp=length(colnames(exprDat)[dynamicColors==ModuleName])
+}
+formulaChar <- paste("Station.Type", "~.", sep ="") 
+fit = plsr(formula(formulaChar), data=markers.data.env, validation="LOO", method = "oscorespls", ncomp=ncomp)
+cverr <- RMSEP(fit)$val[1,,]
+imin <- which.min(cverr) - 1
+myComp <- as.integer(imin)
+if (myComp != 0){ 
+myFit = plsr(formula(formulaChar), data=markers.data.env, validation="LOO", method = "oscorespls", ncomp=myComp)
+cvs = round( cor(myFit$val$pred[,,myComp], markers.data.env[["Station.Type"]][!is.na(markers.data.env[["Station.Type"]])]), digits=3);
+vip = vector("numeric", ncol(markers.data)); for(j in 1:ncol(markers.data))  vip[j] <- VIPjh(myFit, j, myComp)
+vip = round(vip, digits=2)
+o = order(vip, decreasing=TRUE)
+vip.df <- data.frame(Marker = colnames(markers.data), VIP = vip, Temp.Cor = geneTraitSignificance[colnames(markers.data),])
+colnames(vip.df) <- c("Marker", "VIP", c(colnames(sampleAnnot)))
+probes <- colnames(exprDat)
+inModule <- is.finite(match(dynamicColors, ModuleName))
+modProbes <- probes[inModule]
+modTOM <- dissTOM[inModule, inModule]
+dimnames(modTOM) <- list(modProbes, modProbes)
+cyt <- exportNetworkToCytoscape(modTOM, edgeFile = NULL, nodeFile = NULL, weighted = TRUE, nodeNames = modProbes, nodeAttr = dynamicColors[inModule])
+col <- 2 + as.numeric(15)
+if (col != 12 && ModuleName != "white"){ 
+Annot <- taxTable[which(taxTable[["rn"]] %in% rownames(vip.df)), ]
+df.hive.plot <- data.frame(label = rownames(vip.df), x1 = vip.df[["VIP"]], x2 = rep(0, nrow(vip.df)), y1 = rep(0, nrow(vip.df)), y2 = vip.df[[col]], annotation = Annot)
+edgeData <- cyt$`edgeData`
+df.hive.to.plot <- vector_geom_curve(edgeData, df.hive.plot)
+print(cvs)
+plot(myFit, ncomp=myComp, asp=1, line=TRUE)
+  print(ggplot() +
+    geom_point(data = df.hive.plot, aes(x1, y1, color = annotation.Family, size = 3)) + # x1 is the VIP
+    geom_text(data = df.hive.plot, vjust = 0.5, angle = 45, aes(x1, y1, label = annotation.Family)) +
+    geom_point(data = df.hive.plot, aes(x2, abs(y2), color = annotation.Family, size = 3)) + # y2 is the correlation to the pH at time of filtering
+    geom_text(data = df.hive.plot, hjust = 0.5, angle = 45, aes(x2,abs(y2), label = annotation.Family)) + 
+    geom_curve(data = df.hive.to.plot, curvature = 0.2, color = "grey ", size = 0.2,aes(x = vector_x, y = vector_y, xend = vector_xend, yend = abs(vector_yend))) +
+    theme_gdocs() +
+    scale_colour_tableau(palette = "Tableau 20") +
+    labs(x = paste("VIP module", ModuleName, " "), y = paste("Spearman Correlation to", "Station.Type"), colour = "Annotation.Family"))
+}
+}
+}
+```
+
+
+## Comment on the last section 
+
+
+
+  
+ 
+

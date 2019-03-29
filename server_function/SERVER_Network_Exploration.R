@@ -34,8 +34,16 @@ module_Relative_abundance <- reactive({
   }
   
   selectedExpr <- exprDat[, modGenes]
-  
-  exprDat_rel_ab <- as.data.frame(t(apply(selectedExpr, 1, function(x) x / sum(x))))
+  if (input$Transformation =="Yes"){
+    if (input$TypeTransformation=="CLR"){
+      exprDat_rel_ab <- clrInv(selectedExpr)
+    }else{
+      exprDat_rel_ab <- as.data.frame(t(apply(selectedExpr, 1, function(x) x / sum(x))))
+    }
+  }else{
+    exprDat_rel_ab <- as.data.frame(t(apply(selectedExpr, 1, function(x) x / sum(x))))
+    
+  }
   exprDat_rel_ab <- setDT(as.data.frame(t(exprDat_rel_ab)), keep.rownames = TRUE)
   exprDat_rel_ab <- merge(exprDat_rel_ab, taxTable1(), by = "rn")
   exprDat_rel_ab$rn <- as.character(exprDat_rel_ab$rn)
@@ -46,10 +54,6 @@ module_Relative_abundance <- reactive({
 
 module_Relative_abundanceSec <- reactive({
   exprDat <- exprDatSec_WGCNA()
-  #print(exprDat)
-  # validate(
-  #   need(input$OmicTable == "OTUs", "Only for OTUs counting table.")
-  # )
   
   modGenes = (selectedDynamicColor2() == input$selectModuleSec)
   
@@ -59,7 +63,15 @@ module_Relative_abundanceSec <- reactive({
   }
   
   selectedExpr <- exprDat[, modGenes]
-  exprDat_rel_ab <- as.data.frame(t(apply(selectedExpr, 1, function(x) x / sum(x))))
+  if (input$Transformation1 =="Yes"){
+    if (input$TypeTransformation1=="CLR"){
+      exprDat_rel_ab <- clrInv(selectedExpr)
+    }else{
+      exprDat_rel_ab <- as.data.frame(t(apply(selectedExpr, 1, function(x) x / sum(x))))
+    }
+  }else{
+    exprDat_rel_ab <- as.data.frame(t(apply(selectedExpr, 1, function(x) x / sum(x))))
+  }
   exprDat_rel_ab <- setDT(as.data.frame(t(exprDat_rel_ab)), keep.rownames = TRUE)
   exprDat_rel_ab <- merge(exprDat_rel_ab, taxTable1(), by = "rn")
   exprDat_rel_ab$rn <- as.character(exprDat_rel_ab$rn)
@@ -355,7 +367,9 @@ fit.object.ncomp <- reactive({
   }
   formulaChar <- paste(input$sampleAnnotSelection, "~.", sep ="")
   fit = plsr(formula(formulaChar), data=env.markers.data(), validation="LOO", method = "oscorespls", ncomp=ncomp)
+  
   fit
+  
 })
 
 fit.object <- reactive({
@@ -676,7 +690,6 @@ output$Sample_ContributionSec <- renderPlot({
 # Relative abundance of the modules
 
 output$Relative_Abundance_Module <- renderPlot({
-  print(unique(module_Relative_abundance()[[input$selectTaxo2]]))
   validate(
     need(!is.na(unique(module_Relative_abundance()[[input$selectTaxo2]])), "Uncharacterized at this taxonomic level")
   )
@@ -775,6 +788,8 @@ output$summaryFit <- renderText({
 
 #### HIVE PLOT 
 output$edge_node <- renderPlot({
+  df_hive<-df.hive.to.plot()
+
   #edge_to_node()
   ggplot() +
     geom_point(data = df.hive.plot(), aes(x1, y1, color = annotation, size = 3)) + # x1 is the VIP
@@ -835,14 +850,14 @@ output$Download_Network_Exploration <- downloadHandler(
     tmpdir <- tempdir()
     setwd(tempdir())
     if (input$pdf_or_svg_p4 == "pdf"){
-      pdf("Contribution_MEs.pdf", width = 10, height = 10)
+      pdf("Contribution_MEs.pdf", width = input$widthPDF, height = input$heightPDF)
       for (i in 1:ncol(selectedMEs())){
         print(barplot(selectedMEs()[,i], col= substr(colnames(selectedMEs())[i], 3, 40), main="", cex.main=2,
                       ylab="eigengene expression", cex.names = 0.7, names.arg = rownames(sampleAnnot_2()), las = 2))
       }
       dev.off()
       fs <- c(fs, "Contribution_MEs.pdf")
-      pdf(paste("Module_", input$selectModule ,"_Corr_Vs_Membership.pdf", sep=""), width = 10, height = 10)
+      pdf(paste("Module_", input$selectModule ,"_Corr_Vs_Membership.pdf", sep=""), width = input$widthPDF, height = input$heightPDF)
       print(ggplot(moduleMembership(), aes(x = moduleMembership, y = TraitSignificance)) +
               geom_point(color = input$selectModule) +
               geom_smooth(method=lm, color = "white") +
@@ -853,7 +868,7 @@ output$Download_Network_Exploration <- downloadHandler(
       dev.off()
       fs <- c(fs, paste("Module_", input$selectModule ,"_Corr_Vs_Membership.pdf", sep=""))
       if (input$TaxonFile || input$LoadExample == "Yes" || input$LoadExample2 == "Yes"){
-        pdf(paste("Module_", input$selectModule ,"_Relative_Abundance.pdf", sep=""), width = 10, height = 10)
+        pdf(paste("Module_", input$selectModule ,"_Relative_Abundance.pdf", sep=""), width = input$widthPDF, height = input$heightPDF)
         
         print(ggplot(module_Relative_abundance(), aes_string(x = "variable", y = "value", fill = input$selectTaxo2)) +
                 geom_bar(stat = "identity") +
@@ -864,7 +879,7 @@ output$Download_Network_Exploration <- downloadHandler(
         fs <- c(fs, paste("Module_", input$selectModule ,"_Relative_Abundance.pdf", sep=""))
       }
       
-      pdf("Module_Correlation_External_Trait.pdf", width = 10, height = 10)
+      pdf("Module_Correlation_External_Trait.pdf", width = input$widthPDF, height = input$heightPDF)
       print(ggplot(data = selectedCondDF(), aes(x = rn, y = variable, fill = value)) +
               geom_tile(color = "white") +
               scale_fill_gradient2(low = "blue", high = "red", mid = "white",
@@ -881,13 +896,13 @@ output$Download_Network_Exploration <- downloadHandler(
       fs <- c(fs, "Module_Correlation_External_Trait.pdf")
     }else{
       for (i in 1:ncol(selectedMEs())){
-        svg(paste("Contribution_MEs_", substr(colnames(selectedMEs())[i], 3, 40), ".svg", sep = ""), width = 10, height = 10)
+        svg(paste("Contribution_MEs_", substr(colnames(selectedMEs())[i], 3, 40), ".svg", sep = ""), width = input$widthPDF, height = input$heightPDF)
         print(barplot(selectedMEs()[,i], col= substr(colnames(selectedMEs())[i], 3, 40), main="", cex.main=2,
                       ylab="eigengene expression", cex.names = 0.7, names.arg = rownames(sampleAnnot_2()), las = 2))
         dev.off()
         fs <- c(fs, paste("Contribution_MEs_", substr(colnames(selectedMEs())[i], 3, 40), ".svg", sep = ""))
       }
-      svg(paste("Module_", input$selectModule ,"_Corr_Vs_Membership.svg", sep=""), width = 10, height = 10)
+      svg(paste("Module_", input$selectModule ,"_Corr_Vs_Membership.svg", sep=""), width = input$widthPDF, height = input$heightPDF)
       print(ggplot(moduleMembership(), aes(x = moduleMembership, y = TraitSignificance)) +
               geom_point(color = input$selectModule) +
               geom_smooth(method=lm, color = "white") +
@@ -898,7 +913,7 @@ output$Download_Network_Exploration <- downloadHandler(
       dev.off()
       fs <- c(fs, paste("Module_", input$selectModule ,"_Corr_Vs_Membership.svg", sep=""))
       if (input$TaxonFile || input$LoadExample == "Yes" || input$LoadExample2 == "Yes"){
-        svg(paste("Module_", input$selectModule ,"_Relative_Abundance.svg", sep=""), width = 10, height = 10)
+        svg(paste("Module_", input$selectModule ,"_Relative_Abundance.svg", sep=""), width = input$widthPDF, height = input$heightPDF)
         
         print(ggplot(module_Relative_abundance(), aes_string(x = "variable", y = "value", fill = input$selectTaxo2)) +
                 geom_bar(stat = "identity") +
@@ -909,7 +924,7 @@ output$Download_Network_Exploration <- downloadHandler(
         fs <- c(fs, paste("Module_", input$selectModule ,"_Relative_Abundance.svg", sep=""))
       }
       
-      svg("Module_Correlation_External_Trait.svg", width = 10, height = 10)
+      svg("Module_Correlation_External_Trait.svg", width = input$widthPDF, height = input$heightPDF)
       print(ggplot(data = selectedCondDF(), aes(x = rn, y = variable, fill = value)) +
               geom_tile(color = "white") +
               scale_fill_gradient2(low = "blue", high = "red", mid = "white",
@@ -940,12 +955,58 @@ output$PLS_VIP <- downloadHandler(
     vip <- vip.df()
     taxTable <- taxTable1()[which(rownames(taxTable1()) %in% rownames(vip)),]
     taxTable <- taxTable[match(rownames(taxTable),rownames(vip)),]
-    print(taxTable)
     
     vip_taxAnnot <- merge(vip, taxTable, by=0, all=TRUE)
     write.csv(vip_taxAnnot, filename)
   }
 )
+
+output$hivePlot_D1 <- downloadHandler(
+  filename = function(){
+    paste("HIVE.zip")
+  },
+  content = function (filename){
+    fs <- c()
+    tmpdir <- tempdir()
+    setwd(tempdir())
+    if (input$pdf_or_svg_hive_p4 == "pdf"){
+      pdf("HIVE.pdf", width = input$HIVEwidthPDF, height = input$HIVEheightPDF)
+
+        print(  ggplot() +
+                  geom_point(data = df.hive.plot(), aes(x1, y1, color = annotation, size = 3)) + # x1 is the VIP
+                  geom_text(data = df.hive.plot(), vjust = 0.5, angle = 45, aes(x1, y1, label = annotation)) +
+                  geom_point(data = df.hive.plot(), aes(x2, abs(y2), color = annotation, size = 3)) + # y2 is the correlation to the pH at time of filtering
+                  geom_text(data = df.hive.plot(), hjust = 0.5, angle = 45, aes(x2,abs(y2), label = annotation)) +      
+                  geom_curve(data = df.hive.to.plot(), curvature = 0.2, color = "grey ", size = 0.2,aes(x = vector_x, y = vector_y, xend = vector_xend, yend = abs(vector_yend))) +
+                  theme_gdocs() +
+                  scale_colour_tableau(palette = "Tableau 20") +
+                  labs(x = "VIP", y = paste("Spearman Correlation to", input$sampleAnnotSelection), colour = "Annotation"))
+        dev.off()
+        fs <- c(fs, "HIVE.pdf")
+      
+    }else{
+
+        svg("HIVE.svg", width = input$HIVEwidthPDF, height = input$HIVEwidthPDF)
+      
+      print(  ggplot() +
+                geom_point(data = df.hive.plot(), aes(x1, y1, color = annotation, size = 3)) + # x1 is the VIP
+                geom_text(data = df.hive.plot(), vjust = 0.5, angle = 45, aes(x1, y1, label = annotation)) +
+                geom_point(data = df.hive.plot(), aes(x2, abs(y2), color = annotation, size = 3)) + # y2 is the correlation to the pH at time of filtering
+                geom_text(data = df.hive.plot(), hjust = 0.5, angle = 45, aes(x2,abs(y2), label = annotation)) +      
+                geom_curve(data = df.hive.to.plot(), curvature = 0.2, color = "grey ", size = 0.2,aes(x = vector_x, y = vector_y, xend = vector_xend, yend = abs(vector_yend))) +
+                theme_gdocs() +
+                scale_colour_tableau(palette = "Tableau 20") +
+                labs(x = "VIP", y = paste("Spearman Correlation to", input$sampleAnnotSelection), colour = "Annotation"))
+      dev.off()
+      fs <- c(fs, "HIVE.pdf")
+
+      
+    }
+    
+    zip(zipfile=filename, files=fs)
+    
+  },
+  contentType = "application/zip")
 
 #### PLS 
 output$PLS_VIP_D2 <- downloadHandler(
@@ -957,6 +1018,53 @@ output$PLS_VIP_D2 <- downloadHandler(
     write.csv(vip.df_D2(), filename)
   }
 )
+
+output$hivePlot_D2 <- downloadHandler(
+  filename = function(){
+    paste("HIVE_D2.zip")
+  },
+  content = function (filename){
+    fs <- c()
+    tmpdir <- tempdir()
+    setwd(tempdir())
+    if (input$pdf_or_svg_hiveD2_p4 == "pdf"){
+      pdf("HIVE_D2.pdf", width = input$HIVED2widthPDF, height = input$HIVED2heightPDF)
+      
+      print(  ggplot() +
+                geom_point(data = df.hive.plot(), aes(x1, y1, color = annotation, size = 3)) + # x1 is the VIP
+                geom_text(data = df.hive.plot(), vjust = 0.5, angle = 45, aes(x1, y1, label = annotation)) +
+                geom_point(data = df.hive.plot(), aes(x2, abs(y2), color = annotation, size = 3)) + # y2 is the correlation to the pH at time of filtering
+                geom_text(data = df.hive.plot(), hjust = 0.5, angle = 45, aes(x2,abs(y2), label = annotation)) +      
+                geom_curve(data = df.hive.to.plot(), curvature = 0.2, color = "grey ", size = 0.2,aes(x = vector_x, y = vector_y, xend = vector_xend, yend = abs(vector_yend))) +
+                theme_gdocs() +
+                scale_colour_tableau(palette = "Tableau 20") +
+                labs(x = "VIP", y = paste("Spearman Correlation to", input$sampleAnnotSelection), colour = "Annotation"))
+      dev.off()
+      fs <- c(fs, "HIVE_D2.pdf")
+      
+    }else{
+      
+      svg("HIVE_D2.svg", width = input$HIVED2widthPDF, height = input$HIVED2widthPDF)
+      
+      print(  ggplot() +
+                geom_point(data = df.hive.plot(), aes(x1, y1, color = annotation, size = 3)) + # x1 is the VIP
+                geom_text(data = df.hive.plot(), vjust = 0.5, angle = 45, aes(x1, y1, label = annotation)) +
+                geom_point(data = df.hive.plot(), aes(x2, abs(y2), color = annotation, size = 3)) + # y2 is the correlation to the pH at time of filtering
+                geom_text(data = df.hive.plot(), hjust = 0.5, angle = 45, aes(x2,abs(y2), label = annotation)) +      
+                geom_curve(data = df.hive.to.plot(), curvature = 0.2, color = "grey ", size = 0.2,aes(x = vector_x, y = vector_y, xend = vector_xend, yend = abs(vector_yend))) +
+                theme_gdocs() +
+                scale_colour_tableau(palette = "Tableau 20") +
+                labs(x = "VIP", y = paste("Spearman Correlation to", input$sampleAnnotSelection), colour = "Annotation"))
+      dev.off()
+      fs <- c(fs, "HIVE_D2.pdf")
+      
+      
+    }
+    
+    zip(zipfile=filename, files=fs)
+    
+  },
+  contentType = "application/zip")
 
 
 
@@ -971,7 +1079,7 @@ output$Download_Network_Exploration_dataset_2 <- downloadHandler(
     tmpdir <- tempdir()
     setwd(tempdir())
     if (input$pdf_or_svg_p4_dataset2 == "pdf"){
-      pdf("Contribution_MEs.pdf", width = 10, height = 10)
+      pdf("Contribution_MEs.pdf", width = input$widthPDF_D2, height = input$heightPDF_D2)
       for (i in 1:ncol(selectedMEs2())){
         print(barplot(selectedMEs2()[,i], col= substr(colnames(selectedMEs2())[i], 3, 40), main="", cex.main=2,
                       ylab="eigengene expression", cex.names = 0.7, names.arg = rownames(sampleAnnot_sec()), las = 2))
@@ -979,7 +1087,7 @@ output$Download_Network_Exploration_dataset_2 <- downloadHandler(
       dev.off()
       fs <- c(fs, "Contribution_MEs.pdf")
       
-      pdf(paste("Module_", input$selectModuleSec ,"_Corr_Vs_Membership.pdf", sep=""), width = 10, height = 10)
+      pdf(paste("Module_", input$selectModuleSec ,"_Corr_Vs_Membership.pdf", sep=""), width = input$widthPDF_D2, height = input$heightPDF_D2)
       print(ggplot(moduleMembershipSec(), aes(x = moduleMembership, y = TraitSignificance)) +
               geom_point(color = input$selectModuleSec) +
               geom_smooth(method=lm, color = "white") +
@@ -990,7 +1098,7 @@ output$Download_Network_Exploration_dataset_2 <- downloadHandler(
       dev.off()
       fs <- c(fs, paste("Module_", input$selectModuleSec ,"_Corr_Vs_Membership.pdf", sep=""))
       if (input$TaxonFile1){
-        pdf(paste("Module_", input$selectModuleSec ,"_Relative_Abundance.pdf", sep=""), width = 10, height = 10)
+        pdf(paste("Module_", input$selectModuleSec ,"_Relative_Abundance.pdf", sep=""), width = input$widthPDF_D2, height = input$heightPDF_D2)
         
         print(ggplot(module_Relative_abundanceSec(), aes_string(x = "variable", y = "value", fill = input$selectTaxo2Sec)) +
                 geom_bar(stat = "identity") +
@@ -1002,7 +1110,7 @@ output$Download_Network_Exploration_dataset_2 <- downloadHandler(
       }
       
       
-      pdf("Module_Correlation_External_Trait.pdf", width = 10, height = 10)
+      pdf("Module_Correlation_External_Trait.pdf", width = input$widthPDF_D2, height = input$heightPDF_D2)
       print(ggplot(data = selectedCondDFSec(), aes(x = rn, y = variable, fill = value)) +
               geom_tile(color = "white") +
               scale_fill_gradient2(low = "blue", high = "red", mid = "white",
@@ -1019,12 +1127,12 @@ output$Download_Network_Exploration_dataset_2 <- downloadHandler(
       fs <- c(fs, "Module_Correlation_External_Trait.pdf")
     }else{
       for (i in 1:ncol(selectedMEs2())){
-        svg(paste("Contribution_MEs_", substr(colnames(selectedMEs2())[i], 3, 40), ".svg", sep = ""), width = 10, height = 10)
+        svg(paste("Contribution_MEs_", substr(colnames(selectedMEs2())[i], 3, 40), ".svg", sep = ""), width = input$widthPDF_D2, height = input$heightPDF_D2)
         print(barplot(selectedMEs2()[,i], col= substr(colnames(selectedMEs2())[i], 3, 40), main="", cex.main=2,
                       ylab="eigengene expression", cex.names = 0.7, names.arg = rownames(sampleAnnot_sec()), las = 2))
         fs <- c(fs, paste("Contribution_MEs_", substr(colnames(selectedMEs2())[i], 3, 40), ".svg", sep = ""))
       }
-      svg(paste("Module_", input$selectModuleSec ,"_Corr_Vs_Membership.svg", sep=""), width = 10, height = 10)
+      svg(paste("Module_", input$selectModuleSec ,"_Corr_Vs_Membership.svg", sep=""), width = input$widthPDF_D2, height = input$heightPDF_D2)
       print(ggplot(moduleMembershipSec(), aes(x = moduleMembership, y = TraitSignificance)) +
               geom_point(color = input$selectModuleSec) +
               geom_smooth(method=lm, color = "white") +
@@ -1035,7 +1143,7 @@ output$Download_Network_Exploration_dataset_2 <- downloadHandler(
       dev.off()
       fs <- c(fs, paste("Module_", input$selectModuleSec ,"_Corr_Vs_Membership.svg", sep=""))
       if (input$TaxonFile1){
-        svg(paste("Module_", input$selectModuleSec ,"_Relative_Abundance.svg", sep=""), width = 10, height = 10)
+        svg(paste("Module_", input$selectModuleSec ,"_Relative_Abundance.svg", sep=""), width = input$widthPDF_D2, height = input$heightPDF_D2)
         
         print(ggplot(module_Relative_abundanceSec(), aes_string(x = "variable", y = "value", fill = input$selectTaxo2Sec)) +
                 geom_bar(stat = "identity") +
@@ -1046,7 +1154,7 @@ output$Download_Network_Exploration_dataset_2 <- downloadHandler(
         fs <- c(fs, paste("Module_", input$selectModuleSec ,"_Relative_Abundance.svg", sep=""))
       }
       
-      svg("Module_Correlation_External_Trait.svg", width = 10, height = 10)
+      svg("Module_Correlation_External_Trait.svg", width = input$widthPDF_D2, height = input$heightPDF_D2)
       print(ggplot(data = selectedCondDFSec(), aes(x = rn, y = variable, fill = value)) +
               geom_tile(color = "white") +
               scale_fill_gradient2(low = "blue", high = "red", mid = "white",
@@ -1067,3 +1175,6 @@ output$Download_Network_Exploration_dataset_2 <- downloadHandler(
     
   },
   contentType = "application/zip")
+
+
+

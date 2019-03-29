@@ -57,10 +57,20 @@ exprDat_Relative_abundance <- reactive({
   
   exprDat <- exprDat_2()
   
+
   if (input$SelectVariable_rel_ab != "unordered"){
     exprDat <- exprDat[order(sampleAnnot_2()[,input$SelectVariable_rel_ab]),]
   }
-  exprDat_rel_ab <- as.data.frame(t(apply(exprDat, 1, function(x) x / sum(x))))
+  if (input$Transformation =="Yes"){
+    if (input$TypeTransformation=="CLR"){
+      exprDat_rel_ab <- clrInv(exprDat)
+    }else{
+      exprDat_rel_ab <- as.data.frame(t(apply(exprDat, 1, function(x) x / sum(x))))
+    }
+  }else{
+    exprDat_rel_ab <- as.data.frame(t(apply(exprDat, 1, function(x) x / sum(x))))
+    
+  }
   exprDat_rel_ab <- setDT(as.data.frame(t(exprDat_rel_ab)), keep.rownames = TRUE)
   exprDat_rel_ab <- merge(exprDat_rel_ab, taxTable1(), by = "rn")
   exprDat_rel_ab$rn <- as.character(exprDat_rel_ab$rn)
@@ -74,11 +84,21 @@ exprDat_Relative_abundance_sec <- reactive({
     need((input$OmicTable == "OTUs"), "This plot can only be realised with OTUs")
   )
   exprDat <- exprDatSec_3()
-  
+
   if (input$SelectVariable_rel_ab_sec != "unordered"){
     exprDat <- exprDat[order(sampleAnnot_2()[,input$SelectVariable_rel_ab_sec]),]
   }
-  exprDat_rel_ab <- as.data.frame(t(apply(exprDat, 1, function(x) x / sum(x))))
+  
+  if (input$Transformation1 =="Yes"){
+    if (input$TypeTransformation1=="CLR"){
+      exprDat_rel_ab <- clrInv(exprDat)
+    }else{
+      exprDat_rel_ab <- as.data.frame(t(apply(exprDat, 1, function(x) x / sum(x))))
+    }
+  }else{
+    exprDat_rel_ab <- as.data.frame(t(apply(exprDat, 1, function(x) x / sum(x))))
+    
+  }
   exprDat_rel_ab <- setDT(as.data.frame(t(exprDat_rel_ab)), keep.rownames = TRUE)
   exprDat_rel_ab <- merge(exprDat_rel_ab, taxTable1(), by = "rn")
   exprDat_rel_ab$rn <- as.character(exprDat_rel_ab$rn)

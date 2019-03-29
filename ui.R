@@ -40,7 +40,7 @@ ui <- tagList(
              # Page One allows the user to upload its files, filtrate, normalize, transform, remove outliers, view its table
              tabPanel("GENERAL_PARAMETERS", # The header tab Bar
                       id = "GENERAL_PARAMETERS",
-                      icon = icon("folder"), # adding icons --> go to https://fontawesome.com/icons?d=gallery
+                      icon = icon("folder"), #   adding icons --> go to https://fontawesome.com/icons?d=gallery
                       mainPanel(
                         fluidRow( 
                           column(6,
@@ -524,184 +524,202 @@ ui <- tagList(
 
   # ), # End Page 5
 
-  #### PAGE 4 ####
-  tabPanel("NETWORK_EXPLORATION", # Beginning fourth page
-           id = "NETWORK_EXPLORATION",
-           icon = icon("share-alt-square"),
-           tabsetPanel(type = "tabs",
-                       tabPanel("First Dataset",
-                                fluidRow( # first row
-                                  column(3,
-                                         h3("Choose Your Preferences"),
-                                         p("In this section you will be able to explore the genes or OTUs of specific modules."),
-                                         p("The selection inputs under each plots allow you to select your preferences"),
-                                         p("First, take a look at the heatmap on your right and try to find interesting correlation. For the
-                                           modules and variables of your choice, explore their specificity in the network to better understand what
-                                           links these entity together."),
-                                         hr(),
-                                         radioButtons("selectCorrelation", label = "Choose a correlation method to link modules to external traits:",
-                                                      choices = list("Spearman" = "spearman", "Pearson" = "pearson", "Kendall" = "kendall"),
-                                                      selected = "spearman"),
-                                         uiOutput("SelectModule"),
-                                         hr(),
-
-                                         radioButtons("pdf_or_svg_p4",
-                                                      "Choose an extension:",
-                                                      choices = c("pdf", "svg")),
-
-                                         downloadButton("Download_Network_Exploration", "Download")
-
-                                         ),
-                                  column(9,
-                                         title = "Module's Correlation to External Traits",
-                                         plotOutput("Corr_External_Trait", height = 750)
-                                  )
-
-                                  ), # end first row
-                                br(),
-                                br(),
-                                fluidRow( # Beginning Second Row
-                                  column(6,
-                                         h3("Contribution of the Samples to the Modules"),
-                                         plotOutput("Sample_Contribution", height = 650),
-                                         uiOutput("SelectVariable_barplot")
-                                  ),
-                                  column(6,
-                                         h3("Variable's Correlation to External Trait Against Module Membership"),
-                                         plotOutput("Module_Membership", height = 650),
-                                         uiOutput("SelectVariable1")
-                                  )
-                                ), # End Second Row
-                                br(),
-                                hr(),
-                                br(),
-                                fluidRow( # Beginning Third Row
-                                  column(9,
-                                         title = "Module Specificity",
-                                         plotOutput("Relative_Abundance_Module", height = 1000)
-                                  ),
-                                  column(3,
-                                         uiOutput("SelectTaxo1"),
-                                         uiOutput("SelectVariable_RelAb")
-                                  )
-                                ),
-                                br(),
-                                fluidRow(
-                                  h2("PLS and VIP Scores"),
-                                  column(3,
-                                         uiOutput("sampleAnnotSelection"),
-                                         uiOutput("colorModule")),
-                                  column(3,
-                                         plotOutput("ncomp"),
-                                         numericInput("ncomponent", "Number of Components:",
-                                                      1, min = 1, max = 10,
-                                                      value = 6),
-
-
-                                         downloadButton("PLS_VIP", "Download")),
-                                  column(6,
-                                         h3("PLS"),
-                                         plotOutput("PLS"),
-                                         h5("CVS:"),
-                                         textOutput("CVS"))
-                                ),
-                                fluidRow(
-                                  column(9,
-                                         h2("Hive Plot"),
-                                         uiOutput("taxAnnot"),
-                                         plotOutput("edge_node", height = 1000)
-                                         )
-                                )
-
-                                # End Third Row
-                       ),
-                       tabPanel("Second Dataset",
-                                fluidRow( # first row
-                                  column(3,
-                                         h3("Choose Your Preferences"),
-                                         p("In this section you will be able to explore the genes or OTUs of specific modules."),
-                                         p("The selection inputs under each plots allow you to select your preferences"),
-                                         p("First, take a look at the heatmap on your right and try to find interesting correlation. For the
-                                           modules and variables of your choice, explore their specificity in the network to better understand what
-                                           links these entity together."),
-                                         hr(),
-                                         radioButtons("selectCorrelationSec", label = "Choose a correlation method to link modules to external traits:",
-                                                      choices = list("Spearman" = "spearman", "Pearson" = "pearson", "Kendall" = "kendall"),
-                                                      selected = "spearman"),
-                                         uiOutput("SelectModuleSec"),
-                                         hr(),
-                                         radioButtons("pdf_or_svg_p4_dataset2",
-                                                      "Choose an extension:",
-                                                      choices = c("pdf", "svg")),
-
-                                         downloadButton("Download_Network_Exploration_dataset_2", "Download")
-
-                                         )
-                                  ,
-                                  column(9,
-                                         title = "Module's Correlation to External Traits",
-                                         plotOutput("Corr_External_TraitSec", height = 750)
-                                  )
-
-                                  ), # end first row
-                                br(),
-                                br(),
-                                fluidRow( # Beginning Second Row
-                                  column(6,
-                                         h3("Contribution of the Samples to the Modules"),
-                                         plotOutput("Sample_ContributionSec", height = 650),
-                                         uiOutput("SelectVariable_barplotSec")
-                                  ),
-                                  column(6,
-                                         h3("Variable's Correlation to External Trait Against Module Membership"),
-                                         plotOutput("Module_MembershipSec", height = 650),
-                                         uiOutput("SelectVariable1Sec")
-                                  )
-                                ), # End Second Row
-                                br(),
-                                hr(),
-                                br(),
-                                fluidRow( # Beginning Third Row
-                                  column(6,
-                                         title = "Module Specificity",
-                                         plotOutput("Relative_Abundance_ModuleSec", height = 650)
-                                  ),
-                                  column(3,
-                                         uiOutput("SelectTaxo1Sec"),
-                                         uiOutput("SelectVariable_RelAbSec")
-                                  )
-                                ),
-                                br(),
-                                fluidRow(
-                                  h2("PLS and VIP Scores"),
-                                  column(3,
-                                         uiOutput("sampleAnnotSelection_D2"),
-                                         uiOutput("colorModule_D2")),
-                                  column(3,
-                                         plotOutput("ncomp_D2"),
-                                         numericInput("ncomponent_D2", "Number of Components:",
-                                                      1, min = 1, max = 10,
-                                                      value = 6),
-
-                                         downloadButton("PLS_VIP_D2", "Download")),
-                                  column(6,
-                                         h3("PLS"),
-                                         plotOutput("PLS_D2"),
-                                         h5("CVS:"),
-                                         textOutput("CVS_D2"))
-
-                                ),
-                                fluidRow(
-                                  column(9,
-                                         h2("Hive Plot"),
-                                         uiOutput("taxAnnotSec"),
-                                         plotOutput("edge_node_D2", height = 1000)
-                                  )
-
-                                )
-           )
-  )
-           ), # End fourth page
+ #### PAGE 4 ####
+ tabPanel("NETWORK_EXPLORATION", # Beginning fourth page
+          id = "NETWORK_EXPLORATION",
+          icon = icon("share-alt-square"),
+          tabsetPanel(type = "tabs",
+                      tabPanel("First Dataset",
+                               fluidRow( # first row
+                                 column(3,
+                                        h3("Choose Your Preferences"),
+                                        p("In this section you will be able to explore the genes or OTUs of specific modules."),
+                                        p("The selection inputs under each plots allow you to select your preferences"),
+                                        p("First, take a look at the heatmap on your right and try to find interesting correlation. For the
+                                          modules and variables of your choice, explore their specificity in the network to better understand what
+                                          links these entity together."),
+                                        hr(),
+                                        radioButtons("selectCorrelation", label = "Choose a correlation method to link modules to external traits:",
+                                                     choices = list("Spearman" = "spearman", "Pearson" = "pearson", "Kendall" = "kendall"),
+                                                     selected = "spearman"),
+                                        uiOutput("SelectModule"),
+                                        hr(),
+                                        
+                                        radioButtons("pdf_or_svg_p4",
+                                                     "Choose an extension:",
+                                                     choices = c("pdf", "svg")),
+                                        sliderInput("widthPDF", "Figures Width:", min = 10, max = 100, value = 30),
+                                        sliderInput("heightPDF", "Figures Height: ", min = 10, max = 100, value = 30),
+                                        downloadButton("Download_Network_Exploration", "Download")
+                                        
+                                        ),
+                                 column(9,
+                                        title = "Module's Correlation to External Traits",
+                                        plotOutput("Corr_External_Trait", height = 750)
+                                 )
+                                 
+                                 ), # end first row
+                               br(),
+                               br(),
+                               fluidRow( # Beginning Second Row
+                                 column(6,
+                                        h3("Contribution of the Samples to the Modules"),
+                                        plotOutput("Sample_Contribution", height = 650),
+                                        uiOutput("SelectVariable_barplot")
+                                 ),
+                                 column(6,
+                                        h3("Variable's Correlation to External Trait Against Module Membership"),
+                                        plotOutput("Module_Membership", height = 650),
+                                        uiOutput("SelectVariable1")
+                                 )
+                               ), # End Second Row
+                               br(),
+                               hr(),
+                               br(),
+                               fluidRow( # Beginning Third Row
+                                 column(9,
+                                        title = "Module Specificity",
+                                        plotOutput("Relative_Abundance_Module", height = 1000)
+                                 ),
+                                 column(3,
+                                        uiOutput("SelectTaxo1"),
+                                        uiOutput("SelectVariable_RelAb")
+                                 )
+                               ),
+                               br(),
+                               fluidRow(
+                                 h2("PLS and VIP Scores"),
+                                 column(3,
+                                        uiOutput("sampleAnnotSelection"),
+                                        uiOutput("colorModule")),
+                                 column(3,
+                                        plotOutput("ncomp"),
+                                        numericInput("ncomponent", "Number of Components:",
+                                                     1, min = 1, max = 10,
+                                                     value = 6),
+                                        
+                                        
+                                        downloadButton("PLS_VIP", "Download")),
+                                 column(6,
+                                        h3("PLS"),
+                                        plotOutput("PLS"),
+                                        h5("CVS:"),
+                                        textOutput("CVS"))
+                               ),
+                               fluidRow(
+                                 column(9,
+                                        h2("Hive Plot"),
+                                        uiOutput("taxAnnot"),
+                                        plotOutput("edge_node", height = 1000),
+                                        radioButtons("pdf_or_svg_hive_p4",
+                                                     "Choose an extension:",
+                                                     choices = c("pdf", "svg")),
+                                        sliderInput("HIVEwidthPDF", "Figures Width:", min = 10, max = 100, value = 30),
+                                        sliderInput("HIVEheightPDF", "Figures Height: ", min = 10, max = 100, value = 30),
+                                        downloadButton("hivePlot_D1", "Download")
+                                        
+                                 )
+                               )
+                               
+                               # End Third Row
+          ),
+          tabPanel("Second Dataset",
+                   fluidRow( # first row
+                     column(3,
+                            h3("Choose Your Preferences"),
+                            p("In this section you will be able to explore the genes or OTUs of specific modules."),
+                            p("The selection inputs under each plots allow you to select your preferences"),
+                            p("First, take a look at the heatmap on your right and try to find interesting correlation. For the
+                              modules and variables of your choice, explore their specificity in the network to better understand what
+                              links these entity together."),
+                            hr(),
+                            radioButtons("selectCorrelationSec", label = "Choose a correlation method to link modules to external traits:",
+                                         choices = list("Spearman" = "spearman", "Pearson" = "pearson", "Kendall" = "kendall"),
+                                         selected = "spearman"),
+                            uiOutput("SelectModuleSec"),
+                            hr(),
+                            radioButtons("pdf_or_svg_p4_dataset2",
+                                         "Choose an extension:",
+                                         choices = c("pdf", "svg")),
+                            sliderInput("widthPDF_D2", "Figures Width: ", min = 10, max = 100, value = 30),
+                            sliderInput("heightPDF_D2", "Figures Height: ", min = 10, max = 100, value = 30),
+                            
+                            downloadButton("Download_Network_Exploration_dataset_2", "Download")
+                            
+                            )
+                     ,
+                     column(9,
+                            title = "Module's Correlation to External Traits",
+                            plotOutput("Corr_External_TraitSec", height = 1000, width = 1000)
+                     )
+                     
+                     ), # end first row
+                   br(),
+                   br(),
+                   fluidRow( # Beginning Second Row
+                     column(6,
+                            h3("Contribution of the Samples to the Modules"),
+                            plotOutput("Sample_ContributionSec", height = 650),
+                            uiOutput("SelectVariable_barplotSec")
+                     ),
+                     column(6,
+                            h3("Variable's Correlation to External Trait Against Module Membership"),
+                            plotOutput("Module_MembershipSec", height = 650),
+                            uiOutput("SelectVariable1Sec")
+                     )
+                   ), # End Second Row
+                   br(),
+                   hr(),
+                   br(),
+                   fluidRow( # Beginning Third Row
+                     column(6,
+                            title = "Module Specificity",
+                            plotOutput("Relative_Abundance_ModuleSec", height = 650)
+                     ),
+                     column(3,
+                            uiOutput("SelectTaxo1Sec"),
+                            uiOutput("SelectVariable_RelAbSec")
+                     )
+                   ),
+                   br(),
+                   fluidRow(
+                     h2("PLS and VIP Scores"),
+                     column(3,
+                            uiOutput("sampleAnnotSelection_D2"),
+                            uiOutput("colorModule_D2")),
+                     column(3,
+                            plotOutput("ncomp_D2"),
+                            numericInput("ncomponent_D2", "Number of Components:",
+                                         1, min = 1, max = 10,
+                                         value = 6),
+                            
+                            downloadButton("PLS_VIP_D2", "Download")),
+                     column(6,
+                            h3("PLS"),
+                            plotOutput("PLS_D2"),
+                            h5("CVS:"),
+                            textOutput("CVS_D2"))
+                     
+                   ),
+                   fluidRow(
+                     column(9,
+                            h2("Hive Plot"),
+                            uiOutput("taxAnnotSec"),
+                            plotOutput("edge_node_D2", height = 1000),
+                            radioButtons("pdf_or_svg_hiveD2_p4",
+                                         "Choose an extension:",
+                                         choices = c("pdf", "svg")),
+                            sliderInput("HIVED2widthPDF", "Figures Width:", min = 10, max = 100, value = 30),
+                            sliderInput("HIVED2heightPDF", "Figures Height: ", min = 10, max = 100, value = 30),
+                            downloadButton("hivePlot_D2", "Download")
+                            
+                     )
+                     
+                   )
+ )
+          )
+                      ), # End fourth page
+ 
 
   #### PAGE 5 ####
   tabPanel("MULTI-OMICS_ANALYSIS", #Beginning page 5
@@ -803,15 +821,25 @@ ui <- tagList(
                                                 choices = c("ward.D", "ward.D2", "single", "complete", "average", "median"),
                                                 selected = "average")),
                    actionButton("showMethod_P6", "How to choose the right method ?"),
-                   selectInput("selectDist_P6",
-                               label = "Choose a distance for the PCoA: ",
-                               choices = c("bray", "euclidean", "manhattan", "jaccard", "binomial", "cao"),
-                               selected = "bray"),
-                   conditionalPanel("input.TypeAnalysis == 'multivariate'",
-                                    selectInput("selectDist_D2_P6",
-                                                label = "Choose a distance for the PCoA (second Dataset): ",
+                   selectInput("selectOrdination_P6",
+                               label = "Choose a type of ordination",
+                               choices = c("PCA", "PCoA"),
+                               selected = "PCA"),
+                   conditionalPanel("input.selectOrdination_P6 == 'PCoA'",
+                                    selectInput("selectDist_P6",
+                                                label = "Choose a distance for the PCoA: ",
                                                 choices = c("bray", "euclidean", "manhattan", "jaccard", "binomial", "cao"),
                                                 selected = "bray")),
+                   conditionalPanel("input.TypeAnalysis == 'multivariate'",
+                                    selectInput("selectOrdination_D2_P6",
+                                                label = "Choose a type of ordination",
+                                                choices = c("PCA", "PCoA"),
+                                                selected = "PCA"),
+                                    conditionalPanel("input.selectOrdination_D2_P6 == 'PCoA'",
+                                                     selectInput("selectDist_D2_P6",
+                                                                 label = "Choose a distance for the PCoA: ",
+                                                                 choices = c("bray", "euclidean", "manhattan", "jaccard", "binomial", "cao"),
+                                                                 selected = "bray"))),
                    actionButton("showDist_P6", "How to choose the right distance ?"),
                    textAreaInput("commentSection2", "Add a comment about the data overview (Second Section)", width = "700px", height = "200px"),
                    hr(),

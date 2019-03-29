@@ -42,6 +42,15 @@ sampleAnnot <- reactive({
                             sep = input$sep2,
                             dec = input$dec2)
   }
+  col_to_remove <- c()
+  for (i in 1:ncol(sampleAnnot)){
+    if (length(unique(sampleAnnot[,i])) == 1){
+      col_to_remove <- c(col_to_remove, i)
+    }
+  }
+  if (!is.null(col_to_remove)){
+    sampleAnnot <- sampleAnnot[,-col_to_remove]
+  }
   sampleAnnot
 })
 
@@ -133,7 +142,7 @@ exprDat <- reactive({
   }
   rownames(exprDat) <- sampleID
   
-  
+
   
   
   ### SELECTED FILTRATION
@@ -301,7 +310,7 @@ exprDat_Default <- reactive({
             }else{
               if (input$TypeTransformation == "CLR"){
                 exprDat = clr(exprDat)
-                #print(exprDat)
+
               }else{
                 if (input$TypeTransformation == "ILR"){
                   exprDat.ilr = ilr(exprDat)
@@ -345,6 +354,7 @@ exprDat_present <- reactive({
     )
     exprDat_present <- exprDat()     
   }
+
   if (nchar(colnames(exprDat_present)[5]) > 20 ){
     for (i in 1:ncol(exprDat_present)){
       colnames(exprDat_present)[i] <- paste(input$CountingT, i, sep = "") 
@@ -721,6 +731,9 @@ taxTable <- reactive({
     }
   }
   exprDat <- exprDat()
+  if (substr(colnames(exprDat), 1, 1) == "X"){
+    rownames(taxTable) <- paste("X", rownames(taxTable), sep="")
+  }
   taxTable <- taxTable[which(rownames(taxTable) %in% colnames(exprDat)),]
   taxTable <- taxTable[match(rownames(taxTable), colnames(exprDat)),]
   taxTable
@@ -786,7 +799,7 @@ exprDat_report <- reactive({
   if (input$LoadExample == "Yes" || input$LoadExample2 == "Yes"){
     exprDat <- exprDat_Default()
   }else{
-    exprDat <- exprDat()
+    exprDat <- exprDat_2()
   }
   
   exprDat
@@ -906,14 +919,14 @@ exprDat_WGCNA <- reactive({
     if (!gsg$allOK)
     {
       # Optionally, print the gene and sample names that were removed:
-      if (sum(!gsg$goodGenes)>0)
-      {
-        printFlush(paste("Removing genes:", paste(colnames(expr)[!gsg$goodGenes], collapse = ", ")));
-      }
-      if (sum(!gsg$goodSamples)>0)
-      {
-        printFlush(paste("Removing samples:", paste(rownames(expr)[!gsg$goodSamples], collapse = ", ")));
-      }
+      # if (sum(!gsg$goodGenes)>0)
+      # {
+      #   printFlush(paste("Removing genes:", paste(colnames(expr)[!gsg$goodGenes], collapse = ", ")));
+      # }
+      # if (sum(!gsg$goodSamples)>0)
+      # {
+      #   printFlush(paste("Removing samples:", paste(rownames(expr)[!gsg$goodSamples], collapse = ", ")));
+      # }
       exprDat1 <- expr[rownames(expr)[gsg$goodSamples], colnames(expr)[gsg$goodGenes]]
     }else{
       exprDat1 <- expr
@@ -933,14 +946,14 @@ exprDatSec_WGCNA <- reactive({
     if (!gsg$allOK)
     {
       # Optionally, print the gene and sample names that were removed:
-      if (sum(!gsg$goodGenes)>0)
-      {
-        printFlush(paste("Removing genes:", paste(colnames(expr)[!gsg$goodGenes], collapse = ", ")));
-      }
-      if (sum(!gsg$goodSamples)>0)
-      {
-        printFlush(paste("Removing samples:", paste(rownames(expr)[!gsg$goodSamples], collapse = ", ")));
-      }
+      # if (sum(!gsg$goodGenes)>0)
+      # {
+      #   printFlush(paste("Removing genes:", paste(colnames(expr)[!gsg$goodGenes], collapse = ", ")));
+      # }
+      # if (sum(!gsg$goodSamples)>0)
+      # {
+      #   printFlush(paste("Removing samples:", paste(rownames(expr)[!gsg$goodSamples], collapse = ", ")));
+      # }
       expr <- expr[rownames(expr)[gsg$goodSamples], colnames(expr)[gsg$goodGenes]]
     }
   }
