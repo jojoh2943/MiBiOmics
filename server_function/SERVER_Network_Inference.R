@@ -163,6 +163,7 @@ selectedMEs <- reactive ({
     MEList = moduleEigengenes(exprDat_WGCNA(), colors = selectedDynamicColor(), excludeGrey = TRUE)
     MEs = MEList$eigengenes
   }
+  rownames(MEs) <- rownames(exprDat_WGCNA())
   MEs
 })
 
@@ -324,6 +325,7 @@ selectedMEs2 <- reactive ({
     MEList = moduleEigengenes(exprDatSec_WGCNA(), colors = selectedDynamicColor2(), excludeGrey = TRUE)
     MEs = MEList$eigengenes
   }
+  rownames(MEs) <- rownames(exprDatSec_WGCNA())
   MEs
 })
 
@@ -674,6 +676,25 @@ output$multiScalePlotOutput2 <- renderUI({
 
 #### DOWNLOADS ####
 
+
+output$downloadEigen <- downloadHandler(
+  filename = function(){
+    "Modules_Eigenvalue.csv"
+  },
+  content = function (filename){
+    write.csv(selectedMEs(), filename)
+  }
+)
+
+output$downloadModule <- downloadHandler(
+  filename = function(){
+    "Modules_Size.csv"
+  },
+  content = function (filename){
+    write.csv(as.data.frame(table(selectedDynamicColor())), filename)
+  }
+)
+
 output$Download_Network_Creation <- downloadHandler(
   filename = function(){
     paste("NETWORK_CREATION_dataset1.zip")
@@ -733,6 +754,24 @@ output$Download_Network_Creation <- downloadHandler(
   },
   contentType = "application/zip")
 
+
+output$downloadEigenD2 <- downloadHandler(
+  filename = function(){
+    "Modules_Eigenvalue.csv"
+  },
+  content = function (filename){
+    write.csv(selectedMEs(), filename)
+  }
+)
+
+output$downloadModuleD2 <- downloadHandler(
+  filename = function(){
+    "Modules_Size.csv"
+  },
+  content = function (filename){
+    write.csv(as.data.frame(table(selectedDynamicColor())), filename)
+  }
+)
 
 output$Download_Network_Creation_dataset2 <- downloadHandler(
   filename = function(){

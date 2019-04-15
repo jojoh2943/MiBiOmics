@@ -953,10 +953,15 @@ output$PLS_VIP <- downloadHandler(
   },
   content = function (filename){
     vip <- vip.df()
-    taxTable <- taxTable1()[which(rownames(taxTable1()) %in% rownames(vip)),]
-    taxTable <- taxTable[match(rownames(taxTable),rownames(vip)),]
-    
-    vip_taxAnnot <- merge(vip, taxTable, by=0, all=TRUE)
+    if (input$LoadExample == "Yes" || input$LoadExample2 == "Yes" || input$TaxonFile || input$TaxonFile1){
+      taxTable <- taxTable1()[which(rownames(taxTable1()) %in% rownames(vip)),]
+      taxTable <- taxTable[match(rownames(taxTable),rownames(vip)),]
+      
+      vip_taxAnnot <- merge(vip, taxTable, by=0, all=TRUE)
+    }else{
+      vip_taxAnnot <- vip
+    }
+
     write.csv(vip_taxAnnot, filename)
   }
 )
@@ -1015,7 +1020,17 @@ output$PLS_VIP_D2 <- downloadHandler(
   },
   content = function (filename){
     
-    write.csv(vip.df_D2(), filename)
+    vip <- vip.df_D2()
+    if (input$TaxonFile1){
+      taxTable <- taxTable1()[which(rownames(taxTable1()) %in% rownames(vip)),]
+      taxTable <- taxTable[match(rownames(taxTable),rownames(vip)),]
+      
+      vip_taxAnnot <- merge(vip, taxTable, by=0, all=TRUE)
+    }else{
+      vip_taxAnnot <- vip
+    }
+    
+    write.csv(vip_taxAnnot, filename)
   }
 )
 

@@ -379,11 +379,13 @@ ui <- tagList(
                                 fluidRow( #Beginning Third Row
                                   column(10,
                                          h3("Variables Dendrogramme with Module Colors: "),
-                                         plotOutput("Dendrogramme_Colors")
+                                         plotOutput("Dendrogramme_Colors"),
+                                         downloadButton("downloadEigen", "Download Modules\' Eigenvalues")
                                   ),
                                   column(2,
                                          h3("Module Informations: "),
-                                         DT::dataTableOutput("Module_Information")
+                                         DT::dataTableOutput("Module_Information"),
+                                         downloadButton("downloadModule", "Download Modules")
                                   )
                                 )
                                 # , #End third Row
@@ -465,22 +467,25 @@ ui <- tagList(
                                 fluidRow( #Beginning Third Row
                                   column(10,
                                          h3("Variables Dendrogramme with Module Colors: "),
-                                         plotOutput("Dendrogramme_Colors2")
+                                         plotOutput("Dendrogramme_Colors2"),
+                                         downloadButton("downloadEigenD2", "Download Modules\' Eigenvalues")
                                   ),
                                   column(2,
                                          h3("Module Informations: "),
-                                         DT::dataTableOutput("Module_Information2")
+                                         DT::dataTableOutput("Module_Information2"),
+                                         downloadButton("downloadModuleD2", "Download Modules")
                                   )
-                                ), #End third Row
-                                h2("SparCC"),
-                                fluidRow( #Begining fourth row
-
-                                  column(10,
-                                         h3("SparCC Network"),
-                                         uiOutput("buttonSparcc2"),
-                                         visNetworkOutput("sparcc.Network2", height = 1000)
-                                  )
-                                ) # End Fourth Row
+                                )
+                                # , #End third Row
+                                # h2("SparCC"),
+                                # fluidRow( #Begining fourth row
+                                # 
+                                #   column(10,
+                                #          h3("SparCC Network"),
+                                #          uiOutput("buttonSparcc2"),
+                                #          visNetworkOutput("sparcc.Network2", height = 1000)
+                                #   )
+                                # ) # End Fourth Row
                        )
                        )
            ), # End third Page

@@ -284,9 +284,9 @@ output$Relative_Abundance <- renderPlot({
 })
 
 # Dendrogramme
-output$Dendrogramme <- renderPlot({
+output$Dendrogramme <- reactivePlot({
   if (!is.numeric(sampleAnnot_2()[,input$SelectVariable])){
-    ggdendrogram(dendrogramme(), label = FALSE) +
+    print(ggdendrogram(dendrogramme(), label = FALSE) +
       geom_text(data = info_dendrogramme(),
                 aes_string(label = colnames(info_dendrogramme()[3]), x = colnames(info_dendrogramme()[1]), y = 0, colour = input$selectVariable),
                 angle = 75,
@@ -294,9 +294,9 @@ output$Dendrogramme <- renderPlot({
                 nudge_y = -0.1,
                 size = 3) +
       theme_bw() +
-      ylim(-0.15, NA)
+      ylim(-0.15, NA))
   }else{
-    ggdendrogram(dendrogramme(), label = FALSE) +
+    print(ggdendrogram(dendrogramme(), label = FALSE) +
       geom_text(data = info_dendrogramme(),
                 aes_string(label = colnames(info_dendrogramme()[3]), x = colnames(info_dendrogramme()[1]), y = 0, colour = input$selectVariable),
                 angle = 75,
@@ -305,7 +305,7 @@ output$Dendrogramme <- renderPlot({
                 size = 3) +
       theme_bw() +
       scale_colour_gradientn(colours = terrain.colors(10)) +
-      ylim(-0.15, NA)
+      ylim(-0.15, NA))
   }
   
 })
@@ -314,21 +314,21 @@ output$Dendrogramme <- renderPlot({
 output$PCoA <- renderPlotly({
   
   if (is.numeric(sampleAnnot_2()[,input$selectVariable3] )){
-    ggplot(data = PCoA(),
+    print(ggplot(data = PCoA(),
            aes_string(x = colnames(PCoA())[1], y = colnames(PCoA())[2], col = input$selectVariable3)) +
       geom_point(size = 4) +
       theme_bw() +
       scale_colour_gradientn(colours = terrain.colors(10)) +
       labs(x = sprintf("Axis 1 [%s%% Variance]", 100 * round(dudi_PCoA()$eig[1] / sum(dudi_PCoA()$eig), 2)),
-           y = sprintf("Axis 2 [%s%% Variance]", 100 * round(dudi_PCoA()$eig[2] / sum(dudi_PCoA()$eig), 2)))
+           y = sprintf("Axis 2 [%s%% Variance]", 100 * round(dudi_PCoA()$eig[2] / sum(dudi_PCoA()$eig), 2))))
   }else{
     
-    ggplot(data = PCoA(),
+    print(ggplot(data = PCoA(),
            aes_string(x = colnames(PCoA())[1], y = colnames(PCoA())[2], col = input$selectVariable3)) +
       geom_point(size = 4) +
       theme_bw() +
       labs(x = sprintf("Axis 1 [%s%% Variance]", 100 * round(dudi_PCoA()$eig[1] / sum(dudi_PCoA()$eig), 2)),
-           y = sprintf("Axis 2 [%s%% Variance]", 100 * round(dudi_PCoA()$eig[2] / sum(dudi_PCoA()$eig), 2)))
+           y = sprintf("Axis 2 [%s%% Variance]", 100 * round(dudi_PCoA()$eig[2] / sum(dudi_PCoA()$eig), 2))))
   }
   
 })

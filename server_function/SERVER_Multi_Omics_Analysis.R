@@ -40,6 +40,24 @@ selected_sampleInfo <- reactive({
   sample_info_mcoia
 })
 
+LegendDF <- reactive({
+  sample_info_mcoia <- selected_sampleInfo()
+  sample_info_mcoia$DF <- substr(rownames(sample_info_mcoia), nchar(rownames(sample_info_mcoia))-2, nchar(rownames(sample_info_mcoia)))
+  #print(sample_info_mcoia)
+  if (input$LoadExample2 == "Yes"){
+    PlotLegend <- ggplot(data = sample_info_mcoia) +
+      geom_point(aes_string(x=colnames(sample_info_mcoia)[1], y=colnames(sample_info_mcoia)[2], shape = "DF"))+
+      scale_shape_manual(name="Omics", labels=c("OTUs", "Metabolites"), values=c(15, 16))
+  }else{
+    PlotLegend <- ggplot(data = sample_info_mcoia) +
+      geom_point(aes_string(x=colnames(sample_info_mcoia)[1], y=colnames(sample_info_mcoia)[2], shape = "DF"))+
+      scale_shape_manual(name="Omics", labels=c(input$CountingT1, input$OmicTable), values=c(15, 16))
+  }
+
+  myLegend <- get_legend(PlotLegend)
+  myLegend
+})
+
 selected_sampleInfo_df1 <- reactive({
   sample_info_mcoia_df1 <-selected_sampleInfo()[1:(nrow(selected_sampleInfo())/2),]
   sample_info_mcoia_df1
@@ -395,8 +413,8 @@ output$coinertia <- renderPlot({
     if (input$ShowDrivers){
       coinertia_plot <-
         ggplot(data = selected_sampleInfo_all()) +
-        geom_point(aes_string(x = colnames(selected_sampleInfo_all())[1], y = colnames(selected_sampleInfo_all())[2], col = colnames(selected_sampleInfo_all())[3]), size = 3) +
-        geom_point(aes_string(x = colnames(selected_sampleInfo_all())[4], y = colnames(selected_sampleInfo_all())[5], col = colnames(selected_sampleInfo_all())[3]), shape = 5, size = 3) +
+        geom_point(aes_string(x = colnames(selected_sampleInfo_all())[1], y = colnames(selected_sampleInfo_all())[2], col = colnames(selected_sampleInfo_all())[3]), size = 3, shape = 15) +
+        geom_point(aes_string(x = colnames(selected_sampleInfo_all())[4], y = colnames(selected_sampleInfo_all())[5], col = colnames(selected_sampleInfo_all())[3]), shape = 16, size = 3) +
         scale_shape(solid = TRUE) +
         theme_bw() +
         geom_segment(aes_string(x = colnames(selected_sampleInfo_all())[1], y = colnames(selected_sampleInfo_all())[2], colour = colnames(selected_sampleInfo_all())[3], xend = colnames(selected_sampleInfo_all())[4], yend = colnames(selected_sampleInfo_all())[5])) +
@@ -411,8 +429,8 @@ output$coinertia <- renderPlot({
     }else{
       coinertia_plot <-
         ggplot(data = selected_sampleInfo_all()) +
-        geom_point(aes_string(x = colnames(selected_sampleInfo_all())[1], y = colnames(selected_sampleInfo_all())[2], col = colnames(selected_sampleInfo_all())[3]), size = 3) +
-        geom_point(aes_string(x = colnames(selected_sampleInfo_all())[4], y = colnames(selected_sampleInfo_all())[5], col = colnames(selected_sampleInfo_all())[3]), shape = 5, size = 3) +
+        geom_point(aes_string(x = colnames(selected_sampleInfo_all())[1], y = colnames(selected_sampleInfo_all())[2], col = colnames(selected_sampleInfo_all())[3]), size = 3, shape = 15) +
+        geom_point(aes_string(x = colnames(selected_sampleInfo_all())[4], y = colnames(selected_sampleInfo_all())[5], col = colnames(selected_sampleInfo_all())[3]), shape = 16, size = 3) +
         scale_shape(solid = TRUE) +
         theme_bw() +
         geom_segment(aes_string(x = colnames(selected_sampleInfo_all())[1], y = colnames(selected_sampleInfo_all())[2], colour = colnames(selected_sampleInfo_all())[3], xend = colnames(selected_sampleInfo_all())[4], yend = colnames(selected_sampleInfo_all())[5])) +
@@ -430,8 +448,8 @@ output$coinertia <- renderPlot({
     if (input$ShowDrivers){
       coinertia_plot <-
         ggplot(data = selected_sampleInfo_all()) +
-        geom_point(aes_string(x = colnames(selected_sampleInfo_all())[1], y = colnames(selected_sampleInfo_all())[2], col = colnames(selected_sampleInfo_all())[3]), size = 3) +
-        geom_point(aes_string(x = colnames(selected_sampleInfo_all())[4], y = colnames(selected_sampleInfo_all())[5], col = colnames(selected_sampleInfo_all())[3]), shape = 5, size = 3) +
+        geom_point(aes_string(x = colnames(selected_sampleInfo_all())[1], y = colnames(selected_sampleInfo_all())[2], col = colnames(selected_sampleInfo_all())[3]), size = 3, shape = 15) +
+        geom_point(aes_string(x = colnames(selected_sampleInfo_all())[4], y = colnames(selected_sampleInfo_all())[5], col = colnames(selected_sampleInfo_all())[3]), shape = 16, size = 3) +
         scale_shape(solid = TRUE) +
         geom_segment(aes_string(x = colnames(selected_sampleInfo_all())[1], y = colnames(selected_sampleInfo_all())[2], colour = colnames(selected_sampleInfo_all())[3], xend = colnames(selected_sampleInfo_all())[4], yend = colnames(selected_sampleInfo_all())[5])) +
         geom_label_repel(data = selected_axis1_drivers(),
@@ -447,8 +465,8 @@ output$coinertia <- renderPlot({
     }else{
       coinertia_plot <-
         ggplot(data = selected_sampleInfo_all()) +
-        geom_point(aes_string(x = colnames(selected_sampleInfo_all())[1], y = colnames(selected_sampleInfo_all())[2], col = colnames(selected_sampleInfo_all())[3]), size = 3) +
-        geom_point(aes_string(x = colnames(selected_sampleInfo_all())[4], y = colnames(selected_sampleInfo_all())[5], col = colnames(selected_sampleInfo_all())[3]), shape = 5, size = 3) +
+        geom_point(aes_string(x = colnames(selected_sampleInfo_all())[1], y = colnames(selected_sampleInfo_all())[2], col = colnames(selected_sampleInfo_all())[3]), size = 3, shape = 15) +
+        geom_point(aes_string(x = colnames(selected_sampleInfo_all())[4], y = colnames(selected_sampleInfo_all())[5], col = colnames(selected_sampleInfo_all())[3]), shape = 16, size = 3) +
         scale_shape(solid = TRUE) +
         geom_segment(aes_string(x = colnames(selected_sampleInfo_all())[1], y = colnames(selected_sampleInfo_all())[2], colour = colnames(selected_sampleInfo_all())[3], xend = colnames(selected_sampleInfo_all())[4], yend = colnames(selected_sampleInfo_all())[5])) +
         # geom_label_repel(data = selected_axis1_drivers(),
@@ -477,7 +495,7 @@ output$coinertia <- renderPlot({
     geom_hline(yintercept = 0) +
     geom_text(vjust = 0, nudge_y = 0.02) +
     annotate("text", label = "maximal correlation", x = -0.5, y =-0.5, color = "red", size = 5)
-  plot_grid(bivariate_plot, coinertia_plot, labels = c("A", "B"), nrow = 2, align = "v")
+  plot_grid(coinertia_plot,LegendDF(),bivariate_plot, ncol = 2, rel_widths = c(1, .3))
 })
 
 output$coinertia_bivariate <- renderPlot({
