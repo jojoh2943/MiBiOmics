@@ -4,7 +4,7 @@ bioconductor_packages <- c("GO.db", "preprocessCore", "impute",
                            "threejs")
 
 
-install_packages <- c("shiny", "data.table","matrixStats", "Hmisc",
+install_packages <- c("shiny", "matrixStats", "Hmisc",
                       "splines", "foreach", "doParallel",
                       "fastcluster", "dynamicTreeCut", "survival",
                       "WGCNA", "flexdashboard", "plotly",
@@ -17,18 +17,13 @@ install_packages <- c("shiny", "data.table","matrixStats", "Hmisc",
                       "pls", "BiocManager", "iheatmapr",
                       "rmarkdown", "plotly", "ade4",
                       "igraph", "network", "plotly",
-                      "compositions", "jsonlite")
+                      "compositions")
 
 
-if (length(setdiff(bioconductor_packages, rownames(installed.packages()))) > 0) {
+if (length(setdiff(c(bioconductor_packages, install_packages), rownames(installed.packages()))) > 0) {
   source("https://bioconductor.org/biocLite.R")
-  biocLite(setdiff(bioconductor_packages, rownames(installed.packages())), suppressUpdates = TRUE)
+  biocLite(setdiff(c(bioconductor_packages, install_packages), rownames(installed.packages())), suppressUpdates = TRUE)
 }
-
-if (length(setdiff(install_packages, rownames(installed.packages()))) > 0) {
-  install.packages(setdiff(install_packages, rownames(installed.packages())))
-}
-
 
 
 #define MAX_NUM_DLLS 10000
@@ -41,7 +36,7 @@ library("WGCNA")
 library("ggplot2")
 library("ggdendro")
 library("ggrepel")
-library('dendextend')
+library("dendextend")
 library("ggthemes")
 library("pheatmap")
 library("reshape2")
@@ -68,3 +63,5 @@ library("rmarkdown")
 library("pls")
 library("sva") #Batch correction
 library("plotly")
+
+
