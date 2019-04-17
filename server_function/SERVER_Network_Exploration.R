@@ -789,17 +789,30 @@ output$summaryFit <- renderText({
 #### HIVE PLOT 
 output$edge_node <- renderPlot({
   df_hive<-df.hive.to.plot()
-
-  #edge_to_node()
-  ggplot() +
-    geom_point(data = df.hive.plot(), aes(x1, y1, color = annotation, size = 3)) + # x1 is the VIP
-    geom_text(data = df.hive.plot(), vjust = 0.5, angle = 45, aes(x1, y1, label = annotation)) +
-    geom_point(data = df.hive.plot(), aes(x2, abs(y2), color = annotation, size = 3)) + # y2 is the correlation to the pH at time of filtering
-    geom_text(data = df.hive.plot(), hjust = 0.5, angle = 45, aes(x2,abs(y2), label = annotation)) +      
-    geom_curve(data = df.hive.to.plot(), curvature = 0.2, color = "grey ", size = 0.2,aes(x = vector_x, y = vector_y, xend = vector_xend, yend = abs(vector_yend))) +
-    theme_gdocs() +
-    scale_colour_tableau(palette = "Tableau 20") +
-    labs(x = "VIP", y = paste("Spearman Correlation to", input$sampleAnnotSelection), colour = "Annotation")
+  if (length(unique(df_hive$annotation)) > 20){    #edge_to_node()
+    ggplot() +
+      geom_point(data = df.hive.plot(), aes(x1, y1, size = 3, color = "grey")) + # x1 is the VIP
+      geom_text(data = df.hive.plot(), vjust = 0.5, angle = 45, aes(x1, y1, label = annotation)) +
+      geom_point(data = df.hive.plot(), aes(x2, abs(y2), size = 3, color = "grey")) + # y2 is the correlation to the pH at time of filtering
+      geom_text(data = df.hive.plot(), hjust = 0.5, angle = 45, aes(x2,abs(y2), label = annotation)) +      
+      geom_curve(data = df.hive.to.plot(), curvature = 0.2, color = "grey ", size = 0.2,aes(x = vector_x, y = vector_y, xend = vector_xend, yend = abs(vector_yend))) +
+      theme(legend.position = "none") +
+      theme_gdocs() +
+      labs(x = "VIP", y = paste("Spearman Correlation to", input$sampleAnnotSelection), colour = "Annotation")
+    
+  }else{
+    #edge_to_node()
+    ggplot() +
+      geom_point(data = df.hive.plot(), aes(x1, y1, color = annotation, size = 3)) + # x1 is the VIP
+      geom_text(data = df.hive.plot(), vjust = 0.5, angle = 45, aes(x1, y1, label = annotation)) +
+      geom_point(data = df.hive.plot(), aes(x2, abs(y2), color = annotation, size = 3)) + # y2 is the correlation to the pH at time of filtering
+      geom_text(data = df.hive.plot(), hjust = 0.5, angle = 45, aes(x2,abs(y2), label = annotation)) +      
+      geom_curve(data = df.hive.to.plot(), curvature = 0.2, color = "grey ", size = 0.2,aes(x = vector_x, y = vector_y, xend = vector_xend, yend = abs(vector_yend))) +
+      theme_gdocs() +
+      scale_colour_tableau(palette = "Tableau 20") +
+      labs(x = "VIP", y = paste("Spearman Correlation to", input$sampleAnnotSelection), colour = "Annotation")
+    
+  }
   
 })
 
@@ -825,16 +838,32 @@ output$summaryFit_D2 <- renderText({
 
 #### HIVE PLOT 
 output$edge_node_D2 <- renderPlot({
-  ggplot() +
-    geom_point(data = df.hive.plot_D2(), aes(x1, y1, color = annotation, size = 3)) + # x1 is the VIP
-    geom_text(data = df.hive.plot_D2(), vjust = 0.5, angle = 45, aes(x1, y1, label = annotation)) +
-    geom_point(data = df.hive.plot_D2(), aes(x2, abs(y2), color = annotation, size = 3)) + # y2 is the correlation to the pH at time of filtering
-    geom_text(data = df.hive.plot_D2(), hjust = 0.5, angle = 45, aes(x2, abs(y2), label = annotation)) + # y2 is the correlation to the pH at time of filtering
-    geom_curve(data = df.hive.to.plot_D2(), curvature = 0.2, color = "grey ", size = 0.2,aes(x = vector_x, y = vector_y, xend = vector_xend, yend = abs(vector_yend))) +
-    theme_gdocs() +
-    scale_colour_tableau(palette = "Tableau 20") +
-    labs(x = "VIP", y = paste("Spearman Correlation to", input$sampleAnnotSelection_D2), colour = "Annotations")
-  
+  df_hive <- df.hive.plot_D2()
+  if (length(unique(df_hive$annotation)) > 20){
+    ggplot() +
+      geom_point(data = df.hive.plot_D2(), aes(x1, y1, size = 3, color = "grey")) + # x1 is the VIP
+      geom_text(data = df.hive.plot_D2(), vjust = 0.5, angle = 45, aes(x1, y1, label = annotation)) +
+      geom_point(data = df.hive.plot_D2(), aes(x2, abs(y2), size = 3, color = "grey")) + # y2 is the correlation to the pH at time of filtering
+      geom_text(data = df.hive.plot_D2(), hjust = 0.5, angle = 45, aes(x2, abs(y2), label = annotation)) + # y2 is the correlation to the pH at time of filtering
+      geom_curve(data = df.hive.to.plot_D2(), curvature = 0.2, color = "grey ", size = 0.2,aes(x = vector_x, y = vector_y, xend = vector_xend, yend = abs(vector_yend))) +
+      theme_gdocs() +
+      theme(legend.position = "none") +
+      labs(x = "VIP", y = paste("Spearman Correlation to", input$sampleAnnotSelection_D2), colour = "Annotations")
+    
+  }else{
+    ggplot() +
+      geom_point(data = df.hive.plot_D2(), aes(x1, y1, color = annotation, size = 3)) + # x1 is the VIP
+      geom_text(data = df.hive.plot_D2(), vjust = 0.5, angle = 45, aes(x1, y1, label = annotation)) +
+      geom_point(data = df.hive.plot_D2(), aes(x2, abs(y2), color = annotation, size = 3)) + # y2 is the correlation to the pH at time of filtering
+      geom_text(data = df.hive.plot_D2(), hjust = 0.5, angle = 45, aes(x2, abs(y2), label = annotation)) + # y2 is the correlation to the pH at time of filtering
+      geom_curve(data = df.hive.to.plot_D2(), curvature = 0.2, color = "grey ", size = 0.2,aes(x = vector_x, y = vector_y, xend = vector_xend, yend = abs(vector_yend))) +
+      theme_gdocs() +
+      scale_colour_tableau(palette = "Tableau 20") +
+      labs(x = "VIP", y = paste("Spearman Correlation to", input$sampleAnnotSelection_D2), colour = "Annotations")
+
+    
+  }
+
 })
 
 

@@ -284,7 +284,7 @@ output$Relative_Abundance <- renderPlot({
 })
 
 # Dendrogramme
-output$Dendrogramme <- reactivePlot({
+output$Dendrogramme <- renderPlot({
   if (!is.numeric(sampleAnnot_2()[,input$SelectVariable])){
     print(ggdendrogram(dendrogramme(), label = FALSE) +
       geom_text(data = info_dendrogramme(),

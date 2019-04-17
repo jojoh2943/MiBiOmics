@@ -97,6 +97,7 @@ multiScaling <- reactive({
     # We also propose to use classical multi-dimensional scaling plots for visualizing the network. 
     #Here we chose 3 scaling dimensions
     cmd1=cmdscale(as.dist(selectedDissTOM()),3)
+    print(cmd1)
     cmd1 
   }
   
