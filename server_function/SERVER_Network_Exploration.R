@@ -243,7 +243,8 @@ selectedCondDF <- reactive({
   MEs0 = moduleEigengenes(exprDat_WGCNA(), moduleColors)$eigengenes
   MEs = orderMEs(MEs0)
   text_matrix_vector <- c()
-  
+  pval_vector <- c()
+  corr_vector <- c()
   for (condition in 1:(ncol(sampleAnnot_2()))){
     
     condition_name <- colnames(sampleAnnot_2())[condition]
@@ -256,6 +257,8 @@ selectedCondDF <- reactive({
       moduleTraitCor = cor(selectedMEs(), sampleAnnot4[,condition_name], use = "p", method = input$selectCorrelation)
     }
     moduleTraitPvalue = corPvalueStudent(moduleTraitCor, nSamples)
+    pval_vector <- c(pval_vector, moduleTraitPvalue)
+    corr_vector <- c(corr_vector, moduleTraitCor)
     colnames(moduleTraitCor) <- c(condition_name)
     # Will display correlations and their p-values
     textMatrix = paste(signif(moduleTraitCor, 2), "\n(",
@@ -280,7 +283,15 @@ selectedCondDF <- reactive({
     
   }
   
-  
+  if (input$correctPval){
+    pval_vector <- p.adjust(pval_vector, method = "bonferroni", n = length(pval_vector))
+    text_matrix_vector <- c()
+    for (i in 1:length(pval_vector)){
+      textMatrix = paste(signif(corr_vector[i], 2), "\n(",
+                         signif(pval_vector[i], 1), ")", sep = "")
+      text_matrix_vector <- c(text_matrix_vector, textMatrix)
+    }
+  }
   Condition_df <- setDT(Condition_df, keep.rownames = TRUE)[]
   melted_condition_df <- melt(Condition_df, id = 1)
   melted_condition_df$label <- as.data.frame(text_matrix_vector)
@@ -295,7 +306,8 @@ selectedCondDFSec <- reactive({
   MEs0 = moduleEigengenes(exprDatSec_WGCNA(), moduleColors)$eigengenes
   MEs = orderMEs(MEs0)
   text_matrix_vector <- c()
-  
+  pval_vector <- c()
+  corr_vector <- c()
   for (condition in 1:(ncol(sampleAnnot_sec()))){
     
     condition_name <- colnames(sampleAnnot_sec())[condition]
@@ -308,11 +320,14 @@ selectedCondDFSec <- reactive({
       moduleTraitCor = cor(selectedMEs2(), sampleAnnot4[,condition_name], use = "p", method = input$selectCorrelationSec)
     }
     moduleTraitPvalue = corPvalueStudent(moduleTraitCor, nSamples)
+    pval_vector <- c(pval_vector, moduleTraitPvalue)
+    corr_vector <- c(corr_vector, moduleTraitCor)
     colnames(moduleTraitCor) <- c(condition_name)
     # Will display correlations and their p-values
     textMatrix = paste(signif(moduleTraitCor, 2), "\n(",
                        signif(moduleTraitPvalue, 1), ")", sep = "")
     text_matrix_vector <- c(text_matrix_vector, textMatrix)
+    
     dim(textMatrix) = dim(moduleTraitCor)
     
     # create dataframe containing the correlation and the color
@@ -325,7 +340,15 @@ selectedCondDFSec <- reactive({
       Condition_df <- data.frame(Condition_df, moduleTraitCor)
       
     }
-    
+    if (input$correctPval2){
+      pval_vector <- p.adjust(pval_vector, method = "bonferroni", n = length(pval_vector))
+      text_matrix_vector <- c()
+      for (i in 1:length(pval_vector)){
+        textMatrix = paste(signif(corr_vector[i], 2), "\n(",
+                           signif(pval_vector[i], 1), ")", sep = "")
+        text_matrix_vector <- c(text_matrix_vector, textMatrix)
+      }
+    }
     melted_moduleTraitCor <- melt(moduleTraitCor)
     melted_moduleTraitCor <- data.frame(melted_moduleTraitCor, as.data.frame(substr(names(selectedMEs2()), 3, 40)))
     colnames(melted_moduleTraitCor)[4] <- "color"

@@ -63,6 +63,11 @@ ui <- tagList(
                                                                                         conditionalPanel("input.CountingT1 == 'OTUs'",
                                                                                                          checkboxInput("TaxonFile1", "Additionnal Taxon File (CSV)", FALSE)),
                                                                                         radioButtons("OmicTable", "Second 'Omic' Table:", choices = c("Genes" = "Genes", "OTUs" = "OTUs", "Metabolites" = "Metabolites"), selected = character(0))
+                                                                                        # ,
+                                                                                        # checkboxInput("Omic3", "Third Omic Table ?", FALSE),
+                                                                                        # conditionalPanel("input.Omic3",
+                                                                                        #                  radioButtons("OmicTable3", "Third 'Omic' Table:", choices = c("Genes" = "Genes", "OTUs" = "OTUs", "Metabolites" = "Metabolites"), selected = character(0))
+                                                                                        #                  )
                                                                        )
                                                       )),
                                              tabPanel("Advanced Parameters",
@@ -96,6 +101,22 @@ ui <- tagList(
                                                                        radioButtons("Transformation1", "Transformation of the second table", choices = c("Yes" = "Yes", "No" = "No"), selected = "No"),
                                                                        conditionalPanel("input.Transformation1 == 'Yes'",
                                                                                         selectInput("TypeTransformation1", "Type of transformation: ", choices = c("Log10" = "Log10", "Log2"= "Log2", "Hellinger"= "Hellinger", "Square" = "Square", "Square Root" = "sqrt", "ILR" = "ILR", "CLR" = "CLR"))),
+                                                                       conditionalPanel("input.Omic3",
+                                                                                        radioButtons("Filtration2", "Filtration of the third table:", choices = c("Yes" = "Yes", "No" = "No"), selected = "No"),
+                                                                                        conditionalPanel("input.Filtration2 == 'Yes'",
+                                                                                                         selectInput("TypeFiltration2", "Type of filtration", choices = c("On prevalence" = "prevalence", "On minimum count" = "count")),
+                                                                                                         conditionalPanel("input.TypeFiltration2 == 'prevalence'",
+                                                                                                                          sliderInput("prevalence2", "Prevalence Threshold: ", min = 0, max = 100, value = 0)),
+                                                                                                         conditionalPanel("input.TypeFiltration2 == 'count'",
+                                                                                                                          numericInput("count2", "Minimum number of count across sample: ", min = 0, value = 2))),
+                                                                                        hr(),
+                                                                                        radioButtons("Normalisation2", "Normalization of the third table", choices = c("Yes" = "Yes", "No" = "No"), selected = "No"),
+                                                                                        conditionalPanel("input.Normalisation2 == 'Yes'",
+                                                                                                         selectInput("TypeNormalisation2", "Type of normalisation: ", choices = c("CSS" = "CSS", "TSS" = "TSS"))),
+                                                                                        radioButtons("Transformation2", "Transformation of the second table", choices = c("Yes" = "Yes", "No" = "No"), selected = "No"),
+                                                                                        conditionalPanel("input.Transformation2 == 'Yes'",
+                                                                                                         selectInput("TypeTransformation2", "Type of transformation: ", choices = c("Log10" = "Log10", "Log2"= "Log2", "Hellinger"= "Hellinger", "Square" = "Square", "Square Root" = "sqrt", "ILR" = "ILR", "CLR" = "CLR")))
+                                                                                        ),
                                                                        hr()),
                                                       checkboxInput("batchEffect", "Batch Effect", value = FALSE),
 
@@ -424,6 +445,7 @@ ui <- tagList(
                                          radioButtons('corNetwork2', "Choose the correlation option for the network: ",
                                                       choices= c('pearson', 'spearman', 'bicor'),
                                                       selected = 'pearson'),
+                                         
 
                                          hr(),
 
@@ -547,6 +569,7 @@ ui <- tagList(
                                         radioButtons("selectCorrelation", label = "Choose a correlation method to link modules to external traits:",
                                                      choices = list("Spearman" = "spearman", "Pearson" = "pearson", "Kendall" = "kendall"),
                                                      selected = "spearman"),
+                                        checkboxInput("correctPval", "Pvalue correction", value = FALSE),
                                         uiOutput("SelectModule"),
                                         hr(),
                                         
@@ -641,6 +664,7 @@ ui <- tagList(
                             radioButtons("selectCorrelationSec", label = "Choose a correlation method to link modules to external traits:",
                                          choices = list("Spearman" = "spearman", "Pearson" = "pearson", "Kendall" = "kendall"),
                                          selected = "spearman"),
+                            checkboxInput("correctPval2", "Pvalue correction", value = FALSE),
                             uiOutput("SelectModuleSec"),
                             hr(),
                             radioButtons("pdf_or_svg_p4_dataset2",

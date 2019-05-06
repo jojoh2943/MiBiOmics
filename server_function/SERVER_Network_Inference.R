@@ -97,7 +97,7 @@ multiScaling <- reactive({
     # We also propose to use classical multi-dimensional scaling plots for visualizing the network. 
     #Here we chose 3 scaling dimensions
     cmd1=cmdscale(as.dist(selectedDissTOM()),3)
-    print(cmd1)
+    colnames(cmd1) <- c("scale1", "scale2", "scale3")
     cmd1 
   }
   
@@ -268,6 +268,7 @@ multiScaling2 <- reactive({
   # We also propose to use classical multi-dimensional scaling plots for visualizing the network. 
   #Here we chose 3 scaling dimensions
   cmd1=cmdscale(as.dist(selectedDissTOM2()),3)
+  colnames(cmd1) <- c("scale1", "scale2", "scale3")
   cmd1
 })
 
@@ -714,6 +715,29 @@ output$Download_Network_Creation <- downloadHandler(
       dev.off()
       
       fs <- c(fs, "Soft_Power.pdf")
+      pdf("Multiscaling.pdf", width = 10, height = 10)
+      multiscaling <- as.data.frame(multiScaling())
+      multiscaling$color <- as.vector(selectedDynamicColor())
+      my_colors <- as.vector(unique(multiscaling$color))
+      my_colors <- my_colors[order(my_colors)]
+      print(ggplot(data=as.data.frame(multiscaling)) 
+            + geom_point(aes(x = scale1, y = scale2, color = color))
+            + labs(title = "MDS plot", x = "Scaling Dimension 1",
+           y = "Scaling Dimension 2")
+            + scale_color_manual(values=my_colors)) 
+      print(ggplot(data=as.data.frame(multiscaling)) 
+            + geom_point(aes(x = scale2, y = scale3, color = color))
+            + labs(title = "MDS plot", x = "Scaling Dimension 2",
+                   y = "Scaling Dimension 3")
+            + scale_color_manual(values=my_colors))
+      print(ggplot(data=as.data.frame(multiscaling)) 
+            + geom_point(aes(x = scale1, y = scale3, color = color))
+            + labs(title = "MDS plot", x = "Scaling Dimension 1",
+                   y = "Scaling Dimension 3")
+            + scale_color_manual(values=my_colors))
+      dev.off()
+
+      fs <- c(fs, "Multiscaling.pdf")
       pdf("Module_dendrogramme.pdf", width = 10, height = 10)
       print(ggdendrogram(selectedMETree()) + 
               labs(y = "Height", title = "Clustering of module eigengenes"))
@@ -741,6 +765,39 @@ output$Download_Network_Creation <- downloadHandler(
               labs(y = "Height", title = "Clustering of module eigengenes"))
       dev.off()
       fs <- c(fs, "Module_dendrogramme.svg")
+      multiscaling <- as.data.frame(multiScaling())
+      multiscaling$color <- as.vector(selectedDynamicColor())
+      my_colors <- as.vector(unique(multiscaling$color))
+      my_colors <- my_colors[order(my_colors)]
+      svg("Multiscaling_1_2.svg", width = 10, height = 10)
+      print(ggplot(data=as.data.frame(multiscaling)) 
+            + geom_point(aes(x = scale1, y = scale2, color = color))
+            + labs(title = "MDS plot", x = "Scaling Dimension 1",
+                   y = "Scaling Dimension 2")
+            + scale_color_manual(values=my_colors)) 
+      dev.off()
+      
+      fs <- c(fs, "Multiscaling_1_2.svg")
+      
+      svg("Multiscaling_2_3.svg", width = 10, height = 10)
+      print(ggplot(data=as.data.frame(multiscaling)) 
+            + geom_point(aes(x = scale2, y = scale3, color = color))
+            + labs(title = "MDS plot", x = "Scaling Dimension 2",
+                   y = "Scaling Dimension 3")
+            + scale_color_manual(values=my_colors))
+      dev.off()
+      
+      fs <- c(fs, "Multiscaling_2_3.svg")
+      
+      svg("Multiscaling_1_3.svg", width = 10, height = 10)
+      print(ggplot(data=as.data.frame(multiscaling)) 
+            + geom_point(aes(x = scale1, y = scale3, color = color))
+            + labs(title = "MDS plot", x = "Scaling Dimension 1",
+                   y = "Scaling Dimension 3")
+            + scale_color_manual(values=my_colors))
+      dev.off()
+      
+      fs <- c(fs, "Multiscaling_1_3.svg")
       svg("gene_dendrogramme_colors.svg", width = 10, height = 10)
       print(plotDendroAndColors(selectedTree(), selectedDynamicColor(), "Dynamic Tree Cut",
                                 dendroLabels = FALSE, hang = 0.03,
@@ -796,6 +853,29 @@ output$Download_Network_Creation_dataset2 <- downloadHandler(
       print(ggdendrogram(selectedMETree2()) + 
               labs(y = "Height", title = "Clustering of module eigengenes"))
       dev.off()
+      pdf("Multiscaling.pdf", width = 10, height = 10)
+      multiscaling <- as.data.frame(multiScaling2())
+      multiscaling$color <- as.vector(selectedDynamicColor2())
+      my_colors <- as.vector(unique(multiscaling$color))
+      my_colors <- my_colors[order(my_colors)]
+      print(ggplot(data=as.data.frame(multiscaling)) 
+            + geom_point(aes(x = scale1, y = scale2, color = color))
+            + labs(title = "MDS plot", x = "Scaling Dimension 1",
+                   y = "Scaling Dimension 2")
+            + scale_color_manual(values=my_colors)) 
+      print(ggplot(data=as.data.frame(multiscaling)) 
+            + geom_point(aes(x = scale2, y = scale3, color = color))
+            + labs(title = "MDS plot", x = "Scaling Dimension 2",
+                   y = "Scaling Dimension 3")
+            + scale_color_manual(values=my_colors))
+      print(ggplot(data=as.data.frame(multiscaling)) 
+            + geom_point(aes(x = scale1, y = scale3, color = color))
+            + labs(title = "MDS plot", x = "Scaling Dimension 1",
+                   y = "Scaling Dimension 3")
+            + scale_color_manual(values=my_colors))
+      dev.off()
+      
+      fs <- c(fs, "Multiscaling.pdf")
       fs <- c(fs, "Module_dendrogramme.pdf")
       pdf("gene_dendrogramme_colors.pdf", width = 10, height = 10)
       print(plotDendroAndColors(selectedTree2(), selectedDynamicColor2(), "Dynamic Tree Cut",
@@ -818,6 +898,39 @@ output$Download_Network_Creation_dataset2 <- downloadHandler(
       print(ggdendrogram(selectedMETree2()) + 
               labs(y = "Height", title = "Clustering of module eigengenes"))
       dev.off()
+      multiscaling <- as.data.frame(multiScaling2())
+      multiscaling$color <- as.vector(selectedDynamicColor2())
+      my_colors <- as.vector(unique(multiscaling$color))
+      my_colors <- my_colors[order(my_colors)]
+      svg("Multiscaling_1_2.svg", width = 10, height = 10)
+      print(ggplot(data=as.data.frame(multiscaling)) 
+            + geom_point(aes(x = scale1, y = scale2, color = color))
+            + labs(title = "MDS plot", x = "Scaling Dimension 1",
+                   y = "Scaling Dimension 2")
+            + scale_color_manual(values=my_colors)) 
+      dev.off()
+      
+      fs <- c(fs, "Multiscaling_1_2.svg")
+      
+      svg("Multiscaling_2_3.svg", width = 10, height = 10)
+      print(ggplot(data=as.data.frame(multiscaling)) 
+            + geom_point(aes(x = scale2, y = scale3, color = color))
+            + labs(title = "MDS plot", x = "Scaling Dimension 2",
+                   y = "Scaling Dimension 3")
+            + scale_color_manual(values=my_colors))
+      dev.off()
+      
+      fs <- c(fs, "Multiscaling_2_3.svg")
+      
+      svg("Multiscaling_1_3.svg", width = 10, height = 10)
+      print(ggplot(data=as.data.frame(multiscaling)) 
+            + geom_point(aes(x = scale1, y = scale3, color = color))
+            + labs(title = "MDS plot", x = "Scaling Dimension 1",
+                   y = "Scaling Dimension 3")
+            + scale_color_manual(values=my_colors))
+      dev.off()
+      
+      fs <- c(fs, "Multiscaling_1_3.svg")
       fs <- c(fs, "Module_dendrogramme.svg")
       svg("gene_dendrogramme_colors.svg", width = 10, height = 10)
       print(plotDendroAndColors(selectedTree2(), selectedDynamicColor2(), "Dynamic Tree Cut",
