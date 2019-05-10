@@ -20,7 +20,7 @@ install_packages <- c("shiny", "matrixStats", "Hmisc",
                       "compositions")
 
 if (!requireNamespace("BiocManager", quietly = TRUE))
-    install.packages("BiocManager")
+    install.packages("BiocManager", repos = "https://cloud.r-project.org")
 if (length(setdiff(c(bioconductor_packages, install_packages), rownames(installed.packages()))) > 0) {
   BiocManager::install(setdiff(c(bioconductor_packages, install_packages), rownames(installed.packages())), updates = FALSE)
 }
