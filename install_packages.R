@@ -19,10 +19,10 @@ install_packages <- c("shiny", "matrixStats", "Hmisc",
                       "igraph", "network", "plotly",
                       "compositions")
 
-
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
 if (length(setdiff(c(bioconductor_packages, install_packages), rownames(installed.packages()))) > 0) {
-  source("https://bioconductor.org/biocLite.R")
-  biocLite(setdiff(c(bioconductor_packages, install_packages), rownames(installed.packages())), suppressUpdates = TRUE)
+  BiocManager::install(setdiff(c(bioconductor_packages, install_packages), rownames(installed.packages())), updates = FALSE)
 }
 
 
