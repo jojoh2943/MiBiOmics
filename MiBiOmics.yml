@@ -8,3 +8,4 @@ dependencies:
   - r-fpc
   - r-shiny
   - r-xml
+  - r-curl
