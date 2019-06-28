@@ -3,7 +3,7 @@ MiBiOmics is a shiny-based web application to perform correlation network analys
 
 ## Installation
 
-MiBiOmics is available at https://shiny-bird.univ-nantes.fr/jzoppi/app/ but can also be runned locally in RStudio. To run MiBiOmics locally you need to install the lastest version of shiny, **R (version 3.5)** and run the following commands:
+MiBiOmics will soon be available at https://mibiomics.univ-nantes.fr/ but can also be runned locally in RStudio. To run MiBiOmics locally you need to install the lastest version of shiny, **R (version 3.5)** and run the following commands:
 
 ```r
 library(shiny)
