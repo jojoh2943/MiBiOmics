@@ -1,0 +1,11 @@
+name: MiBiOmics
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - curl<8
+  - r-base=3.5.1
+  - r-fpc
+  - r-shiny
+  - r-xml
+  - r-curl

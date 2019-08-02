@@ -11,7 +11,7 @@ source("function.R")
 
 #### GENERAL WGCNA CONFIGURATION ####
 options(stringsAsFactors = FALSE)
-enableWGCNAThreads()
+enableWGCNAThreads(12)
 
 #### JS AND CSS ####
 
