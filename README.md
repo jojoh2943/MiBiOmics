@@ -24,11 +24,11 @@ The first launch will take some time (about one hour) due to the installation of
 In the first section you can upload one, two or even three omics tables:
 
 |        | Gene1  | Gene2 | Gene3 |
-|        | ------ | ----- | ----- |
-|Sample 1|   1    |   0   |  512  |
-|Sample 2|  106   |   0   |   26  |
-|Sample 3|   0    |   3   |   0   |
-|Sample 4|   19   |   0   |   6   |
+| ------ | ------ | ----- | ----- |
+| Sample 1 |   1    |   0   |  512  |
+| Sample 2 |  106   |   0   |   26  |
+| Sample 3 |   0    |   3   |   0   |
+| Sample 4 |   19   |   0   |   6   |
 
 Omics table may contain Gene names, OTUs/ASVs or even metabolites in columns. Rownames must be unique. 
 An annotation table describing your samples is also necessary:
