@@ -35,7 +35,7 @@ An annotation table describing your samples is also necessary:
 
 
 |        |  Site  |  ADN  | group |
-|        | ------ | ----- | ----- |
+| ------ | ------ | ----- | ----- |
 |Sample 1|   1    |  0.63 |   A   |
 |Sample 2|   2    |  1.12 |   B   |
 |Sample 3|   2    |  0.45 |   A   |
@@ -44,7 +44,7 @@ An annotation table describing your samples is also necessary:
 If an Omics table containing ASVs or OTUs is uploaded, you can also add a taxonomic table describing the phylogenetic information of each OTUs/ASVs.
 
 |        |Kingdom |Phylum | Class | Order |Family |Species|
-|        | ------ | ----- | ----- | ----- | ----- | ----- |
+| ------ | ------ | ----- | ----- | ----- | ----- | ----- |
 | OTU 1  |  ...   |  ...  |  ...  |  ...  |  ...  |  ...  |
 | OTU 2  |  ...   |  ...  |  ...  |  ...  |  ...  |  ...  |
 | OTU 3  |  ...   |  ...  |  ...  |  ...  |  ...  |  ...  |
