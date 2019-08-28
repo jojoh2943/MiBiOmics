@@ -42,6 +42,9 @@ sampleAnnot <- reactive({
                             sep = input$sep2,
                             dec = input$dec2)
   }
+
+  
+ 
   col_to_remove <- c()
   for (i in 1:ncol(sampleAnnot)){
     if (length(unique(sampleAnnot[,i])) == 1){
@@ -50,7 +53,16 @@ sampleAnnot <- reactive({
   }
   if (!is.null(col_to_remove)){
     sampleAnnot <- sampleAnnot[,-col_to_remove]
+
+    
   }
+
+  validate(
+    need(ncol(sampleAnnot)!= 1, "Please upload an annotation file containing at least two columns of non-unique features")
+  )
+
+    sampleAnnot <- sampleAnnot[order(rownames(sampleAnnot)),]
+  
   sampleAnnot
 })
 
@@ -63,6 +75,7 @@ sampleAnnot_Default <- reactive({
   # sampleAnnot <- sampleAnnot[which(rownames(sampleAnnot) %in% rownames(exprDat_Default())),]
   # sampleAnnot <- sampleAnnot[which(rownames(sampleAnnot) %in% rownames(exprDatSec_Default())),]
   #sampleAnnot <- sampleAnnot[which(rownames(sampleAnnot) %!in% input$selectSample),]
+
   sampleAnnot
 })
 
@@ -83,13 +96,7 @@ sampleAnnot1 <- reactive({
   }
 })
 
-sampleAnnot_Batch <- reactive({
-  if (input$LoadExample == "Yes" | input$LoadExample2 == "Yes" ){
-    sampleAnnot <- sampleAnnot_Default()[which(rownames(sampleAnnot_Default()) %!in% input$selectSample),]
-  }else{
-    sampleAnnot <- sampleAnnot()[which(rownames(sampleAnnot()) %!in% input$selectSample),]
-  }
-})
+
 
 # Data Upload
 
@@ -129,7 +136,9 @@ exprDat <- reactive({
                         check.names = FALSE)
   }
   # Look if rows are OTUs and columns are samples.
-  if (length(exprDat[which(colnames(exprDat) %in% rownames(sampleAnnot()))]) > 2){
+
+  if (length(exprDat[which(colnames(exprDat) %in% rownames(sampleAnnot()))]) > 1){
+
     exprDat <- as.data.frame(t(exprDat))
   }
   exprDat[is.na(exprDat)] <- 0
@@ -140,9 +149,10 @@ exprDat <- reactive({
     showNotification("The counting table does not contains numeric values. The values were transformed into numbers but your analysis may not worked as expected. Please check the format of your counting table.", type = "warning", duration = NULL)
   }
   rownames(exprDat) <- sampleID
-  
 
   
+
+
   
   ### SELECTED FILTRATION
   if (input$Filtration == "Yes"){
@@ -186,8 +196,16 @@ exprDat <- reactive({
   }
   exprDat <- exprDat[which(rownames(exprDat) %in% rownames(sampleAnnot())),]
   exprDat <- exprDat[which(rownames(exprDat) %!in% input$selectSample),]
+
+  
   sampleAnnotation <- sampleAnnot()
-  sampleAnnotation <- sampleAnnotation[which(rownames(sampleAnnotation) %!in% input$selectSample),]
+  rownamesAnnot <- as.character(rownames(sampleAnnot()))
+  colnamesAnnot <- as.character(colnames(sampleAnnot()))
+  
+  sampleAnnotation <- as.data.frame(sampleAnnotation[which(rownames(sampleAnnotation) %!in% as.character(input$selectSample)),])
+  colnames(sampleAnnotation) <- colnamesAnnot
+  rownames(sampleAnnotation) <- rownamesAnnot[rownamesAnnot %!in% as.character(input$selectSample)]
+
   # DATA TRANFORMATION
   if (input$Transformation == "Yes"){
     if (input$TypeTransformation == "Log10"){
@@ -223,20 +241,10 @@ exprDat <- reactive({
     }
   }
   exprDat <- exprDat[which(rownames(exprDat) %in% rownames(sampleAnnotation)),]
-  sampleAnnotation <- sampleAnnotation[which(rownames(sampleAnnotation) %in% rownames(exprDat)),]
-  exprDat <- exprDat[match(rownames(sampleAnnotation), rownames(exprDat)),]
-  # Batch effect 
-  if (input$batchEffect){
-    batch <- sampleAnnotation[,input$batchCol]
-    
-    # Create a design matrix
-    modCombat <- model.matrix(~1, data=sampleAnnotation)
-    #Apply ComBat function using parametric empirical Bayesian adjustments : returns a new expression matrix adjusted 
-    #for batch
-    exprDat <- ComBat(dat = t(as.matrix(exprDat)), batch = batch, mod=modCombat, par.prior = TRUE, prior.plots = FALSE)
-    
-    exprDat <- t(exprDat)
-  }
+
+
+  exprDat <- exprDat[order(rownames(exprDat)),]
+ 
   exprDat
 })
 
@@ -328,18 +336,7 @@ exprDat_Default <- reactive({
   exprDat <- exprDat[which(rownames(exprDat) %in% rownames(sampleAnnotation)),]
   sampleAnnotation <- sampleAnnotation[which(rownames(sampleAnnotation) %in% rownames(exprDat)),]
   exprDat <- exprDat[match(rownames(sampleAnnotation), rownames(exprDat)),]
-  # Batch effect 
-  if (input$batchEffect){
-    batch <- sampleAnnotation[,input$batchCol]
-    
-    # Create a design matrix
-    modCombat <- model.matrix(~1, data=sampleAnnotation)
-    #Apply ComBat function using parametric empirical Bayesian adjustments : returns a new expression matrix adjusted 
-    #for batch
-    
-    exprDat <- ComBat(dat = t(as.matrix(exprDat)), batch = batch, mod=modCombat,par.prior = FALSE, prior.plots = FALSE)
-    exprDat <- t(exprDat)
-  }
+ 
   
   exprDat
 })
@@ -353,8 +350,7 @@ exprDat_present <- reactive({
     )
     exprDat_present <- exprDat()     
   }
-
-  if (nchar(colnames(exprDat_present)[5]) > 20 ){
+  if (nchar(colnames(exprDat_present)[1]) > 20 ){
     for (i in 1:ncol(exprDat_present)){
       colnames(exprDat_present)[i] <- paste(input$CountingT, i, sep = "") 
     }
@@ -505,18 +501,7 @@ exprDatSec <- reactive ({
   exprDatSec <- exprDatSec[which(rownames(exprDatSec) %in% rownames(sampleAnnotation)),]
   exprDatSec <- exprDatSec[match(rownames(sampleAnnotation), rownames(exprDatSec)),]
   
-  # Batch effect 
-  if (input$batchEffect){
-    batch <- sampleAnnotation[,input$batchCol]
-    
-    # Create a design matrix
-    modCombat <- model.matrix(~1, data=sampleAnnotation)
-    #Apply ComBat function using parametric empirical Bayesian adjustments : returns a new expression matrix adjusted 
-    #for batch
-    
-    exprDatSec <- ComBat(dat = t(as.matrix(exprDatSec)), batch = batch, mod=modCombat,par.prior = FALSE, prior.plots = FALSE)
-    exprDatSec <- t(exprDatSec)
-  }
+ 
   exprDatSec
 })
 
@@ -618,18 +603,7 @@ exprDatSec_Default <- reactive({
     }
   }
   exprDatSec <- exprDatSec[match(rownames(sampleAnnotation), rownames(exprDatSec)),]
-  # Batch effect 
-  if (input$batchEffect){
-    batch <- sampleAnnotation[,input$batchCol]
-    
-    # Create a design matrix
-    modCombat <- model.matrix(~1, data=sampleAnnotation)
-    #Apply ComBat function using parametric empirical Bayesian adjustments : returns a new expression matrix adjusted 
-    #for batch
-    
-    exprDatSec <- ComBat(dat = t(as.matrix(exprDatSec)), batch = batch, mod=modCombat,par.prior = FALSE, prior.plots = FALSE)
-    exprDatSec <- t(exprDatSec)
-  }
+  
   exprDatSec
 })
 
@@ -786,18 +760,7 @@ exprDatTer <- reactive({
   exprDat <- exprDat[which(rownames(exprDat) %in% rownames(sampleAnnotation)),]
   sampleAnnotation <- sampleAnnotation[which(rownames(sampleAnnotation) %in% rownames(exprDat)),]
   exprDat <- exprDat[match(rownames(sampleAnnotation), rownames(exprDat)),]
-  # Batch effect 
-  if (input$batchEffect){
-    batch <- sampleAnnotation[,input$batchCol]
-    
-    # Create a design matrix
-    modCombat <- model.matrix(~1, data=sampleAnnotation)
-    #Apply ComBat function using parametric empirical Bayesian adjustments : returns a new expression matrix adjusted 
-    #for batch
-    exprDat <- ComBat(dat = t(as.matrix(exprDat)), batch = batch, mod=modCombat, par.prior = TRUE, prior.plots = FALSE)
-    
-    exprDat <- t(exprDat)
-  }
+  
   exprDat
 })
 
@@ -1504,16 +1467,18 @@ output$selectSample <- renderUI({
   
 })
 
-output$batchCol <-  renderUI({
-  selectInput("batchCol", 
-              label = "Choose the batch Column: ", 
-              choices = colnames(sampleAnnot_Batch()), 
-              selected = colnames(sampleAnnot_Batch())[2])
-})
 
 #### FIGURES OUTPUTS ####
 
 output$ViewTable <- renderDataTable({
+  if (ncol(exprDat_present()) < 10){
+    length_expr <- ncol(exprDat_present())
+  }else{
+    length_expr <- 10
+  }
+
+  
+  
   if(is.null(input$View1)&is.null(input$View2)&is.null(input$View3)&is.null(input$View4)&is.null(input$View5)&is.null(input$View6)){
     validate(
       need(input$file1$datapath != "", "Please upload a counting table")
@@ -1565,11 +1530,11 @@ output$ViewTable <- renderDataTable({
       if(input$TaxonFile | input$LoadExample == "Yes"){
         if (input$View1 == "counting"){
           if (ncol(exprDat_present()) < 1000){
-            datatable(exprDat_present()[,1:10],
+            datatable(exprDat_present()[,1:length_expr],
                       options = list(lengthMenu = FALSE, pageLength = 5,  dom = 'tip'),
                       class = 'cell-border stripe')
           }else{
-            datatable(head(exprDat_present()[,1:10]),
+            datatable(head(exprDat_present()[,1:length_expr]),
                       options = list(lengthMenu = FALSE, pageLength = 6,  dom = 'tip'),
                       class = 'cell-border stripe')
           }
@@ -1592,11 +1557,11 @@ output$ViewTable <- renderDataTable({
                     class = 'cell-border stripe')
         }else{
           if(ncol(exprDat_present()) < 1000){
-            datatable(exprDat_present()[,1:10],
+            datatable(exprDat_present()[,1:length_expr],
                       options = list(lengthMenu = FALSE, pageLength = 5,  dom = 'tip'),
                       class = 'cell-border stripe')       
           }else{
-            datatable(head(exprDat_present()[,1:10]),
+            datatable(head(exprDat_present()[,1:length_expr]),
                       options = list(lengthMenu = FALSE, pageLength = 5,  dom = 'tip'),
                       class = 'cell-border stripe')                
           }
@@ -1607,11 +1572,11 @@ output$ViewTable <- renderDataTable({
         if (!input$Omic3){
           if (input$View3 == "counting"){
             if (ncol(exprDat_present()) < 1000){
-              datatable(exprDat_present()[,1:10],
+              datatable(exprDat_present()[,1:length_expr],
                         options = list(lengthMenu = FALSE, pageLength = 5,  dom = 'tip'),
                         class = 'cell-border stripe')
             }else{
-              datatable(head(exprDat_present()[,1:10]),
+              datatable(head(exprDat_present()[,1:length_expr]),
                         options = list(lengthMenu = FALSE, pageLength = 6,  dom = 'tip'),
                         class = 'cell-border stripe')
             }
@@ -1628,7 +1593,14 @@ output$ViewTable <- renderDataTable({
                           options = list(lengthMenu = FALSE, pageLength = 5, dom = 'tip'), 
                           class = 'cell-border stripe')
               }else{
-                datatable(exprDatSec_present()[,1:10],
+                if (ncol(exprDatSec_present()) < 10){
+                  length_expr_sec <- ncol(exprDatSec_present())
+                }else{
+                  length_expr_sec <- 10
+                }
+
+                
+                datatable(exprDatSec_present()[,1:length_expr_sec],
                           options = list(lengthMenu = FALSE, pageLength = 5, dom = 'tip'), 
                           class = 'cell-border stripe')
               }
@@ -1642,22 +1614,35 @@ output$ViewTable <- renderDataTable({
           }else{
             if (input$View6 =="counting"){
               if(ncol(exprDat_present()) < 1000){
-                datatable(exprDat_present()[,1:10],
+                datatable(exprDat_present()[,1:length_expr],
                           options = list(lengthMenu = FALSE, pageLength = 5,  dom = 'tip'),
                           class = 'cell-border stripe')
               }else{
-                datatable(head(exprDat_present()[,1:10]),
+                datatable(head(exprDat_present()[,1:length_expr]),
                           options = list(lengthMenu = FALSE, pageLength = 5,  dom = 'tip'),
                           class = 'cell-border stripe')
               }
             }else{
               if (input$View6 =="sec"){
-                datatable(exprDatSec_present()[,1:10],
+                if (ncol(exprDatSec_present()) < 10){
+                  length_expr_sec <- ncol(exprDatSec_present())
+                }else{
+                  length_expr_sec <- 10
+                }
+
+                datatable(exprDatSec_present()[,1:length_expr_sec],
                           options = list(lengthMenu = FALSE, pageLength = 5, dom = 'tip'),
                           class = 'cell-border stripe')
               }else{
                 if (input$View6 == "ter"){
-                  datatable(exprDatTer_present()[,1:10],
+     
+                  
+                  if (ncol(exprDatTer()) < 10){
+                    length_expr_ter <- ncol(exprDatTer())
+                  }else{
+                    length_expr_ter <- 10
+                  }
+                  datatable(exprDatTer_present()[,1:length_expr_ter],
                             options = list(lengthMenu = FALSE, pageLength = 5, dom = 'tip'),
                             class = 'cell-border stripe')
                 }else{
@@ -1678,21 +1663,34 @@ output$ViewTable <- renderDataTable({
             }else{
               if (input$View5 =="counting"){
                 if(ncol(exprDat_present()) < 1000){
-                  datatable(exprDat_present()[,1:10],
+                  datatable(exprDat_present()[,1:length_expr],
                             options = list(lengthMenu = FALSE, pageLength = 5,  dom = 'tip'),
                             class = 'cell-border stripe')
                 }else{
-                  datatable(head(exprDat_present()[,1:10]),
+                  datatable(head(exprDat_present()[,1:length_expr]),
                             options = list(lengthMenu = FALSE, pageLength = 5,  dom = 'tip'),
                             class = 'cell-border stripe')
                 }
               }else{
                 if (input$View5 =="sec"){
-                  datatable(exprDatSec_present()[,1:10],
+                  if (ncol(exprDatSec()) < 10){
+                    length_expr_sec <- ncol(exprDatSec())
+                  }else{
+                    length_expr_sec <- 10
+                  }
+
+                  datatable(exprDatSec_present()[,1:length_expr_sec],
                             options = list(lengthMenu = FALSE, pageLength = 5, dom = 'tip'),
                             class = 'cell-border stripe')
                 }else{
-                  datatable(exprDatTer_present()[,1:10],
+
+                  
+                  if (ncol(exprDatTer()) < 10){
+                    length_expr_ter <- ncol(exprDatTer())
+                  }else{
+                    length_expr_ter <- 10
+                  }
+                  datatable(exprDatTer_present()[,1:length_expr_ter],
                             options = list(lengthMenu = FALSE, pageLength = 5, dom = 'tip'),
                             class = 'cell-border stripe')
                 }
@@ -1706,16 +1704,21 @@ output$ViewTable <- renderDataTable({
             }else{
               if (input$View4 =="counting"){
                 if(ncol(exprDat_present()) < 1000){
-                  datatable(exprDat_present()[,1:10],
+                  datatable(exprDat_present()[,1:length_expr],
                             options = list(lengthMenu = FALSE, pageLength = 5,  dom = 'tip'),
                             class = 'cell-border stripe')
                 }else{
-                  datatable(head(exprDat_present()[,1:10]),
+                  datatable(head(exprDat_present()[,1:length_expr]),
                             options = list(lengthMenu = FALSE, pageLength = 5,  dom = 'tip'),
                             class = 'cell-border stripe')
                 }
               }else{
-                datatable(exprDatSec_present()[,1:10],
+                if (ncol(exprDatSec()) < 10){
+                  length_expr_sec <- ncol(exprDatSec())
+                }else{
+                  length_expr_sec <- 10
+                }
+                datatable(exprDatSec_present()[,1:length_expr_sec],
                           options = list(lengthMenu = FALSE, pageLength = 5, dom = 'tip'),
                           class = 'cell-border stripe')
               }

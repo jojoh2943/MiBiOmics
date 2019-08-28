@@ -118,9 +118,6 @@ ui <- tagList(
                                                                                                          selectInput("TypeTransformation2", "Type of transformation: ", choices = c("Log10" = "Log10", "Log2"= "Log2", "Hellinger"= "Hellinger", "Square" = "Square", "Square Root" = "sqrt", "ILR" = "ILR", "CLR" = "CLR")))
                                                                                         ),
                                                                        hr()),
-                                                      checkboxInput("batchEffect", "Batch Effect", value = FALSE),
-
-                                                                       uiOutput("batchCol"),
                                                       uiOutput("selectSample")
                                              ) # end TabPanel advanced Parameter
                                  ) #End TabPanel where user select its options

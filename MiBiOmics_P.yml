@@ -6,4 +6,3 @@ dependencies:
   - r-base=3.5.1
   - r-xml
   - curl<8
-

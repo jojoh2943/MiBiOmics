@@ -320,14 +320,14 @@ output$SelectVariable <-  renderUI({
   selectInput("selectVariable", 
               label = "Choose a variable: ", 
               choices = colnames(sampleAnnot_2()), 
-              selected = colnames(sampleAnnot_2())[2])
+              selected = colnames(sampleAnnot_2())[1])
 })
 
 output$SelectVariable3 <-  renderUI({
   selectInput("selectVariable3", 
               label = "Choose a variable: ", 
               choices = colnames(sampleAnnot_2()), 
-              selected = colnames(sampleAnnot_2())[2])
+              selected = colnames(sampleAnnot_2())[1])
 })
 
 output$SelectTaxo <- renderUI({
@@ -341,14 +341,14 @@ output$SelectVariable_sec <-  renderUI({
   selectInput("selectVariable_sec", 
               label = "Choose a variable: ", 
               choices = colnames(sampleAnnot_2()), 
-              selected = colnames(sampleAnnot_2())[2])
+              selected = colnames(sampleAnnot_2())[1])
 })
 
 output$SelectVariable_ter <-  renderUI({
   selectInput("selectVariable_ter", 
               label = "Choose a variable: ", 
               choices = colnames(sampleAnnot_2()), 
-              selected = colnames(sampleAnnot_2())[2])
+              selected = colnames(sampleAnnot_2())[1])
 })
 
 
@@ -356,14 +356,14 @@ output$SelectVariable3_sec <-  renderUI({
   selectInput("selectVariable3_sec", 
               label = "Choose a variable: ", 
               choices = colnames(sampleAnnot_2()), 
-              selected = colnames(sampleAnnot_2())[2])
+              selected = colnames(sampleAnnot_2())[1])
 })
 
 output$SelectVariable3_ter <-  renderUI({
   selectInput("selectVariable3_ter", 
               label = "Choose a variable: ", 
               choices = colnames(sampleAnnot_2()), 
-              selected = colnames(sampleAnnot_2())[2])
+              selected = colnames(sampleAnnot_2())[1])
 })
 
 output$SelectTaxo_sec <- renderUI({
