@@ -263,7 +263,7 @@ hive_myLayers <- function(l_WGCNA_D1, l_WGCNA_D2, l_WGCNA_D3, myCorrs, myAnnots,
 
 
 
-hive_my2Layers <- function(l_WGCNA_D1, l_WGCNA_D2, myCorr, myAnnots, correlation= "spearman", trait, exportPDF = FALSE, exportSVG = FALSE, sizePlot = 10, nameFile = "hive_D1_D2_D3"){
+hive_my2Layers <- function(l_WGCNA_D1, l_WGCNA_D2, myCorr, myAnnots, correlation= "spearman", trait, exportPDF = FALSE, exportSVG = FALSE, sizePlot = 10, nameFile = "hive_D1_D2_D3", cureCorr = FALSE, exportCSV = FALSE){
   require(leaflet)
   
   annot_D1 <- myAnnots[[1]]
@@ -275,17 +275,19 @@ hive_my2Layers <- function(l_WGCNA_D1, l_WGCNA_D2, myCorr, myAnnots, correlation
   
   
   # Create nodes dataframe:
-  id <- c(seq(from = 1, to = (ncol(l_WGCNA_D1[[5]])+ ncol(l_WGCNA_D2[[5]]) + 2 )))
-  label <- c( as.vector(paste(colnames(l_WGCNA_D1[[5]]), "DF1", sep = "_")), as.vector(paste( colnames(l_WGCNA_D2[[5]]), "DF2", sep = "_")), "extreme_DF1", "extreme_DF2")
-  color <- c( as.vector(substr(colnames(l_WGCNA_D1[[5]]), 3, 30)), as.vector(substr( colnames(l_WGCNA_D2[[5]]), 3, 30)), "white", "white")
-  axis <- c( as.vector(rep(1, ncol(l_WGCNA_D1[[5]]))), as.vector(rep(2, ncol(l_WGCNA_D2[[5]]))), 1, 2 )
-  size <- c( as.vector(rep(1, sum(ncol(l_WGCNA_D1[[5]]), ncol(l_WGCNA_D2[[5]])))), 0, 0)
+  id <- c(seq(from = 1, to = (ncol(l_WGCNA_D1[[5]])+ ncol(l_WGCNA_D2[[5]]) + 4 )))
+  label <- c("min_DF1", "min_DF2", as.vector(paste(colnames(l_WGCNA_D1[[5]]), "DF1", sep = "_")), as.vector(paste( colnames(l_WGCNA_D2[[5]]), "DF2", sep = "_")), "extreme_DF1", "extreme_DF2")
+  color <- c("white", "white", as.vector(substr(colnames(l_WGCNA_D1[[5]]), 3, 30)), as.vector(substr( colnames(l_WGCNA_D2[[5]]), 3, 30)), "white", "white")
+  axis <- c(1, 2, as.vector(rep(1, ncol(l_WGCNA_D1[[5]]))), as.vector(rep(2, ncol(l_WGCNA_D2[[5]]))), 1, 2 )
+  size <- c(0, 0, as.vector(rep(1, sum(ncol(l_WGCNA_D1[[5]]), ncol(l_WGCNA_D2[[5]])))), 0, 0)
   radius <- c()
   v_pv <- c()
   for (i in 1:2){
     annot <- myAnnots[[i]]
     myWGCNA <- WGCNA_list[[i]]
+
     if (is.numeric(annot[,trait])){
+
       moduleTraitCor = cor(myWGCNA[[5]], annot[,trait], use = "p", method = correlation)
     }else{
       annot2<- annot
@@ -323,6 +325,7 @@ hive_my2Layers <- function(l_WGCNA_D1, l_WGCNA_D2, myCorr, myAnnots, correlation
       }
     }
   }
+
   edges <- data.frame(id1 = id1, id2 = id2, weight = weight, color = as.character(color))
   id_to_keep <- nodes[which(nodes$size != 0),]
   id_to_keep <- id_to_keep$id

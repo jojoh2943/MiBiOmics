@@ -27,8 +27,8 @@ mcoia <- reactive({
     df1_df2 <- list()
     df1_df2[["df1"]] <- t(as.data.frame(selected_moduleOTU()))
     df1_df2[["df2"]] <- t(as.data.frame(selectMetab))
-    rownames(df1_df2_df3[["df1"]]) <- paste("a_", rownames(df1_df2_df3[["df1"]]), sep = "")
-    rownames(df1_df2_df3[["df2"]]) <- paste("b_", rownames(df1_df2_df3[["df2"]]), sep = "")
+    rownames(df1_df2[["df1"]]) <- paste("a_", rownames(df1_df2[["df1"]]), sep = "")
+    rownames(df1_df2[["df2"]]) <- paste("b_", rownames(df1_df2[["df2"]]), sep = "")
     mcia(df1_df2, nsc = F)
   }
 })
@@ -1262,6 +1262,7 @@ output$Download_Multivariate_Analysis3 <- downloadHandler(
     paste("HEATMAP12.zip")
   },
   content = function (filename){
+    webshot::install_phantomjs()
     fs <- c()
     tmpdir <- tempdir()
     setwd(tempdir())
@@ -1297,6 +1298,7 @@ output$Download_Multivariate_Analysis4 <- downloadHandler(
     paste("HEATMAP23.zip")
   },
   content = function (filename){
+    webshot::install_phantomjs()
     fs <- c()
     tmpdir <- tempdir()
     setwd(tempdir())
@@ -1332,6 +1334,7 @@ output$Download_Multivariate_Analysis5 <- downloadHandler(
     paste("HEATMAP13.zip")
   },
   content = function (filename){
+    webshot::install_phantomjs()
     fs <- c()
     tmpdir <- tempdir()
     setwd(tempdir())
@@ -1367,6 +1370,7 @@ output$Download_Multivariate_Analysis6 <- downloadHandler(
     paste("HEATMAP_AND_BIPARTITE.zip")
   },
   content = function (filename){
+    webshot::install_phantomjs()
     fs <- c()
     tmpdir <- tempdir()
     setwd(tempdir())
@@ -1421,6 +1425,7 @@ output$Download_Multivariate_Analysis7 <- downloadHandler(
     paste("HEATMAP_AND_BIPARTITE.zip")
   },
   content = function (filename){
+    webshot::install_phantomjs()
     fs <- c()
     tmpdir <- tempdir()
     setwd(tempdir())
@@ -1474,6 +1479,7 @@ output$Download_Multivariate_Analysis8 <- downloadHandler(
     paste("HEATMAP_AND_BIPARTITE.zip")
   },
   content = function (filename){
+    webshot::install_phantomjs()
     fs <- c()
     tmpdir <- tempdir()
     setwd(tempdir())

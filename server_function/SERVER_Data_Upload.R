@@ -1113,6 +1113,7 @@ exprDat_WGCNA <- reactive({
 
 exprDatSec_WGCNA <- reactive({
   expr <- exprDatSec_2()
+  #expr <- expr[which(rownames(expr) %in% rownames(sampleAnnot_2()))]
   if (nrow(expr) > 14){
     gsg = goodSamplesGenes(expr, verbose = 3)
     #If gsg$allOK is TRUE, all genes have passed the cuts.  If not, we remove the offending genes and samples
@@ -1136,6 +1137,8 @@ exprDatSec_WGCNA <- reactive({
 
 exprDatTer_WGCNA <- reactive({
   expr <- exprDatTer_2()
+  #expr <- expr[which(rownames(expr) %in% rownames(sampleAnnot_2()))]
+  
   if (nrow(expr) > 14){
     gsg = goodSamplesGenes(expr, verbose = 3)
     #If gsg$allOK is TRUE, all genes have passed the cuts.  If not, we remove the offending genes and samples

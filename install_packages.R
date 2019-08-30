@@ -66,6 +66,6 @@ library("plotly")
 library("leaflet")
 library("grid")
 library("webshot") # save iheatmap
-webshot::install_phantomjs()
+
 
 

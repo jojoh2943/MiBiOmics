@@ -63,7 +63,7 @@ module_Relative_abundanceSec <- reactive({
   
   
   if (input$selectVariable_RelAbSec != "unordered"){
-    exprDat <- exprDat[order(sampleAnnot_sec()[,input$selectVariable_RelAbSec]),]
+    exprDat <- exprDat[order(sampleAnnot_sec_WGCNA()[,input$selectVariable_RelAbSec]),]
   }
   
   selectedExpr <- exprDat[, modGenes]
@@ -130,10 +130,10 @@ MEs_ordered <- reactive ({
 })
 
 MEs_orderedSec <- reactive ({
-  MEs <- data.frame(selectedMEs2(), rownames(sampleAnnot_sec()))
+  MEs <- data.frame(selectedMEs2(), rownames(sampleAnnot_sec_WGCNA()))
   colnames(MEs) <- c(colnames(selectedMEs2()), "sampleName")
   if (input$selectVariable_barplotSec != "unordered"){
-    MEs <- MEs[order(sampleAnnot_sec()[,input$selectVariable_barplotSec]),]
+    MEs <- MEs[order(sampleAnnot_sec_WGCNA()[,input$selectVariable_barplotSec]),]
   }
   MEs$sampleName <- as.character(MEs$sampleName)
   MEs$sampleName <- factor(MEs$sampleName, levels = unique(MEs$sampleName))
@@ -163,10 +163,10 @@ sampleAnnot_ordered <- reactive({
 })
 
 sampleAnnot_orderedSec <- reactive({
-  sampleAnnot <- data.frame(sampleAnnot_sec(), rownames(sampleAnnot_sec()))
-  colnames(sampleAnnot) <- c(colnames(sampleAnnot_sec()), "sampleName")
+  sampleAnnot <- data.frame(sampleAnnot_sec_WGCNA(), rownames(sampleAnnot_sec_WGCNA()))
+  colnames(sampleAnnot) <- c(colnames(sampleAnnot_sec_WGCNA()), "sampleName")
   if (input$selectVariable_barplotSec != "unordered"){
-    sampleAnnot <- sampleAnnot[order(sampleAnnot_sec()[,input$selectVariable_barplotSec]),]
+    sampleAnnot <- sampleAnnot[order(sampleAnnot_sec_WGCNA()[,input$selectVariable_barplotSec]),]
   }
   sampleAnnot$sampleName <- as.character(sampleAnnot$sampleName)
   sampleAnnot$sampleName <- factor(sampleAnnot$sampleName, levels = unique(sampleAnnot$sampleName))
@@ -233,17 +233,17 @@ geneTraitSignificance <- reactive({
 
 geneTraitSignificanceSec <- reactive({
   colnames_used <- c()
-  for (i in names(sampleAnnot_sec())) {
-    if(length(unique(sampleAnnot_sec()[,i])) > 1){
-      if (is.numeric(sampleAnnot_sec()[,i])){
-        env = as.data.frame(sampleAnnot_sec()[,i])
+  for (i in names(sampleAnnot_sec_WGCNA())) {
+    if(length(unique(sampleAnnot_sec_WGCNA()[,i])) > 1){
+      if (is.numeric(sampleAnnot_sec_WGCNA()[,i])){
+        env = as.data.frame(sampleAnnot_sec_WGCNA()[,i])
       }else{
-        env = as.data.frame(as.numeric(as.factor(sampleAnnot_sec()[,i])))
+        env = as.data.frame(as.numeric(as.factor(sampleAnnot_sec_WGCNA()[,i])))
       }
       colnames(env) = i
       colnames_used <- c(colnames_used, i)
       modNames = substring(names(selectedMEs2()), 3)
-      if (i == colnames(sampleAnnot_sec())[1]){
+      if (i == colnames(sampleAnnot_sec_WGCNA())[1]){
         geneTraitSignificance = as.data.frame(cor(exprDatSec_WGCNA(), env, method= as.character(input$selectCorrelationSec), use="na.or.complete"));
       }else{
         geneTraitSignificance = data.frame(geneTraitSignificance, cor(exprDatSec_WGCNA(), env, method= as.character(input$selectCorrelationSec), use="na.or.complete"));
@@ -484,13 +484,13 @@ selectedCondDFSec <- reactive({
   text_matrix_vector <- c()
   pval_vector <- c()
   corr_vector <- c()
-  for (condition in 1:(ncol(sampleAnnot_sec()))){
+  for (condition in 1:(ncol(sampleAnnot_sec_WGCNA()))){
     
-    condition_name <- colnames(sampleAnnot_sec())[condition]
-    if (is.numeric(sampleAnnot_sec()[,condition_name])){
-      moduleTraitCor = cor(selectedMEs2(), sampleAnnot_sec()[,condition_name], use = "p", method = input$selectCorrelationSec)
+    condition_name <- colnames(sampleAnnot_sec_WGCNA())[condition]
+    if (is.numeric(sampleAnnot_sec_WGCNA()[,condition_name])){
+      moduleTraitCor = cor(selectedMEs2(), sampleAnnot_sec_WGCNA()[,condition_name], use = "p", method = input$selectCorrelationSec)
     }else{
-      sampleAnnot4 <- sampleAnnot_sec()
+      sampleAnnot4 <- sampleAnnot_sec_WGCNA()
       sampleAnnot4[,condition_name] <- as.factor(sampleAnnot4[, condition_name])
       sampleAnnot4[,condition_name] <- as.numeric(sampleAnnot4[,condition_name])
       moduleTraitCor = cor(selectedMEs2(), sampleAnnot4[,condition_name], use = "p", method = input$selectCorrelationSec)
@@ -640,7 +640,7 @@ markers.data_D2 <- reactive({
 })
 
 env.markers.data_D2 <- reactive({
-  sampleAnnot <- sampleAnnot_sec()
+  sampleAnnot <- sampleAnnot_sec_WGCNA()
   if (!is.numeric(sampleAnnot[,input$sampleAnnotSelection_D2])){
     sampleAnnot[,input$sampleAnnotSelection_D2] <- as.numeric(as.factor(sampleAnnot[,input$sampleAnnotSelection_D2]))
   }
@@ -1646,7 +1646,7 @@ output$Download_Network_Exploration_dataset_2 <- downloadHandler(
       pdf("Contribution_MEs.pdf", width = input$widthPDF_D2, height = input$heightPDF_D2)
       for (i in 1:ncol(selectedMEs2())){
         print(barplot(selectedMEs2()[,i], col= substr(colnames(selectedMEs2())[i], 3, 40), main="", cex.main=2,
-                      ylab="eigengene expression", cex.names = 0.7, names.arg = rownames(sampleAnnot_sec()), las = 2))
+                      ylab="eigengene expression", cex.names = 0.7, names.arg = rownames(sampleAnnot_sec_WGCNA()), las = 2))
       }
       dev.off()
       fs <- c(fs, "Contribution_MEs.pdf")
@@ -1693,7 +1693,7 @@ output$Download_Network_Exploration_dataset_2 <- downloadHandler(
       for (i in 1:ncol(selectedMEs2())){
         svg(paste("Contribution_MEs_", substr(colnames(selectedMEs2())[i], 3, 40), ".svg", sep = ""), width = input$widthPDF_D2, height = input$heightPDF_D2)
         print(barplot(selectedMEs2()[,i], col= substr(colnames(selectedMEs2())[i], 3, 40), main="", cex.main=2,
-                      ylab="eigengene expression", cex.names = 0.7, names.arg = rownames(sampleAnnot_sec()), las = 2))
+                      ylab="eigengene expression", cex.names = 0.7, names.arg = rownames(sampleAnnot_sec_WGCNA()), las = 2))
         dev.off()
         fs <- c(fs, paste("Contribution_MEs_", substr(colnames(selectedMEs2())[i], 3, 40), ".svg", sep = ""))
       }
