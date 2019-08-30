@@ -17,12 +17,18 @@ mcoia <- reactive({
     df1_df2_df3[["df1"]] <- t(as.data.frame(selectD1))
     df1_df2_df3[["df2"]] <- t(as.data.frame(selectD2))
     df1_df2_df3[["df3"]] <- t(as.data.frame(selectD3))
+    rownames(df1_df2_df3[["df1"]]) <- paste("a_", rownames(df1_df2_df3[["df1"]]), sep = "")
+    rownames(df1_df2_df3[["df2"]]) <- paste("b_", rownames(df1_df2_df3[["df2"]]), sep = "")
+    rownames(df1_df2_df3[["df3"]]) <- paste("c_", rownames(df1_df2_df3[["df3"]]), sep = "")
+    
     mcia(df1_df2_df3, cia.scan = TRUE, cia.nf = 2)
   }else{
     selectMetab <- selectedMetab()
     df1_df2 <- list()
     df1_df2[["df1"]] <- t(as.data.frame(selected_moduleOTU()))
     df1_df2[["df2"]] <- t(as.data.frame(selectMetab))
+    rownames(df1_df2_df3[["df1"]]) <- paste("a_", rownames(df1_df2_df3[["df1"]]), sep = "")
+    rownames(df1_df2_df3[["df2"]]) <- paste("b_", rownames(df1_df2_df3[["df2"]]), sep = "")
     mcia(df1_df2, nsc = F)
   }
 })
@@ -181,141 +187,90 @@ selected_axis1_drivers <- reactive({
   }
   axis_drivers <- axis1_drivers
   if (input$Omic3){
-    names_df1 <- colnames(selected_moduleOTU())
-    names_df2 <- colnames(selectedMetab())
-    names_df3 <- colnames(selectedD3())
-    name_axis_drivers <- rename_axis_drivers(axis1_drivers, colnames_df1 = colnames(selected_moduleOTU()), colnames_df2 = colnames(selectedMetab()), colnames_df3 = colnames(selectedD3()), n_df = 3)
+    name_axis_drivers <- rename_axis_drivers_simplified(axis1_drivers)
     feature_type_axis_1 <- c()
     spec_axis_1 <- c()
     the_name <- c()
-
-    
-    for (i in 1:length(name_axis_drivers)){
-      if (substr(rownames(axis_drivers)[i], nchar(rownames(axis_drivers)[i])- 3, nchar(rownames(axis_drivers)[i])) == ".df1"){
-        if (input$CountingT1 == "OTUs" || input$LoadExample2 == "Yes"){
-          feature_type_axis_1 <- c(feature_type_axis_1,"OTUs.df1")
-          if (input$LoadExample2 == "No"){
-            spec_axis_1 <- c(spec_axis_1,as.character(taxTable()[as.character(name_axis_drivers[i]), input$selectTaxonomy]))
-          }else{
-            spec_axis_1 <- c(spec_axis_1,as.character(taxTable_default()[as.character(name_axis_drivers[i]), input$selectTaxonomy]))
-            
-          }
-          the_name <- c(the_name, name_axis_drivers[i])
+    drivers <- data.frame("old" = rownames(axis1_drivers), "new" = name_axis_drivers)
+    for (i in 1:nrow(drivers)){
+      if (substr(drivers$old[i], 1, 1) == "a"){
+        feature_type_axis_1 <- c(feature_type_axis_1, input$CountingT1)
+        if (input$CountingT1 == "OTUs" && input$TaxonFile1){
+          spec_axis_1 <- c(spec_axis_1, as.character(taxTable()[as.character(drivers$new[i]), input$selectTaxonomy]))
         }else{
-          feature_type_axis_1 <- c(feature_type_axis_1,paste(input$CountingT1, ".df1", sep = ""))
-          spec_axis_1 <- c(spec_axis_1,name_axis_drivers[i])
-          the_name <- c(the_name, name_axis_drivers[i])
-        }
-      }else{
-        if (substr(rownames(axis_drivers)[i], nchar(rownames(axis_drivers)[i])- 3, nchar(rownames(axis_drivers)[i])) == ".df2"){
-          if (input$OmicTable == "OTUs" ){
-            feature_type_axis_1 <- c(feature_type_axis_1,"OTUs.df2")
-            if (input$LoadExample2 == "No"){
-              spec_axis_1 <- c(spec_axis_1,as.character(taxTable()[as.character(name_axis_drivers[i]), input$selectTaxonomy]))
-              
-            }else{
-              spec_axis_1 <- c(spec_axis_1,as.character(taxTable_default()[as.character(name_axis_drivers[i]), input$selectTaxonomy]))
-              
-            }
-            the_name <- c(the_name, name_axis_drivers[i])
-          }else{
-            if (input$LoadExample2 == "Yes"){
-              feature_type_axis_1 <- c(feature_type_axis_1,paste("metabolites.df2"))
-            }else{
-              feature_type_axis_1 <- c(feature_type_axis_1,paste(input$OmicTable, ".df2", sep = ""))
-            }
-            spec_axis_1 <- c(spec_axis_1,name_axis_drivers[i])
-            the_name <- c(the_name, name_axis_drivers[i])
-          }
-        }else{
-          if (substr(rownames(axis_drivers)[i], nchar(rownames(axis_drivers)[i])- 3, nchar(rownames(axis_drivers)[i])) == ".df3"){
-            if (input$OmicTable3 == "OTUs"){
-              feature_type_axis_1 <- c(feature_type_axis_1,"OTUs.df3")
-              if (input$LoadExample2 == "No"){
-                spec_axis_1 <- c(spec_axis_1,as.character(taxTable()[as.character(name_axis_drivers[i]), input$selectTaxonomy]))
-                
-              }else{
-                spec_axis_1 <- c(spec_axis_1,as.character(taxTable_default()[as.character(name_axis_drivers[i]), input$selectTaxonomy]))
-                
-              }
-              the_name <- c(the_name, name_axis_drivers[i])
-            }else{
-              feature_type_axis_1 <- c(feature_type_axis_1,paste(input$OmicTable3, ".df3", sep = ""))
-              spec_axis_1 <- c(spec_axis_1,name_axis_drivers[i])
-              the_name <- c(the_name, name_axis_drivers[i])
-            }
-          }else{
-            feature_type_axis_1 <- c(feature_type_axis_1,"unknown")
-            spec_axis_1 <- c(spec_axis_1,name_axis_drivers[i])
-            the_name <- c(the_name, name_axis_drivers[i])
-          }
+          spec_axis_1 <- c(spec_axis_1, as.character(drivers$new[i]))
         }
         
+      }else{
+        if (substr(drivers$old[i], 1, 1) == "b"){
+          feature_type_axis_1 <- c(feature_type_axis_1, input$OmicTable)
+          if (input$OmicTable == "OTUs" && input$TaxonFile1){
+            spec_axis_1 <- c(spec_axis_1, as.character(taxTable()[as.character(drivers$new[i]), input$selectTaxonomy]))
+          }else{
+            spec_axis_1 <- c(spec_axis_1, as.character(drivers$new[i]))
+          }
+          
+        }else{
+          if (substr(drivers$old[i], 1, 1) == "c"){
+            feature_type_axis_1 <- c(feature_type_axis_1, input$OmicTable3)
+            if (input$OmicTable3 == "OTUs" && input$TaxonFile1){
+              spec_axis_1 <- c(spec_axis_1, as.character(taxTable()[as.character(drivers$new[i]), input$selectTaxonomy]))
+            }else{
+              spec_axis_1 <- c(spec_axis_1, as.character(drivers$new[i]))
+            }
+            
+          }else{
+            feature_type_axis_1 <- c(feature_type_axis_1, "unkwown")
+            spec_axis_1 <- c(spec_axis_1, as.character(drivers$new[i]))
+          }
+        }
       }
     }
   }else{
-    name_axis_drivers <- rename_axis_drivers(axis1_drivers, colnames_df1 = colnames(selected_moduleOTU()), colnames_df2 = colnames(selectedMetab()), n_df = 2)
-    print(name_axis_drivers)
-    names_df1 <- colnames(selected_moduleOTU())
-    names_df2 <- colnames(selectedMetab())
+    name_axis_drivers <- rename_axis_drivers_simplified(axis1_drivers)
     feature_type_axis_1 <- c()
     spec_axis_1 <- c()
     the_name <- c()
-    for (i in 1:length(name_axis_drivers)){
-      if (substr(rownames(axis_drivers)[i], nchar(rownames(axis_drivers)[i])- 3, nchar(rownames(axis_drivers)[i])) == ".df1"){
-        if (input$CountingT1 == "OTUs" || input$LoadExample2 == "Yes"){
-          feature_type_axis_1 <- c(feature_type_axis_1,"OTUs.df1")
+    drivers <- data.frame("old" = rownames(axis1_drivers), "new" = name_axis_drivers)
+    for (i in 1:nrow(drivers)){
+      if (substr(drivers$old[i], 1, 1) == "a"){
+        if (input$LoadExample2 == "Yes"){
+          feature_type_axis_1 <- c(feature_type_axis_1,"OTUs")
+          spec_axis_1 <- c(spec_axis_1,as.character(taxTable_default()[as.character(name_axis_drivers[i]), input$selectTaxonomy]))
+        }else{
+          feature_type_axis_1 <- c(feature_type_axis_1, input$CountingT1)
+          if (input$CountingT1 == "OTUs" && input$TaxonFile1){
+            spec_axis_1 <- c(spec_axis_1, as.character(taxTable()[as.character(drivers$new[i]), input$selectTaxonomy]))
+          }else{
+            spec_axis_1 <- c(spec_axis_1, as.character(drivers$new[i]))
+          }
+        }
 
-            spec_axis_1 <- c(spec_axis_1,as.character(taxTable_default()[as.character(name_axis_drivers[i]), input$selectTaxonomy]))
-            
-          the_name <- c(the_name, name_axis_drivers[i])
-        }else{
-          feature_type_axis_1 <- c(feature_type_axis_1,paste(input$CountingT1, ".df1", sep = ""))
-          spec_axis_1 <- c(spec_axis_1,name_axis_drivers[i])
-          the_name <- c(the_name, name_axis_drivers[i])
-        }
+        
       }else{
-        if (substr(rownames(axis_drivers)[i], nchar(rownames(axis_drivers)[i])- 3, nchar(rownames(axis_drivers)[i])) == ".df2"){
-          if (input$OmicTable == "OTUs" && input$LoadExample2 == "No"){
-            feature_type_axis_1 <- c(feature_type_axis_1,"OTUs.df2")
-            if (input$LoadExample2 == "No"){
-              spec_axis_1 <- c(spec_axis_1,as.character(taxTable()[as.character(name_axis_drivers[i]), input$selectTaxonomy]))
-            }
-            the_name <- c(the_name, name_axis_drivers[i])
+        if (substr(drivers$old[i], 1, 1) == "b"){
+          if (input$LoadExample2 == "Yes"){
+            feature_type_axis_1 <- c(feature_type_axis_1, "Metabolites")
+            spec_axis_1 <- c(spec_axis_1, as.character(drivers$new[i]))
           }else{
-            if (input$LoadExample2 == "Yes"){
-              feature_type_axis_1 <- c(feature_type_axis_1,paste("metabolites.df2"))
+            feature_type_axis_1 <- c(feature_type_axis_1, input$OmicTable)
+            if (input$OmicTable == "OTUs" && input$TaxonFile1){
+              spec_axis_1 <- c(spec_axis_1, as.character(taxTable()[as.character(drivers$new[i]), input$selectTaxonomy]))
             }else{
-              feature_type_axis_1 <- c(feature_type_axis_1,paste(input$OmicTable, ".df2", sep = ""))
+              spec_axis_1 <- c(spec_axis_1, as.character(drivers$new[i]))
             }
-            spec_axis_1 <- c(spec_axis_1,name_axis_drivers[i])
-            the_name <- c(the_name, name_axis_drivers[i])
           }
         }else{
-          if (input$OmicTable == "OTUs" && input$LoadExample2 == "No"){
-            feature_type_axis_1 <- c(feature_type_axis_1,"OTUs.df2")
-            if (input$LoadExample2 == "No"){
-              spec_axis_1 <- c(spec_axis_1,as.character(taxTable()[as.character(name_axis_drivers[i]), input$selectTaxonomy]))
-            }
-            the_name <- c(the_name, name_axis_drivers[i])
-          }else{
-            if (input$LoadExample2 == "Yes"){
-              feature_type_axis_1 <- c(feature_type_axis_1,paste("example"))
-            }else{
-              feature_type_axis_1 <- c(feature_type_axis_1,paste(input$OmicTable, ".df2", sep = ""))
-            }
-            spec_axis_1 <- c(spec_axis_1,name_axis_drivers[i])
-            the_name <- c(the_name, name_axis_drivers[i])
-          }
+          feature_type_axis_1 <- c(feature_type_axis_1, "unkwown")
+          spec_axis_1 <- c(spec_axis_1, as.character(drivers$new[i]))
         }
-      } 
+      }
     }
   }
 
   axis1_drivers$feature <- feature_type_axis_1
   axis1_drivers$spec <- spec_axis_1
   axis1_drivers$name <- the_name
-  print(axis1_drivers)
   axis1_drivers
 })
 
@@ -431,11 +386,9 @@ hive_data <- reactive({
 
   my_Corrs <- list()
   my_Corrs[[1]] <- myCorr_D1_D2
-  
   my_Annot <- list()
   my_Annot[[1]] <- sampleAnnot_WGCNA()
   my_Annot[[2]] <- sampleAnnot_sec_WGCNA()
-  
 
   if (input$Omic3){
     myCorr_D1_D3 <- list()
@@ -459,15 +412,18 @@ hive_data <- reactive({
     
     my_Corrs[[2]] <- myCorr_D1_D3
     my_Corrs[[3]] <- myCorr_D2_D3
-    
     my_Annot[[3]] <- sampleAnnot_ter_WGCNA()
-    
-    
-    hive_myLayers(WGCNA_1, WGCNA_2, WGCNA_3, myCorrs = my_Corrs, myAnnots = my_Annot, trait = input$traitHive)
+    my_hive <- hive_myLayers(WGCNA_1, WGCNA_2, WGCNA_3, myCorrs = my_Corrs, myAnnots = my_Annot, trait = input$traitHive)
+    validate(
+      need(nrow(my_hive$edges) != 0, "No significant interaction between modules and external trait")
+    )
   }else{
-    hive_my2Layers(WGCNA_1, WGCNA_2, myCorr = myCorr_D1_D2, myAnnots = my_Annot, trait = input$traitHive)
+    my_hive <- hive_my2Layers(WGCNA_1, WGCNA_2, myCorr = myCorr_D1_D2, myAnnots = my_Annot, trait = input$traitHive)
+    validate(
+      need(nrow(my_hive$edges) != 0, "No significant interaction between modules and external trait")
+    )
   }
-
+  my_hive
 
 })
 
@@ -501,7 +457,7 @@ p_val_MEs_D2D3 <- reactive({
 
 p_val_MEs_D1D3 <- reactive({
   MEs3 <- selectedMEs3()
-  MEs <- selectedMEs2()
+  MEs <- selectedMEs()
   MEs3 <- MEs3[which(rownames(MEs3) %in% rownames(MEs)),]
   MEs <- MEs[which(rownames(MEs) %in% rownames(MEs3)),]
   pvalue_MEs_D1_D2 <- corPvalueStudent(cor(MEs, MEs3, use = "p", method = "spearman"), nrow(MEs))
@@ -515,6 +471,9 @@ p_val_MEs_D1D3 <- reactive({
 corr_expr <- reactive({
   corr_expr_1 <- cor(exprDat_41(), exprDatSec_51(), use = "p", method = "spearman")
   corr_expr_1 <- as.data.frame(corr_expr_1)
+  rownames(corr_expr_1) <- paste("DF1_", rownames(corr_expr_1), sep = "")
+  colnames(corr_expr_1) <- paste("DF2_", colnames(corr_expr_1), sep = "")
+  
   row.order <- hclust(dist(corr_expr_1, method = "euclidean"), method = "ward.D")$order 
   col.order <- hclust(dist(t(corr_expr_1), method = "euclidean"), method = "ward.D")$order
   corr_expr_new <- corr_expr_1[row.order, col.order]
@@ -525,6 +484,8 @@ corr_expr23 <- reactive({
 
   corr_expr_1 <- cor(exprDatSec_52(), exprDatTer_52(), use = "p", method = "spearman")
   corr_expr_1 <- as.data.frame(corr_expr_1)
+  rownames(corr_expr_1) <- paste("DF2_", rownames(corr_expr_1), sep = "")
+  colnames(corr_expr_1) <- paste("DF3_", colnames(corr_expr_1), sep = "")
   row.order <- hclust(dist(corr_expr_1, method = "euclidean"), method = "ward.D")$order 
   col.order <- hclust(dist(t(corr_expr_1), method = "euclidean"), method = "ward.D")$order
   corr_expr_new <- corr_expr_1[row.order, col.order]
@@ -534,6 +495,8 @@ corr_expr23 <- reactive({
 corr_expr13 <- reactive({
   corr_expr_1 <- cor(exprDat_43(), exprDatTer_53(), use = "p", method = "spearman")
   corr_expr_1 <- as.data.frame(corr_expr_1)
+  rownames(corr_expr_1) <- paste("DF1_", rownames(corr_expr_1), sep = "")
+  colnames(corr_expr_1) <- paste("DF3_", colnames(corr_expr_1), sep = "")
   row.order <- hclust(dist(corr_expr_1, method = "euclidean"), method = "ward.D")$order 
   col.order <- hclust(dist(t(corr_expr_1), method = "euclidean"), method = "ward.D")$order
   corr_expr_new <- corr_expr_1[row.order, col.order]
@@ -608,23 +571,25 @@ family_group23_3 <- reactive({
 adjacency_expr12 <- reactive({
   corr_expr_1 <- cor(exprDat_41(), exprDatSec_51(), use = "p", method = "spearman")
   corr_expr_1 <- as.data.frame(corr_expr_1)
+  rownames(corr_expr_1) <- paste("DF1_", rownames(corr_expr_1), sep = "")
+  colnames(corr_expr_1) <- paste("DF2_", colnames(corr_expr_1), sep = "")
   #corr_expr_1[which(corr_expr_1 < 0.30 && corr_expr_1 > -0.30),] <- 0
   corr_expr_1[abs(corr_expr_1) < 0.5] <- 0
   #corr_expr_1[(corr_expr_1 < 0.70 && corr_expr_1 > 0.50) || (corr_expr_1 > -0.70 && corr_expr_1 < -0.50)] <- 1
   corr_expr_1[abs(corr_expr_1)>=0.5] <- 1
   #corr_expr_1 <- t(corr_expr_1)
-  if (nchar(rownames(corr_expr_1)[5]) >20){
-    for (row in 1:nrow(corr_expr_1)){
-      
-      rownames(corr_expr_1)[row] <- paste(input$CountingT1, "_D1", row, sep="")
-    }
-  }
-  if (nchar(colnames(corr_expr_1)[5]) >20){
-    for (col in 1:ncol(corr_expr_1)){
-      
-      colnames(corr_expr_1)[col] <- paste(input$OmicTable, "_D2", row, sep="")
-    }
-  }
+  # if (nchar(rownames(corr_expr_1)[5]) >20){
+  #   for (row in 1:nrow(corr_expr_1)){
+  #     
+  #     rownames(corr_expr_1)[row] <- paste(input$CountingT1, "_D1", row, sep="")
+  #   }
+  # }
+  # if (nchar(colnames(corr_expr_1)[5]) >20){
+  #   for (col in 1:ncol(corr_expr_1)){
+  #     
+  #     colnames(corr_expr_1)[col] <- paste(input$OmicTable, "_D2", row, sep="")
+  #   }
+  # }
   adjacency_expr <- corr_expr_1
   adjacency_expr
 })
@@ -633,23 +598,25 @@ adjacency_expr12 <- reactive({
 adjacency_expr13 <- reactive({
   corr_expr_1 <- cor(exprDat_43(), exprDatTer_53(), use = "p", method = "spearman")
   corr_expr_1 <- as.data.frame(corr_expr_1)
+  rownames(corr_expr_1) <- paste("DF1_", rownames(corr_expr_1), sep = "")
+  colnames(corr_expr_1) <- paste("DF3_", colnames(corr_expr_1), sep = "")
   #corr_expr_1[which(corr_expr_1 < 0.30 && corr_expr_1 > -0.30),] <- 0
   corr_expr_1[abs(corr_expr_1) < 0.5] <- 0
   #corr_expr_1[(corr_expr_1 < 0.70 && corr_expr_1 > 0.50) || (corr_expr_1 > -0.70 && corr_expr_1 < -0.50)] <- 1
   corr_expr_1[abs(corr_expr_1)>=0.5] <- 1
   #corr_expr_1 <- t(corr_expr_1)
-  if (nchar(rownames(corr_expr_1)[5]) >20){
-    for (row in 1:nrow(corr_expr_1)){
-      
-      rownames(corr_expr_1)[row] <- paste(input$CountingT1, "_D1", row, sep="")
-    }
-  }
-  if (nchar(colnames(corr_expr_1)[5]) >20){
-    for (col in 1:ncol(corr_expr_1)){
-      
-      colnames(corr_expr_1)[col] <- paste(input$OmicTable3, "_D3", row, sep="")
-    }
-  }
+  # if (nchar(rownames(corr_expr_1)[5]) >20){
+  #   for (row in 1:nrow(corr_expr_1)){
+  #     
+  #     rownames(corr_expr_1)[row] <- paste(input$CountingT1, "_D1", row, sep="")
+  #   }
+  # }
+  # if (nchar(colnames(corr_expr_1)[5]) >20){
+  #   for (col in 1:ncol(corr_expr_1)){
+  #     
+  #     colnames(corr_expr_1)[col] <- paste(input$OmicTable3, "_D3", row, sep="")
+  #   }
+  # }
   adjacency_expr <- corr_expr_1
   adjacency_expr
 })
@@ -657,23 +624,25 @@ adjacency_expr13 <- reactive({
 adjacency_expr23 <- reactive({
   corr_expr_1 <- cor(exprDatSec_52(), exprDatTer_52(), use = "p", method = "spearman")
   corr_expr_1 <- as.data.frame(corr_expr_1)
+  rownames(corr_expr_1) <- paste("DF2_", rownames(corr_expr_1), sep = "")
+  colnames(corr_expr_1) <- paste("DF3_", colnames(corr_expr_1), sep = "")
   #corr_expr_1[which(corr_expr_1 < 0.30 && corr_expr_1 > -0.30),] <- 0
   corr_expr_1[abs(corr_expr_1) < 0.5] <- 0
   #corr_expr_1[(corr_expr_1 < 0.70 && corr_expr_1 > 0.50) || (corr_expr_1 > -0.70 && corr_expr_1 < -0.50)] <- 1
   corr_expr_1[abs(corr_expr_1)>=0.5] <- 1
   #corr_expr_1 <- t(corr_expr_1)
-  if (nchar(rownames(corr_expr_1)[5]) >20){
-    for (row in 1:nrow(corr_expr_1)){
-      
-      rownames(corr_expr_1)[row] <- paste(input$OmicTable, "_D2", row, sep="")
-    }
-  }
-  if (nchar(colnames(corr_expr_1)[5]) >20){
-    for (col in 1:ncol(corr_expr_1)){
-      
-      colnames(corr_expr_1)[col] <- paste(input$OmicTable3, "_D3", row, sep="")
-    }
-  }
+  # if (nchar(rownames(corr_expr_1)[5]) >20){
+  #   for (row in 1:nrow(corr_expr_1)){
+  #     
+  #     rownames(corr_expr_1)[row] <- paste(input$OmicTable, "_D2", row, sep="")
+  #   }
+  # }
+  # if (nchar(colnames(corr_expr_1)[5]) >20){
+  #   for (col in 1:ncol(corr_expr_1)){
+  #     
+  #     colnames(corr_expr_1)[col] <- paste(input$OmicTable3, "_D3", row, sep="")
+  #   }
+  # }
   adjacency_expr <- corr_expr_1
   adjacency_expr
 })
@@ -1134,34 +1103,64 @@ output$HEATMAP_MEs13 <- renderIheatmap({
 output$HEATMAP <- renderIheatmap({
   if (is.null(corr_expr()))
     return(NULL)
-        main_heatmap(corr_expr(), name = "Correlation") %>%
-          add_col_clustering() %>%
-          add_row_clustering() %>%
-          add_col_title("Variables of the first datasets in each module") %>% 
-          add_row_title("Variables of the second dataset")
-
+  if (input$addLabels12){
+    hm <- main_heatmap(corr_expr(), name = "Correlation") %>%
+      add_row_labels() %>%
+      add_col_labels() %>%
+      add_col_clustering() %>%
+      add_row_clustering() %>%
+      add_col_title("Variables of the first datasets in each module") %>% 
+      add_row_title("Variables of the second dataset")
+  }else{
+    hm <- main_heatmap(corr_expr(), name = "Correlation") %>%
+      add_col_clustering() %>%
+      add_row_clustering() %>%
+      add_col_title("Variables of the first datasets in each module") %>% 
+      add_row_title("Variables of the second dataset")
+  }
+  hm
   
 })
 
 output$HEATMAP23 <- renderIheatmap({
   if (is.null(corr_expr23()))
     return(NULL)
-        main_heatmap(corr_expr23(), name = "Correlation") %>%
-          add_col_clustering() %>%
-          add_row_clustering() %>%
-          add_col_title("Variables of the first datasets in each module") %>% 
-          add_row_title("Variables of the second dataset")  
-  
+  if (input$addLabels23){
+    hm <- main_heatmap(corr_expr23(), name = "Correlation") %>%
+      add_row_labels() %>%
+      add_col_labels() %>%
+      add_col_clustering() %>%
+      add_row_clustering() %>%
+      add_col_title("Variables of the first datasets in each module") %>% 
+      add_row_title("Variables of the second dataset")
+  }else{
+    hm <- main_heatmap(corr_expr23(), name = "Correlation") %>%
+      add_col_clustering() %>%
+      add_row_clustering() %>%
+      add_col_title("Variables of the first datasets in each module") %>% 
+      add_row_title("Variables of the second dataset")
+  }
+  hm
 })
 
 output$HEATMAP13 <- renderIheatmap({
   if (is.null(corr_expr13()))
     return(NULL)
-        main_heatmap(corr_expr13(), name = "Correlation") %>%
-          add_col_clustering() %>%
-          add_row_clustering() %>%
-          add_col_title("Variables of the first datasets in each module") %>% 
-          add_row_title("Variables of the second dataset") 
+  if (input$addLabels13){
+    hm <- main_heatmap(corr_expr13(), name = "Correlation") %>%
+      add_row_labels() %>%
+      add_col_labels() %>%
+      add_col_clustering() %>%
+      add_row_clustering() %>%
+      add_col_title("Variables of the first datasets in each module") %>% 
+      add_row_title("Variables of the second dataset")
+  }else{
+    hm <- main_heatmap(corr_expr13(), name = "Correlation") %>%
+      add_col_clustering() %>%
+      add_row_clustering() %>%
+      add_col_title("Variables of the first datasets in each module") %>% 
+      add_row_title("Variables of the second dataset")
+  }
 })
 
 output$bipartite_network12 <- renderPlot({
@@ -1216,6 +1215,9 @@ output$Download_Multivariate_Analysis2 <- downloadHandler(
     tmpdir <- tempdir()
     setwd(tempdir())
     myHive <- hive_data()
+    validate(
+      need(nrow(myHive$edges) != 0, "No significant interaction between modules and external trait")
+    )
     myHive$nodes$lab <- as.character(myHive$nodes$lab)
     myHive$nodes$color <- as.character(myHive$nodes$color)
     myHive$edges$color <- as.character(myHive$edges$color)
@@ -1244,6 +1246,11 @@ output$Download_Multivariate_Analysis2 <- downloadHandler(
         fs <- c(fs, paste("hive.svg"))
       }
     }
+    write.csv(myHive$edges, "Hive_edges.csv")
+    fs <- c(fs, "Hive_edges.csv")
+    write.csv(myHive$nodes, "Hive_nodes.csv")
+    fs <- c(fs, "Hive_nodes.csv")
+    
     zip(zipfile=filename, files=fs)
     
     
@@ -1273,7 +1280,10 @@ output$Download_Multivariate_Analysis3 <- downloadHandler(
       save_iheatmap(hm, "heatmap12.png" )
       fs <- c(fs, paste("heatmap12.png"))
     }
-
+    write.csv(corr_MEs_D1D2(), "Corr_D1D2.csv")
+    fs <- c(fs, "Corr_D1D2.csv")
+    write.csv(p_val_MEs_D1D2(), "PValues_D1D2.csv")
+    fs <- c(fs, "PValues_D1D2.csv")
     
     zip(zipfile=filename, files=fs)
     
@@ -1305,7 +1315,10 @@ output$Download_Multivariate_Analysis4 <- downloadHandler(
       save_iheatmap(hm, "heatmap23.png" )
       fs <- c(fs, paste("heatmap23.png"))
     }
-    
+    write.csv(corr_MEs_D2D3(), "Corr_D2D3.csv")
+    fs <- c(fs, "Corr_D2D3.csv")
+    write.csv(p_val_MEs_D2D3(), "PValues_D2D3.csv")
+    fs <- c(fs, "PValues_D2D3.csv")
     
     zip(zipfile=filename, files=fs)
     
@@ -1337,7 +1350,10 @@ output$Download_Multivariate_Analysis5 <- downloadHandler(
       save_iheatmap(hm, "heatmap13.png" )
       fs <- c(fs, paste("heatmap13.png"))
     }
-    
+    write.csv(corr_MEs_D1D3(), "Corr_D1D3.csv")
+    fs <- c(fs, "Corr_D1D3.csv")
+    write.csv(p_val_MEs_D1D3(), "PValues_D1D3.csv")
+    fs <- c(fs, "PValues_D1D3.csv")
     
     zip(zipfile=filename, files=fs)
     
@@ -1354,11 +1370,22 @@ output$Download_Multivariate_Analysis6 <- downloadHandler(
     fs <- c()
     tmpdir <- tempdir()
     setwd(tempdir())
-    hm <- main_heatmap(corr_expr(), name = "Correlation") %>%
-      add_col_clustering() %>%
-      add_row_clustering() %>%
-      add_col_title("Variables of the first datasets in each module") %>% 
-      add_row_title("Variables of the second dataset")
+    if (input$addLabels12){
+      hm <- main_heatmap(corr_expr(), name = "Correlation") %>%
+        add_row_labels() %>%
+        add_col_labels() %>%
+        add_col_clustering() %>%
+        add_row_clustering() %>%
+        add_col_title("Variables of the first datasets in each module") %>% 
+        add_row_title("Variables of the second dataset")
+    }else{
+      hm <- main_heatmap(corr_expr(), name = "Correlation") %>%
+        add_col_clustering() %>%
+        add_row_clustering() %>%
+        add_col_title("Variables of the first datasets in each module") %>% 
+        add_row_title("Variables of the second dataset")
+    }
+
     
     if (input$pdf_or_svg_p5_6 == "pdf"){
       save_iheatmap(hm, paste("heatmap12_",input$selectModule12_p5,"_", input$selectModule21_p5, ".pdf", sep = "") )
@@ -1379,7 +1406,9 @@ output$Download_Multivariate_Analysis6 <- downloadHandler(
       dev.off()
       fs <- c(fs, paste("bipartite_",input$selectModule12_p5,"_", input$selectModule21_p5, ".svg", sep = ""))
     }
-    
+    write.csv(corr_expr(), "Corr_expr_D1D2.csv")
+    fs <- c(fs, "Corr_expr_D1D2.csv")
+
     
     zip(zipfile=filename, files=fs)
     
@@ -1395,11 +1424,21 @@ output$Download_Multivariate_Analysis7 <- downloadHandler(
     fs <- c()
     tmpdir <- tempdir()
     setwd(tempdir())
-    hm <- main_heatmap(corr_expr23(), name = "Correlation") %>%
-      add_col_clustering() %>%
-      add_row_clustering() %>%
-      add_col_title("Variables of the first datasets in each module") %>% 
-      add_row_title("Variables of the second dataset")  
+    if (input$addLabels23){
+      hm <- main_heatmap(corr_expr23(), name = "Correlation") %>%
+        add_row_labels() %>%
+        add_col_labels() %>%
+        add_col_clustering() %>%
+        add_row_clustering() %>%
+        add_col_title("Variables of the first datasets in each module") %>% 
+        add_row_title("Variables of the second dataset")
+    }else{
+      hm <- main_heatmap(corr_expr23(), name = "Correlation") %>%
+        add_col_clustering() %>%
+        add_row_clustering() %>%
+        add_col_title("Variables of the first datasets in each module") %>% 
+        add_row_title("Variables of the second dataset")
+    }
     
     if (input$pdf_or_svg_p5_7 == "pdf"){
       save_iheatmap(hm, paste("heatmap23_",input$selectModule23_p5,"_", input$selectModule32_p5, ".pdf", sep = "") )
@@ -1420,7 +1459,8 @@ output$Download_Multivariate_Analysis7 <- downloadHandler(
       dev.off()
       fs <- c(fs, paste("bipartite_",input$selectModule23_p5,"_", input$selectModule32_p5, ".svg", sep = ""))
     }
-    
+    write.csv(corr_expr23(), "Corr_expr_D2D3.csv")
+    fs <- c(fs, "Corr_expr_D2D3.csv")
     
     zip(zipfile=filename, files=fs)
     
@@ -1437,11 +1477,21 @@ output$Download_Multivariate_Analysis8 <- downloadHandler(
     fs <- c()
     tmpdir <- tempdir()
     setwd(tempdir())
-    hm <- main_heatmap(corr_expr13(), name = "Correlation") %>%
-      add_col_clustering() %>%
-      add_row_clustering() %>%
-      add_col_title("Variables of the first datasets in each module") %>% 
-      add_row_title("Variables of the second dataset")  
+    if (input$addLabels13){
+      hm <- main_heatmap(corr_expr13(), name = "Correlation") %>%
+        add_row_labels() %>%
+        add_col_labels() %>%
+        add_col_clustering() %>%
+        add_row_clustering() %>%
+        add_col_title("Variables of the first datasets in each module") %>% 
+        add_row_title("Variables of the second dataset")
+    }else{
+      hm <- main_heatmap(corr_expr13(), name = "Correlation") %>%
+        add_col_clustering() %>%
+        add_row_clustering() %>%
+        add_col_title("Variables of the first datasets in each module") %>% 
+        add_row_title("Variables of the second dataset")
+    } 
     
     if (input$pdf_or_svg_p5_8 == "pdf"){
       save_iheatmap(hm, paste("heatmap13_",input$selectModule13_p5,"_", input$selectModule31_p5, ".pdf", sep = "") )
@@ -1462,7 +1512,8 @@ output$Download_Multivariate_Analysis8 <- downloadHandler(
       dev.off()
       fs <- c(fs, paste("bipartite_",input$selectModule13_p5,"_", input$selectModule31_p5, ".svg", sep = ""))
     }
-    
+    write.csv(corr_expr(), "Corr_expr_D1D3.csv")
+    fs <- c(fs, "Corr_expr_D1D3.csv")
     
     zip(zipfile=filename, files=fs)
     

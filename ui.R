@@ -1111,6 +1111,7 @@ ui <- tagList(
                                          ),
                                          p("Before the download; be sure to select the variables to plot in the bipartite network and the heatmap (either individual variables or modules)"),
                                          downloadButton("Download_Multivariate_Analysis6", "Download Heatmap and bipartite network"), # End Third Row
+                                         checkboxInput("addLabels12", "Add rownames and colnames in download", value = FALSE),
                                          radioButtons("pdf_or_svg_p5_6",
                                                       "Choose an extension:",
                                                       choices = c("pdf", "svg")),
@@ -1151,6 +1152,7 @@ ui <- tagList(
                                          ),
                                          p("Before the download; be sure to select the variables to plot in the bipartite network and the heatmap (either individual variables or modules)"),
                                          downloadButton("Download_Multivariate_Analysis7", "Download Heatmap and bipartite network"), # End Third Row
+                                         checkboxInput("addLabels23", "Add rownames and colnames in download", value = FALSE),
                                          radioButtons("pdf_or_svg_p5_7",
                                                       "Choose an extension:",
                                                       choices = c("pdf", "svg")),
@@ -1191,6 +1193,7 @@ ui <- tagList(
                                          ),
                                          p("Before the download; be sure to select the variables to plot in the bipartite network and the heatmap (either individual variables or modules)"),
                                          downloadButton("Download_Multivariate_Analysis8", "Download Heatmap and bipartite network"), # End Third Row
+                                         checkboxInput("addLabels13", "Add rownames and colnames in download", value = FALSE),
                                          radioButtons("pdf_or_svg_p5_8",
                                                       "Choose an extension:",
                                                       choices = c("pdf", "svg")),

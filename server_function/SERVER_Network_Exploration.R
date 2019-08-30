@@ -85,12 +85,11 @@ module_Relative_abundanceSec <- reactive({
 })
 
 module_Relative_abundanceTer <- reactive({
-  if (input$OmicTable3 == "OTUs"){
-    validate(
-      #need(input$CountingT == "OTUs", "Only for OTUs counting table (multi-omics)."),
-      need(input$TaxonFile1, "Only for OTUs counting table.(multi-omics)")
-    )
-  }
+
+  validate(
+    need((input$OmicTable3 == "OTUs" && input$TaxonFile1), "This plot can only be realised with OTUs")
+  )
+  
   exprDat <- exprDatTer_WGCNA()
   
   modGenes = (selectedDynamicColor3() == input$selectModuleTer)
@@ -1633,6 +1632,8 @@ output$hivePlot_D3 <- downloadHandler(
 
 #### DataSet 2 
 
+
+
 output$Download_Network_Exploration_dataset_2 <- downloadHandler(
   filename = function(){
     paste("NETWORK_EXPLORATION_dataset2.zip")
@@ -1660,7 +1661,7 @@ output$Download_Network_Exploration_dataset_2 <- downloadHandler(
       
       dev.off()
       fs <- c(fs, paste("Module_", input$selectModuleSec ,"_Corr_Vs_Membership.pdf", sep=""))
-      if (input$TaxonFile1){
+      if (input$TaxonFile1 && input$OmicTable == "OTUs"){
         pdf(paste("Module_", input$selectModuleSec ,"_Relative_Abundance.pdf", sep=""), width = input$widthPDF_D2, height = input$heightPDF_D2)
         
         print(ggplot(module_Relative_abundanceSec(), aes_string(x = "variable", y = "value", fill = input$selectTaxo2Sec)) +
@@ -1693,6 +1694,7 @@ output$Download_Network_Exploration_dataset_2 <- downloadHandler(
         svg(paste("Contribution_MEs_", substr(colnames(selectedMEs2())[i], 3, 40), ".svg", sep = ""), width = input$widthPDF_D2, height = input$heightPDF_D2)
         print(barplot(selectedMEs2()[,i], col= substr(colnames(selectedMEs2())[i], 3, 40), main="", cex.main=2,
                       ylab="eigengene expression", cex.names = 0.7, names.arg = rownames(sampleAnnot_sec()), las = 2))
+        dev.off()
         fs <- c(fs, paste("Contribution_MEs_", substr(colnames(selectedMEs2())[i], 3, 40), ".svg", sep = ""))
       }
       svg(paste("Module_", input$selectModuleSec ,"_Corr_Vs_Membership.svg", sep=""), width = input$widthPDF_D2, height = input$heightPDF_D2)
@@ -1705,7 +1707,7 @@ output$Download_Network_Exploration_dataset_2 <- downloadHandler(
       
       dev.off()
       fs <- c(fs, paste("Module_", input$selectModuleSec ,"_Corr_Vs_Membership.svg", sep=""))
-      if (input$TaxonFile1){
+      if (input$TaxonFile1 && input$OmicTable == "OTUs"){
         svg(paste("Module_", input$selectModuleSec ,"_Relative_Abundance.svg", sep=""), width = input$widthPDF_D2, height = input$heightPDF_D2)
         
         print(ggplot(module_Relative_abundanceSec(), aes_string(x = "variable", y = "value", fill = input$selectTaxo2Sec)) +
@@ -1768,7 +1770,7 @@ output$Download_Network_Exploration_dataset_3 <- downloadHandler(
       
       dev.off()
       fs <- c(fs, paste("Module_", input$selectModuleTer ,"_Corr_Vs_Membership.pdf", sep=""))
-      if (input$TaxonFile1){
+      if (input$TaxonFile1 && input$OmicTable3 == "OTUs"){
         pdf(paste("Module_", input$selectModuleTer ,"_Relative_Abundance.pdf", sep=""), width = input$widthPDF_D3, height = input$heightPDF_D3)
         
         print(ggplot(module_Relative_abundanceTer(), aes_string(x = "variable", y = "value", fill = input$selectTaxo2Ter)) +
@@ -1813,7 +1815,7 @@ output$Download_Network_Exploration_dataset_3 <- downloadHandler(
       
       dev.off()
       fs <- c(fs, paste("Module_", input$selectModuleTer ,"_Corr_Vs_Membership.svg", sep=""))
-      if (input$TaxonFile1){
+      if (input$TaxonFile1 && input$OmicTable3 == "OTUs"){
         svg(paste("Module_", input$selectModuleTer ,"_Relative_Abundance.svg", sep=""), width = input$widthPDF_D3, height = input$heightPDF_D3)
         
         print(ggplot(module_Relative_abundanceTer(), aes_string(x = "variable", y = "value", fill = input$selectTaxo2Ter)) +

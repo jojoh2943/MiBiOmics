@@ -4,6 +4,11 @@
 
 '%!in%' <- function(x,y)!('%in%'(x,y))
 
+rename_axis_drivers_simplified <- function(axis_drivers){
+  right_names <- substr(rownames(axis_drivers),3, nchar(rownames(axis_drivers)))
+  return(right_names)
+}
+
 rename_axis_drivers <- function(axis_drivers, colnames_df1, colnames_df2, colnames_df3, n_df =3){
   right_names <- c()
   if (n_df == 3){
@@ -165,26 +170,27 @@ vector_geom_curve <- function(edge_df, df_ggplot){
 
 #### HIVE FUNCTIONS ####
 
-hive_myLayers <- function(l_WGCNA_D1, l_WGCNA_D2, l_WGCNA_D3, myCorrs, myAnnots, correlation= "spearman", trait, exportPDF = FALSE, exportSVG = FALSE, sizePlot = 10, nameFile = "hive_D1_D2_D3"){
+hive_myLayers <- function(l_WGCNA_D1, l_WGCNA_D2, l_WGCNA_D3, myCorrs, myAnnots, correlation= "spearman", trait, exportPDF = FALSE, exportSVG = FALSE, sizePlot = 10, nameFile = "hive_D1_D2_D3", cureCorr = FALSE, exportCSV = FALSE){
   require(leaflet)
   
   annot_D1 <- myAnnots[[1]]
   annot_D2 <- myAnnots[[2]]
   annot_D3 <- myAnnots[[3]]
   WGCNA_list <- list()
-  WGCNA_list[[1]] <- l_WGCNA_D1 
+  WGCNA_list[[1]] <- l_WGCNA_D1
   WGCNA_list[[2]] <- l_WGCNA_D2
   WGCNA_list[[3]] <- l_WGCNA_D3
   pal <- colorNumeric(palette = "RdBu", 1:-1)
   
   
   # Create nodes dataframe:
-  id <- c(seq(from = 1, to = (ncol(l_WGCNA_D1[[5]])+ ncol(l_WGCNA_D2[[5]]) + ncol(l_WGCNA_D3[[5]]) +3 )))
-  label <- c( as.vector(paste(colnames(l_WGCNA_D1[[5]]), "DF1", sep = "_")), as.vector(paste( colnames(l_WGCNA_D2[[5]]), "DF2", sep = "_")), as.vector(paste( colnames(l_WGCNA_D3[[5]]), "DF3", sep = "_")), "extreme_DF1", "extreme_DF2", "extreme_DF3" )
-  color <- c( as.vector(substr(colnames(l_WGCNA_D1[[5]]), 3, 30)), as.vector(substr( colnames(l_WGCNA_D2[[5]]), 3, 30)), as.vector(substr(colnames(l_WGCNA_D3[[5]]), 3, 30)), "white", "white", "white" )
-  axis <- c( as.vector(rep(1, ncol(l_WGCNA_D1[[5]]))), as.vector(rep(2, ncol(l_WGCNA_D2[[5]]))), as.vector(rep(3, ncol(l_WGCNA_D3[[5]]))), 1, 2, 3 )
-  size <- c( as.vector(rep(1, sum(ncol(l_WGCNA_D1[[5]]), ncol(l_WGCNA_D2[[5]]), ncol(l_WGCNA_D3[[5]])))), 0, 0, 0)
+  id <- c(seq(from = 1, to = (ncol(l_WGCNA_D1[[5]])+ ncol(l_WGCNA_D2[[5]]) + ncol(l_WGCNA_D3[[5]]) +6 )))
+  label <- c("min_DF1", "min_DF2", "min_DF3", as.vector(paste(colnames(l_WGCNA_D1[[5]]), "DF1", sep = "_")), as.vector(paste( colnames(l_WGCNA_D2[[5]]), "DF2", sep = "_")), as.vector(paste( colnames(l_WGCNA_D3[[5]]), "DF3", sep = "_")), "extreme_DF1", "extreme_DF2", "extreme_DF3" )
+  color <- c("white", "white", "white", as.vector(substr(colnames(l_WGCNA_D1[[5]]), 3, 30)), as.vector(substr( colnames(l_WGCNA_D2[[5]]), 3, 30)), as.vector(substr(colnames(l_WGCNA_D3[[5]]), 3, 30)), "white", "white", "white" )
+  axis <- c(1, 2, 3, as.vector(rep(1, ncol(l_WGCNA_D1[[5]]))), as.vector(rep(2, ncol(l_WGCNA_D2[[5]]))), as.vector(rep(3, ncol(l_WGCNA_D3[[5]]))), 1, 2, 3 )
+  size <- c(0, 0, 0, as.vector(rep(1, sum(ncol(l_WGCNA_D1[[5]]), ncol(l_WGCNA_D2[[5]]), ncol(l_WGCNA_D3[[5]])))), 0, 0, 0)
   radius <- c()
+  v_pv <- c()
   for (i in 1:3){
     annot <- myAnnots[[i]]
     myWGCNA <- WGCNA_list[[i]]
@@ -196,14 +202,17 @@ hive_myLayers <- function(l_WGCNA_D1, l_WGCNA_D2, l_WGCNA_D3, myCorrs, myAnnots,
       annot2[,trait] <- as.numeric(annot2[,trait])
       moduleTraitCor = cor(myWGCNA[[5]], annot2[,trait], use = "p", method = correlation)
     }
+    pv <- corPvalueStudent(moduleTraitCor, nrow(annot))
+    
     radius <- c(radius, abs(moduleTraitCor)*100)
+    v_pv <- c(v_pv, pv)
   }
-  
-  radius <- c(radius, 100, 100, 100)
+  v_pv <- c(0, 0, 0 ,v_pv, 0, 0, 0)
+  df_size <- data.frame("size" = size, "pv" = v_pv)
+  df_size[df_size$pv > 0.05,] <- 0
+  radius <- c(0, 0, 0, radius, 100, 100, 100)
+  nodes <- data.frame(id = id, lab= as.character(label), axis = as.integer(axis), radius= radius, size= df_size$size, color= as.character(color))
 
-  nodes <- data.frame(id = id, lab= as.character(label), axis = as.integer(axis), radius= radius, size= size, color= as.character(color))
-  
-  
   # Do we set the size of the node to zero if the p-value is not significative ?
   
   # create edge dataframe:
@@ -216,8 +225,6 @@ hive_myLayers <- function(l_WGCNA_D1, l_WGCNA_D2, l_WGCNA_D3, myCorrs, myAnnots,
     for (i in 1:nrow(myCorr[[2]])){
       for (j in 1:ncol(myCorr[[2]])){
         if (myCorr[[2]][i, j] < 0.05 && abs(myCorr[[1]][i, j]) > 0.4){
-          print(rownames(myCorr[[2]])[i])
-          print(colnames(myCorr[[2]])[j])
           myNode1 <-nodes[which(nodes$lab==rownames(myCorr[[2]])[i]),]
           myNode2 <-nodes[which(nodes$lab==colnames(myCorr[[2]])[j]),]
           id1 <- c(id1, myNode1$id)
@@ -228,16 +235,29 @@ hive_myLayers <- function(l_WGCNA_D1, l_WGCNA_D2, l_WGCNA_D3, myCorrs, myAnnots,
       }
     }
   }
-
   edges <- data.frame(id1 = id1, id2 = id2, weight = weight, color = as.character(color))
+  id_to_keep <- nodes[which(nodes$size != 0),]
+  id_to_keep <- id_to_keep$id
+  id_to_keep <- c(1, 2, 3, id_to_keep, nodes$id[(length(nodes$id)-2):length(nodes$id)])
+  nodes <- nodes[which(nodes$id %in% id_to_keep),]
+  edges <- edges[which(edges$id1 %in% id_to_keep),]
+  edges <- edges[which(edges$id2 %in% id_to_keep),]
+  
+  if (cureCorr){
+    nodes <- nodes[which(nodes$radius > 40),]
+    edges <- edges[which(edges$id1 %in% nodes$id),]
+    edges <- edges[which(edges$id2 %in% nodes$id),]
+  }
   type <- "2D"
   desc <- "Hive Plot 3 Layers"
   axis.cols <- c("#636363", "#636363", "#636363")
+  if (exportCSV){
+    write.csv(nodes, file = paste("nodes_", trait, "_", nameFile, ".csv", sep = ""))
+    write.csv(edges, file = paste("edges_", trait, "_", nameFile, ".csv", sep = ""))
+
+  }
   myHive <- list(nodes = nodes, edges = edges, type = type, desc = desc, axis.cols= axis.cols)
   return(myHive)
-  
-  
-  
 }
 
 
@@ -261,6 +281,7 @@ hive_my2Layers <- function(l_WGCNA_D1, l_WGCNA_D2, myCorr, myAnnots, correlation
   axis <- c( as.vector(rep(1, ncol(l_WGCNA_D1[[5]]))), as.vector(rep(2, ncol(l_WGCNA_D2[[5]]))), 1, 2 )
   size <- c( as.vector(rep(1, sum(ncol(l_WGCNA_D1[[5]]), ncol(l_WGCNA_D2[[5]])))), 0, 0)
   radius <- c()
+  v_pv <- c()
   for (i in 1:2){
     annot <- myAnnots[[i]]
     myWGCNA <- WGCNA_list[[i]]
@@ -272,12 +293,16 @@ hive_my2Layers <- function(l_WGCNA_D1, l_WGCNA_D2, myCorr, myAnnots, correlation
       annot2[,trait] <- as.numeric(annot2[,trait])
       moduleTraitCor = cor(myWGCNA[[5]], annot2[,trait], use = "p", method = correlation)
     }
+    pv <- corPvalueStudent(moduleTraitCor, nrow(annot))
+    
     radius <- c(radius, abs(moduleTraitCor)*100)
+    v_pv <- c(v_pv, pv)
   }
-  radius <- c(radius, 100, 100)
-  nodes <- data.frame(id = id, lab= as.character(label), axis = as.integer(axis), radius= radius, size= size, color= as.character(color))
-  
-  
+  v_pv <- c(0, 0,v_pv, 0, 0)
+  df_size <- data.frame("size" = size, "pv" = v_pv)
+  df_size[df_size$pv > 0.05,] <- 0
+  radius <- c(0, 0, radius, 100, 100)
+  nodes <- data.frame(id = id, lab= as.character(label), axis = as.integer(axis), radius= radius, size= df_size$size, color= as.character(color))
   # Do we set the size of the node to zero if the p-value is not significative ?
   
   # create edge dataframe:
@@ -299,6 +324,25 @@ hive_my2Layers <- function(l_WGCNA_D1, l_WGCNA_D2, myCorr, myAnnots, correlation
     }
   }
   edges <- data.frame(id1 = id1, id2 = id2, weight = weight, color = as.character(color))
+  id_to_keep <- nodes[which(nodes$size != 0),]
+  id_to_keep <- id_to_keep$id
+  id_to_keep <- c(1, 2, id_to_keep, nodes$id[(length(nodes$id)-1):length(nodes$id)])
+  nodes <- nodes[which(nodes$id %in% id_to_keep),]
+  edges <- edges[which(edges$id1 %in% id_to_keep),]
+  edges <- edges[which(edges$id2 %in% id_to_keep),]
+
+  
+  if (cureCorr){
+    nodes <- nodes[which(nodes$radius > 40),]
+    edges <- edges[which(edges$id1 %in% nodes$id),]
+    edges <- edges[which(edges$id2 %in% nodes$id),]
+  }
+
+  if (exportCSV){
+    write.csv(nodes, file = paste("nodes_", trait, "_", nameFile, ".csv", sep = ""))
+    write.csv(edges, file = paste("edges_", trait, "_", nameFile, ".csv", sep = ""))
+    
+  }
   type <- "2D"
   desc <- "Hive Plot 2 Layers"
   axis.cols <- c("#636363", "#636363")

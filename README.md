@@ -7,14 +7,14 @@ MiBiOmics will soon be available at https://mibiomics.univ-nantes.fr/ but can al
 
 ```r
 library(shiny)
-runGitHub("MiBiOmics", "jojoh2943")
+runGitHub("MiBiOmics", "jojoh2943", launch.browser = TRUE)
 ```
 All the necessary packages will be installed automatically for the usage of MiBiOmics. If you don't have the right R and shiny version you can download the conda environment from the file *MiBiOmics.yml* and run Rstudio from this environment. If your using the conda environment, you will have to run the following command in conda:
 
 ```bash
 conda env create -f MiBiOmics.yml
 conda activate MiBiOmics
-R -e 'shiny::runGitHub("MiBiOmics", "jojoh2943")'
+R -e 'shiny::runGitHub("MiBiOmics", "jojoh2943", launch.browser = TRUE)'
 ```
 
 The first launch will take some time (about one hour) due to the installation of all the necessary packages.
@@ -31,7 +31,7 @@ In the first section you can upload one, two or even three omics tables:
 | Sample 3 |   0    |   3   |   0   |
 | Sample 4 |   19   |   0   |   6   |
 
-Omics table may contain Gene names, OTUs/ASVs or even metabolites in columns. Rownames must be unique. 
+Omics table may contain Gene names, OTUs/ASVs or even metabolites in columns. Rownames must be unique.
 An annotation table describing your samples is also necessary:
 
 
@@ -101,3 +101,9 @@ Procrustes analysis is realized in MiBiOmics thanks to the [vegan](http://cc.oul
 The first heatmap represents the correlation between each modules of both networks. The more two modules are correlated the more they might be associated to each other. This heatmap needs to be used as a guide to select the module of both network (and both omics layers) to each other. Only one module of each network can be selected to pursue the analysis. These correlations are also represented with hive plots.
 
 Once a module from each network (each omics dataset) is selected, the pairwise correlation between each variables of each modules is performed and represented in two different manners: a bi-partite networks and a correlation heatmap. In the bi-partite networks, red nodes represents the variables of the first dataset and blue nodes the variables of the second datasets. A line between two nodes indicates an association. The following heatmap represents the correlation values between the variables of the first selected module (first omics layer) and the variables of the second selected module (second omic layer)
+
+# Common sources of error in MiBiOmics:
+Most error messages appear during the loading of the data or in the multi-omics section. They are mostly due to file format. To prevent these common error messages, here are some suggestions:
+* Make sure your column names all begin with a character (in r, column names beginning with a number are modified)
+* Upload an annotation file with at least 2 variables containing non-unique values.
+* Rownames must be unique identifiers.

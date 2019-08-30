@@ -591,7 +591,7 @@ output$Download_Page2_dataset1_rel_ab <- downloadHandler(
     fs <- c()
     tmpdir <- tempdir()
     setwd(tempdir())
-    
+
     if (input$pdf_or_svg_page2_dataset1_rel_ab == "pdf"){
       if (input$TaxonFile || input$TaxonFile1 || input$LoadExample == "Yes" || input$LoadExample2 == "Yes"){
         for (i in 1:ncol(taxTable_present())){
@@ -656,8 +656,7 @@ output$Download_Page2_dataset1_dendrogramme <- downloadHandler(
               ylim(-0.15, NA))
       dev.off()
     }
-  },
-  contentType = paste("application/", input$pdf_or_svg_page2_dataset1_dendrogramme, sep= "")
+  }
 )
 
 output$Download_Page2_dataset1_ordination <- downloadHandler(
@@ -680,8 +679,7 @@ output$Download_Page2_dataset1_ordination <- downloadHandler(
                    y = sprintf("Axis 2 [%s%% Variance]", 100 * round(dudi_PCoA()$eig[2] / sum(dudi_PCoA()$eig), 2))))
       dev.off()
     }
-  },
-  contentType = paste("application/", input$pdf_or_svg_page2_dataset1_ordination, sep= "")
+  }
 )
 
 output$Download_Page2_dataset2_rel_ab <- downloadHandler(
@@ -753,8 +751,7 @@ output$Download_Page2_dataset2_dendrogramme <- downloadHandler(
               ylim(-0.15, NA))
       dev.off()
     }
-  },
-  contentType = paste("application/", input$pdf_or_svg_page2_dataset2_dendrogramme, sep= "")
+  }
 )
 
 output$Download_Page2_dataset2_ordination <- downloadHandler(
@@ -779,8 +776,7 @@ output$Download_Page2_dataset2_ordination <- downloadHandler(
                    y = sprintf("Axis 2 [%s%% Variance]", 100 * round(dudi_PCoA_sec()$eig[2] / sum(dudi_PCoA_sec()$eig), 2))))
       dev.off()
     }
-  },
-  contentType = paste("application/", input$pdf_or_svg_page2_dataset2_ordination, sep= "")
+  }
 )
 
 
@@ -853,8 +849,7 @@ output$Download_Page2_dataset3_dendrogramme <- downloadHandler(
               ylim(-0.15, NA))
       dev.off()
     }
-  },
-  contentType = paste("application/", input$pdf_or_svg_page2_dataset3_dendrogramme, sep= "")
+  }
 )
 
 output$Download_Page2_dataset3_ordination <- downloadHandler(
@@ -879,6 +874,5 @@ output$Download_Page2_dataset3_ordination <- downloadHandler(
                    y = sprintf("Axis 2 [%s%% Variance]", 100 * round(dudi_PCoA_ter()$eig[2] / sum(dudi_PCoA_ter()$eig), 2))))
       dev.off()
     }
-  },
-  contentType = paste("application/", input$pdf_or_svg_page2_dataset3_ordination, sep= "")
+  }
 )
