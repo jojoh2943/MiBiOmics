@@ -69,7 +69,7 @@ info_dendrogramme_ter <- reactive({
 
 exprDat_Relative_abundance <- reactive({
   validate(
-    need(input$LoadExample == "Yes" || input$LoadExample2 == "Yes" || (input$TaxonFile == TRUE|| input$TaxonFile1 == TRUE), "This plot can only be realised with OTUs")
+    need(input$LoadExample == "Yes" || (input$TaxonFile == TRUE|| input$TaxonFile1 == TRUE), "This plot can only be realised with OTUs")
   )
   
   exprDat <- exprDat_2()
@@ -100,7 +100,7 @@ exprDat_Relative_abundance <- reactive({
 exprDat_Relative_abundance_sec <- reactive({
   
   validate(
-    need((input$OmicTable == "OTUs" && input$LoadExample2 == "No"), "This plot can only be realised with OTUs")
+    need((input$OmicTable == "OTUs"), "This plot can only be realised with OTUs")
   )
   exprDat <- exprDatSec_3()
 
@@ -593,7 +593,7 @@ output$Download_Page2_dataset1_rel_ab <- downloadHandler(
     setwd(tempdir())
 
     if (input$pdf_or_svg_page2_dataset1_rel_ab == "pdf"){
-      if (input$TaxonFile || input$TaxonFile1 || input$LoadExample == "Yes" || input$LoadExample2 == "Yes"){
+      if (input$TaxonFile || input$TaxonFile1 || input$LoadExample == "Yes"){
         for (i in 1:ncol(taxTable_present())){
           pdf(paste("rel_abundance_", colnames(taxTable_present())[i],".pdf", sep= ""), width = 10, height = 10)
           print(ggplot(exprDat_Relative_abundance(), aes_string(x = "variable", y = "value", fill = colnames(taxTable_present())[i])) +
@@ -606,7 +606,7 @@ output$Download_Page2_dataset1_rel_ab <- downloadHandler(
         }
       }
     }else{
-      if (input$TaxonFile1 || input$TaxonFile || input$LoadExample == "Yes" || input$LoadExample2 == "Yes"){
+      if (input$TaxonFile1 || input$TaxonFile || input$LoadExample == "Yes"){
         for (i in 1:ncol(taxTable_present())){
           svg(paste("rel_abundance_", colnames(taxTable_present())[i],".svg", sep= ""), width = 10, height = 10)
           print(ggplot(exprDat_Relative_abundance(), aes_string(x = "variable", y = "value", fill = colnames(taxTable_present())[i])) +
@@ -692,7 +692,7 @@ output$Download_Page2_dataset2_rel_ab <- downloadHandler(
     setwd(tempdir())
     
     if (input$pdf_or_svg_page2_dataset2_rel_ab == "pdf"){
-      if (input$TaxonFile1 || input$LoadExample == "Yes" || input$LoadExample2 == "Yes"){
+      if (input$TaxonFile1 || input$LoadExample == "Yes"){
         for (i in 1:ncol(taxTable_present())){
           pdf(paste("rel_abundance_", colnames(taxTable_present())[i],".pdf", sep= ""), width = 10, height = 10)
           print(ggplot(exprDat_Relative_abundance_sec(), aes_string(x = "variable", y = "value", fill = colnames(taxTable_present())[i])) +
@@ -705,7 +705,7 @@ output$Download_Page2_dataset2_rel_ab <- downloadHandler(
         }
       }
     }else{
-      if (input$TaxonFile1 || input$LoadExample == "Yes" || input$LoadExample2 == "Yes"){
+      if (input$TaxonFile1 || input$LoadExample == "Yes"){
         for (i in 1:ncol(taxTable_present())){
           svg(paste("rel_abundance_", colnames(taxTable_present())[i],".svg", sep= ""), width = 10, height = 10)
           print(ggplot(exprDat_Relative_abundance_sec(), aes_string(x = "variable", y = "value", fill = colnames(taxTable_present())[i])) +
@@ -790,7 +790,7 @@ output$Download_Page2_dataset3_rel_ab <- downloadHandler(
     setwd(tempdir())
     
     if (input$pdf_or_svg_page2_dataset3_rel_ab == "pdf"){
-      if (input$TaxonFile1 || input$LoadExample == "Yes" || input$LoadExample2 == "Yes"){
+      if (input$TaxonFile1 || input$LoadExample == "Yes"){
         for (i in 1:ncol(taxTable_present())){
           pdf(paste("rel_abundance_", colnames(taxTable_present())[i],".pdf", sep= ""), width = 10, height = 10)
           print(ggplot(exprDat_Relative_abundance_sec(), aes_string(x = "variable", y = "value", fill = colnames(taxTable_present())[i])) +
@@ -803,7 +803,7 @@ output$Download_Page2_dataset3_rel_ab <- downloadHandler(
         }
       }
     }else{
-      if (input$TaxonFile1 || input$LoadExample == "Yes" || input$LoadExample2 == "Yes"){
+      if (input$TaxonFile1 || input$LoadExample == "Yes"){
         for (i in 1:ncol(taxTable_present())){
           svg(paste("rel_abundance_", colnames(taxTable_present())[i],".svg", sep= ""), width = 10, height = 10)
           print(ggplot(exprDat_Relative_abundance_ter(), aes_string(x = "variable", y = "value", fill = colnames(taxTable_present())[i])) +

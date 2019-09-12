@@ -10,38 +10,51 @@
 # Data Upload
 
 sampleAnnot <- reactive({
-  
-  validate(
-    need(input$file2$datapath != "", "Please select a data set")
-  )
-  if (input$rownames2 == FALSE){
-    essai <- try(read.csv(input$file2$datapath,
-                          header = input$header2,
-                          sep = input$sep2,
-                          dec = input$dec2))
+  if (input$LoadExample == "Yes"){
+    sampleMetadata<-"data/metadataLIGHT.csv" #sample sheet path
+    sampleAnnot <- read.csv(sampleMetadata, sep = ",", header = TRUE, row.names = 1)
+    if (input$TypeAnalysis == "simple"){
+      updateRadioButtons(session, "CountingT", selected = "OTUs")
+      updateCheckboxInput(session, "TaxonFile", value = TRUE)
+    }else{
+      updateRadioButtons(session, "CountingT1", selected = "OTUs")
+      updateRadioButtons(session, "OmicTable", selected = "Genes")
+      updateCheckboxInput(session, "TaxonFile1", value = TRUE)
+    }
+  }else{
     validate(
-      need(substr(essai,1,5) != "Error", "Your annotation table cannot be uploaded. Please try to select a different separator or decimal. If you are still getting this error, verify the format of your file (you need a .csv file).")
+      need(input$file2$datapath != "", "Please select a data set")
     )
-    sampleAnnot <- read.csv(input$file2$datapath,
+    if (input$rownames2 == FALSE){
+      essai <- try(read.csv(input$file2$datapath,
                             header = input$header2,
                             sep = input$sep2,
-                            dec = input$dec2)
-    
-  }else{
-    essai <- try(read.csv(input$file2$datapath,
-                          header = input$header2,
-                          row.names = 1,
-                          sep = input$sep2,
-                          dec = input$dec2))
-    validate(
-      need(substr(essai,1,5) != "Error", "Your annotation table cannot be uploaded. Please try to select a different separator or decimal. If you are still getting this error, verify the format of your file (you need a .csv file).")
-    )
-    sampleAnnot <- read.csv(input$file2$datapath,
+                            dec = input$dec2))
+      validate(
+        need(substr(essai,1,5) != "Error", "Your annotation table cannot be uploaded. Please try to select a different separator or decimal. If you are still getting this error, verify the format of your file (you need a .csv file).")
+      )
+      sampleAnnot <- read.csv(input$file2$datapath,
+                              header = input$header2,
+                              sep = input$sep2,
+                              dec = input$dec2)
+      
+    }else{
+      essai <- try(read.csv(input$file2$datapath,
                             header = input$header2,
                             row.names = 1,
                             sep = input$sep2,
-                            dec = input$dec2)
+                            dec = input$dec2))
+      validate(
+        need(substr(essai,1,5) != "Error", "Your annotation table cannot be uploaded. Please try to select a different separator or decimal. If you are still getting this error, verify the format of your file (you need a .csv file).")
+      )
+      sampleAnnot <- read.csv(input$file2$datapath,
+                              header = input$header2,
+                              row.names = 1,
+                              sep = input$sep2,
+                              dec = input$dec2)
+    }
   }
+  
 
   
  
@@ -66,34 +79,25 @@ sampleAnnot <- reactive({
   sampleAnnot
 })
 
-sampleAnnot_Default <- reactive({
-  validate(
-    need((input$LoadExample == "Yes" | input$LoadExample2 =="Yes"), "")
-  )
-  sampleMetadata<-"data/DS_Food_intake.csv" #sample sheet path
-  sampleAnnot <- read.csv(sampleMetadata, sep = ";", header = TRUE, row.names = 1, dec = ",")
-  # sampleAnnot <- sampleAnnot[which(rownames(sampleAnnot) %in% rownames(exprDat_Default())),]
-  # sampleAnnot <- sampleAnnot[which(rownames(sampleAnnot) %in% rownames(exprDatSec_Default())),]
-  #sampleAnnot <- sampleAnnot[which(rownames(sampleAnnot) %!in% input$selectSample),]
-
-  sampleAnnot
-})
+# sampleAnnot_Default <- reactive({
+#   validate(
+#     need((input$LoadExample == "Yes" | input$LoadExample2 =="Yes"), "")
+#   )
+#   sampleMetadata<-"data/DS_Food_intake.csv" #sample sheet path
+#   sampleAnnot <- read.csv(sampleMetadata, sep = ";", header = TRUE, row.names = 1, dec = ",")
+#   # sampleAnnot <- sampleAnnot[which(rownames(sampleAnnot) %in% rownames(exprDat_Default())),]
+#   # sampleAnnot <- sampleAnnot[which(rownames(sampleAnnot) %in% rownames(exprDatSec_Default())),]
+#   #sampleAnnot <- sampleAnnot[which(rownames(sampleAnnot) %!in% input$selectSample),]
+# 
+#   sampleAnnot
+# })
 
 sampleName <- reactive({
-  if (input$LoadExample == "Yes" | input$LoadExample2 == "Yes" ){
-    sampleName <- rownames(sampleAnnot_Default())
-  }else{
-    sampleName <- rownames(sampleAnnot())
-  }
-  sampleName
+  sampleName <- rownames(sampleAnnot())
 })
 
 sampleAnnot1 <- reactive({
-  if (input$LoadExample == "Yes" | input$LoadExample2 == "Yes" ){
-    sampleAnnot <- sampleAnnot_Default()[which(rownames(sampleAnnot_Default()) %!in% input$selectSample),]
-  }else{
-    sampleAnnot <- sampleAnnot()[which(rownames(sampleAnnot()) %!in% input$selectSample),]
-  }
+  sampleAnnot <- sampleAnnot()[which(rownames(sampleAnnot()) %!in% input$selectSample),]
 })
 
 
@@ -101,44 +105,49 @@ sampleAnnot1 <- reactive({
 # Data Upload
 
 exprDat <- reactive({
-  validate(
-    need(input$file1$datapath != "" && (input$LoadExample == "No" | input$LoadExample2 == "No"), "Please select a data set")
-  )
-  
-  ### IMPORT CSV FORMAT
-  if (input$rownames == FALSE){
-    essai <- try(read.csv(input$file1$datapath,
+  if (input$LoadExample == "Yes"){
+    expressionData<-"data/otuTable.csv" #expression file path
+    exprDat <- read.csv(expressionData, sep = ",", header = TRUE, row.names = 1)
+  }else{
+    validate(
+      need(input$file1$datapath != "" && (input$LoadExample == "No"), "Please select a data set")
+    )
+    
+    ### IMPORT CSV FORMAT
+    if (input$rownames == FALSE){
+      essai <- try(read.csv(input$file1$datapath,
+                            header = input$header,
+                            sep = input$sep,
+                            dec = input$dec))
+      validate(
+        need(substr(essai,1,5) != "Error", "Your counting table cannot be uploaded. Please try to select a different separator or decimal. If you are still getting this error, verify the format of your file (you need a .csv file).")
+      )
+      exprDat <- read.csv(input$file1$datapath,
                           header = input$header,
                           sep = input$sep,
-                          dec = input$dec))
-    validate(
-      need(substr(essai,1,5) != "Error", "Your counting table cannot be uploaded. Please try to select a different separator or decimal. If you are still getting this error, verify the format of your file (you need a .csv file).")
-    )
-    exprDat <- read.csv(input$file1$datapath,
-                        header = input$header,
-                        sep = input$sep,
-                        dec = input$dec,
-                        check.names = FALSE)
-  }else{
-    essai <- try(read.csv(input$file1$datapath,
+                          dec = input$dec,
+                          check.names = FALSE)
+    }else{
+      essai <- try(read.csv(input$file1$datapath,
+                            header = input$header,
+                            row.names = 1,
+                            sep = input$sep,
+                            dec = input$dec))
+      validate(
+        need(substr(essai,1,5) != "Error", "Your counting table cannot be uploaded. Please try to select a different separator or decimal. If you are still getting this error, verify the format of your file (you need a .csv file).")
+      )
+      exprDat <- read.csv(input$file1$datapath,
                           header = input$header,
                           row.names = 1,
                           sep = input$sep,
-                          dec = input$dec))
-    validate(
-      need(substr(essai,1,5) != "Error", "Your counting table cannot be uploaded. Please try to select a different separator or decimal. If you are still getting this error, verify the format of your file (you need a .csv file).")
-    )
-    exprDat <- read.csv(input$file1$datapath,
-                        header = input$header,
-                        row.names = 1,
-                        sep = input$sep,
-                        dec = input$dec,
-                        check.names = FALSE)
+                          dec = input$dec,
+                          check.names = FALSE)
+    }
+    # Look if rows are OTUs and columns are samples.
   }
-  # Look if rows are OTUs and columns are samples.
 
   if (length(exprDat[which(colnames(exprDat) %in% rownames(sampleAnnot()))]) > 1){
-
+    
     exprDat <- as.data.frame(t(exprDat))
   }
   exprDat[is.na(exprDat)] <- 0
@@ -149,10 +158,6 @@ exprDat <- reactive({
     showNotification("The counting table does not contains numeric values. The values were transformed into numbers but your analysis may not worked as expected. Please check the format of your counting table.", type = "warning", duration = NULL)
   }
   rownames(exprDat) <- sampleID
-
-  
-
-
   
   ### SELECTED FILTRATION
   if (input$Filtration == "Yes"){
@@ -248,102 +253,102 @@ exprDat <- reactive({
   exprDat
 })
 
-exprDat_Default <- reactive({
-  validate(
-    need((input$LoadExample == 'Yes' | input$LoadExample2 =="Yes"), "")
-  )
-  expressionData<-"data/otu_table_silva.csv" #expression file path
-  exprDat <- read.csv(expressionData, sep = ",", header = TRUE, row.names = 1)
-  exprDat[is.na(exprDat)] <- 0
-  ### SELECTED FILTRATION
-  if (input$Filtration == "Yes"){
-    if (input$TypeFiltration == "prevalence"){
-      if(input$prevalence != 0){
-        Prevalence_threshold = round((input$prevalence/100) * nrow(exprDat))
-        names_OTU <- c()
-        for (col in 1:ncol(exprDat)){
-          nb_zero = 0
-          for (row in 1:nrow(exprDat)){
-            if (exprDat[row, col] == 0){
-              nb_zero = nb_zero + 1
-            }
-          }
-          
-          if (nb_zero > (nrow(exprDat) - Prevalence_threshold)){
-            names_OTU <- c(names_OTU, colnames(exprDat)[col])
-          }
-        }
-        exprDat <- exprDat[,which(colnames(exprDat) %!in% names_OTU)]
-      }
-    }else{
-      min_count = input$count
-      exprDat <- exprDat[, which(colSums(exprDat) >= min_count)]
-    }
-  }
-  exprDat <- exprDat[which(rownames(exprDat) %!in% input$selectSample),]
-  sampleAnnotation <- sampleAnnot_Default()
-  sampleAnnotation <- sampleAnnotation[which(rownames(sampleAnnotation) %!in% input$selectSample),]
-  
-  # DATA NORMALIZATION
-  if(input$Normalisation == "Yes"){
-    if (input$TypeNormalisation == 'CSS'){
-      MR_exprDat <- newMRexperiment(exprDat)
-      p = cumNormStat(MR_exprDat) #default is 0.5
-      MR_exprDat = cumNorm(MR_exprDat, p=p)
-      exprDat <- MRcounts(MR_exprDat, norm = TRUE)
-    }else{
-      if (input$TypeNormalisation == 'TSS'){
-        exprDat <- apply(exprDat, 2, TSS.divide)
-      }
-    }
-  }
-  
-  # DATA TRANSFORMATION
-  if (input$Transformation == "Yes"){
-    if (input$TypeTransformation == "Log10"){
-      exprDat <- log((1 + exprDat), base = 10)
-    }else{
-      if(input$TypeTransformation == "Log2"){
-        exprDat <- log((1 + exprDat), base = 2)
-      }else{
-        if(input$TypeTransformation == "Square"){
-          exprDat <- exprDat^2
-        }else{
-          if(input$TypeTransformation == "sqrt"){
-            exprDat <- sqrt(exprDat)
-          }else{
-            if(input$TypeTransformation == "Hellinger"){
-              exprDat <- decostand(exprDat, method = "hellinger")
-            }else{
-              if (input$TypeTransformation == "CLR"){
-                exprDat = clr(exprDat)
-
-              }else{
-                if (input$TypeTransformation == "ILR"){
-                  exprDat.ilr = ilr(exprDat)
-                  B <- exp(ilrBase(D=ncol(exprDat)))
-                  exprDat = t(apply(exprDat.ilr, 1, function(x){
-                    B[,1]^x[1] * B[,2]^x[2]
-                  }))
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-  exprDat <- exprDat[which(rownames(exprDat) %in% rownames(sampleAnnotation)),]
-  sampleAnnotation <- sampleAnnotation[which(rownames(sampleAnnotation) %in% rownames(exprDat)),]
-  exprDat <- exprDat[match(rownames(sampleAnnotation), rownames(exprDat)),]
- 
-  
-  exprDat
-})
+# exprDat_Default <- reactive({
+#   validate(
+#     need((input$LoadExample == 'Yes' | input$LoadExample2 =="Yes"), "")
+#   )
+#   expressionData<-"data/otu_table_silva.csv" #expression file path
+#   exprDat <- read.csv(expressionData, sep = ",", header = TRUE, row.names = 1)
+#   exprDat[is.na(exprDat)] <- 0
+#   ### SELECTED FILTRATION
+#   if (input$Filtration == "Yes"){
+#     if (input$TypeFiltration == "prevalence"){
+#       if(input$prevalence != 0){
+#         Prevalence_threshold = round((input$prevalence/100) * nrow(exprDat))
+#         names_OTU <- c()
+#         for (col in 1:ncol(exprDat)){
+#           nb_zero = 0
+#           for (row in 1:nrow(exprDat)){
+#             if (exprDat[row, col] == 0){
+#               nb_zero = nb_zero + 1
+#             }
+#           }
+#           
+#           if (nb_zero > (nrow(exprDat) - Prevalence_threshold)){
+#             names_OTU <- c(names_OTU, colnames(exprDat)[col])
+#           }
+#         }
+#         exprDat <- exprDat[,which(colnames(exprDat) %!in% names_OTU)]
+#       }
+#     }else{
+#       min_count = input$count
+#       exprDat <- exprDat[, which(colSums(exprDat) >= min_count)]
+#     }
+#   }
+#   exprDat <- exprDat[which(rownames(exprDat) %!in% input$selectSample),]
+#   sampleAnnotation <- sampleAnnot_Default()
+#   sampleAnnotation <- sampleAnnotation[which(rownames(sampleAnnotation) %!in% input$selectSample),]
+#   
+#   # DATA NORMALIZATION
+#   if(input$Normalisation == "Yes"){
+#     if (input$TypeNormalisation == 'CSS'){
+#       MR_exprDat <- newMRexperiment(exprDat)
+#       p = cumNormStat(MR_exprDat) #default is 0.5
+#       MR_exprDat = cumNorm(MR_exprDat, p=p)
+#       exprDat <- MRcounts(MR_exprDat, norm = TRUE)
+#     }else{
+#       if (input$TypeNormalisation == 'TSS'){
+#         exprDat <- apply(exprDat, 2, TSS.divide)
+#       }
+#     }
+#   }
+#   
+#   # DATA TRANSFORMATION
+#   if (input$Transformation == "Yes"){
+#     if (input$TypeTransformation == "Log10"){
+#       exprDat <- log((1 + exprDat), base = 10)
+#     }else{
+#       if(input$TypeTransformation == "Log2"){
+#         exprDat <- log((1 + exprDat), base = 2)
+#       }else{
+#         if(input$TypeTransformation == "Square"){
+#           exprDat <- exprDat^2
+#         }else{
+#           if(input$TypeTransformation == "sqrt"){
+#             exprDat <- sqrt(exprDat)
+#           }else{
+#             if(input$TypeTransformation == "Hellinger"){
+#               exprDat <- decostand(exprDat, method = "hellinger")
+#             }else{
+#               if (input$TypeTransformation == "CLR"){
+#                 exprDat = clr(exprDat)
+# 
+#               }else{
+#                 if (input$TypeTransformation == "ILR"){
+#                   exprDat.ilr = ilr(exprDat)
+#                   B <- exp(ilrBase(D=ncol(exprDat)))
+#                   exprDat = t(apply(exprDat.ilr, 1, function(x){
+#                     B[,1]^x[1] * B[,2]^x[2]
+#                   }))
+#                 }
+#               }
+#             }
+#           }
+#         }
+#       }
+#     }
+#   }
+#   exprDat <- exprDat[which(rownames(exprDat) %in% rownames(sampleAnnotation)),]
+#   sampleAnnotation <- sampleAnnotation[which(rownames(sampleAnnotation) %in% rownames(exprDat)),]
+#   exprDat <- exprDat[match(rownames(sampleAnnotation), rownames(exprDat)),]
+#  
+#   
+#   exprDat
+# })
 
 exprDat_present <- reactive({
-  if (input$LoadExample == "Yes" | input$LoadExample2 == "Yes"){
-    exprDat_present <- exprDat_Default()
+  if (input$LoadExample == "Yes"){
+    exprDat_present <- exprDat()
   }else{
     validate(
       need(input$file1$datapath != "", "Please select a data set")
@@ -360,38 +365,44 @@ exprDat_present <- reactive({
 
 
 exprDatSec <- reactive ({
-  validate(
-    need(input$file4$datapath != "", "Please select a data set")
-  )
-  ### IMPORT CSV FORMAT
-  if (input$rownames4 == FALSE){
-    essai <- try(read.csv(input$file4$datapath,
-                          header = input$header4,
-                          sep = input$sep4,
-                          dec = input$dec4))
-    validate(
-      need(substr(essai,1,5) != "Error", "Your second omic table cannot be uploaded. Please try to select a different separator or decimal. If you are still getting this error, verify the format of your file (you need a .csv file).")
-    )
-    exprDatSec <- read.csv(input$file4$datapath,
-                           header = input$header4,
-                           sep = input$sep4,
-                           dec = input$dec4,
-                           check.names = FALSE)
+  if (input$LoadExample == "Yes" && input$TypeAnalysis == "multivariate"){
+    expressionData<-"data/host_txLIGHT.csv" #expression file path
+    exprDatSec <- read.csv(expressionData, sep = ",", header = TRUE, row.names = 1)
   }else{
-    essai <- try(read.csv(input$file4$datapath,
-                          header = input$header4,
-                          row.names = 1,
-                          sep = input$sep4,
-                          dec = input$dec4))
     validate(
-      need(substr(essai,1,5) != "Error", "Your second omic table cannot be uploaded. Please try to select a different separator or decimal. If you are still getting this error, verify the format of your file (you need a .csv file).")
+      need(input$file4$datapath != "", "Please select a data set")
     )
-    exprDatSec <- read.csv(input$file4$datapath,
-                           header = input$header4,
-                           row.names = 1,
-                           sep = input$sep4,
-                           dec = input$dec4,
-                           check.names = FALSE)
+    ### IMPORT CSV FORMAT
+    if (input$rownames4 == FALSE){
+      essai <- try(read.csv(input$file4$datapath,
+                            header = input$header4,
+                            sep = input$sep4,
+                            dec = input$dec4))
+      validate(
+        need(substr(essai,1,5) != "Error", "Your second omic table cannot be uploaded. Please try to select a different separator or decimal. If you are still getting this error, verify the format of your file (you need a .csv file).")
+      )
+      exprDatSec <- read.csv(input$file4$datapath,
+                             header = input$header4,
+                             sep = input$sep4,
+                             dec = input$dec4,
+                             check.names = FALSE)
+    }else{
+      essai <- try(read.csv(input$file4$datapath,
+                            header = input$header4,
+                            row.names = 1,
+                            sep = input$sep4,
+                            dec = input$dec4))
+      validate(
+        need(substr(essai,1,5) != "Error", "Your second omic table cannot be uploaded. Please try to select a different separator or decimal. If you are still getting this error, verify the format of your file (you need a .csv file).")
+      )
+      exprDatSec <- read.csv(input$file4$datapath,
+                             header = input$header4,
+                             row.names = 1,
+                             sep = input$sep4,
+                             dec = input$dec4,
+                             check.names = FALSE)
+    }
+   
   }
   if (length(exprDatSec[which(colnames(exprDatSec) %in% rownames(sampleAnnot()))]) > 2){
     exprDatSec <- as.data.frame(t(exprDatSec))
@@ -410,9 +421,8 @@ exprDatSec <- reactive ({
   }else{
     exprDatSec <- sapply(exprDatSec, as.numeric)
   }
-
-  rownames(exprDatSec) <- sampleID
   
+  rownames(exprDatSec) <- sampleID
   
   ### SELECTED FILTRATION
   if (input$Filtration1 == "Yes"){
@@ -505,111 +515,111 @@ exprDatSec <- reactive ({
   exprDatSec
 })
 
-exprDatSec_Default <- reactive({
-  validate(
-    need(input$LoadExample2 =="Yes", "")
-  )
-  
-  expressionData<-"data/metabolites.txt" #expression file path
-  exprDatSec <- read.csv(expressionData, sep = ";", header = TRUE, row.names = 1)
-  #exprDatSec <- exprDatSec[which(rownames(exprDatSec) %in% rownames(exprDat_present())),]
-  validate(
-    need(nrow(exprDatSec) != 0, "The sample names are differents between the datasets.")
-  )
-  exprDatSec[is.na(exprDatSec)] <- 0
-  
-  ### SELECTED FILTRATION
-  if (input$Filtration1 == "Yes"){
-    if (input$TypeFiltration1 == "prevalence"){
-      if(input$prevalence1 != 0){
-        Prevalence_threshold = round((input$prevalence1/100) * nrow(exprDatSec))
-        names_OTU <- c()
-        for (col in 1:ncol(exprDatSec)){
-          nb_zero = 0
-          for (row in 1:nrow(exprDatSec)){
-            if (exprDatSec[row, col] == 0){
-              nb_zero = nb_zero + 1
-            }
-          }
-          
-          if (nb_zero > (nrow(exprDatSec) - Prevalence_threshold)){
-            names_OTU <- c(names_OTU, colnames(exprDatSec)[col])
-          }
-        }
-        exprDatSec <- exprDatSec[,which(colnames(exprDatSec) %!in% names_OTU)]
-      }
-    }else{
-      min_count = input$count1
-      exprDatSec <- exprDatSec[, which(colSums(exprDatSec) >= min_count)]
-    }
-  }
-  exprDatSec <- exprDatSec[which(rownames(exprDatSec) %!in% input$selectSample),]
-  sampleAnnotation <- sampleAnnot_Default()
-  sampleAnnotation <- sampleAnnotation[which(rownames(sampleAnnotation) %!in% input$selectSample),]
-  sampleAnnotation <- sampleAnnotation[which(rownames(sampleAnnotation) %in% rownames(exprDatSec)),]
-  exprDatSec <- exprDatSec[which(rownames(exprDatSec) %in% rownames(sampleAnnotation)),]
-  
-  # DATA NORMALIZATION
-  if(input$Normalisation1 == "Yes"){
-    if (input$TypeNormalisation1 == 'CSS'){
-      MR_exprDatSec <- newMRexperiment(exprDatSec)
-      if (input$LoadExample2 == "Yes" || input$LoadExample == "Yes" || input$OmicTable != 'OTUs'){
-        p <- 0.5
-      }else{
-        p = cumNormStat(MR_exprDatSec) #default is 0.5
-      }
-      MR_exprDatSec = cumNorm(MR_exprDatSec, p=p)
-      exprDatSec <- MRcounts(MR_exprDatSec, norm = TRUE)
-      
-    }else{
-      if (input$TypeNormalisation1 == 'TSS'){
-        exprDatSec <- apply(exprDatSec, 2, TSS.divide)
-      }
-    }
-  }
-  
-  # DATA TRANSFORMATION
-  if (input$Transformation1 == "Yes"){
-    if (input$TypeTransformation1 == "Log10"){
-      exprDatSec <- log((1 + exprDatSec), base = 10)
-    }else{
-      if(input$TypeTransformation1 == "Log2"){
-        exprDatSec <- log((1 + exprDatSec), base = 2)
-      }else{
-        if(input$TypeTransformation1 == "Square"){
-          exprDatSec <- exprDatSec^2
-        }else{
-          if(input$TypeTransformation1 == "sqrt"){
-            exprDatSec <- sqrt(exprDatSec)
-          }else{
-            if(input$TypeTransformation1 == "Hellinger"){
-              exprDatSec <- decostand(exprDatSec, method = "hellinger")
-            }else{
-              if (input$TypeTransformation1 == "CLR"){
-                exprDatSec = clr(exprDatSec)
-              }else{
-                if (input$TypeTransformation1 == "ILR"){
-                  exprDatSec.ilr = ilr(exprDatSec)
-                  B <- exp(ilrBase(D=ncol(exprDatSec)))
-                  exprDatSec = t(apply(exprDatSec.ilr, 1, function(x){
-                    B[,1]^x[1] * B[,2]^x[2]
-                  }))
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-  exprDatSec <- exprDatSec[match(rownames(sampleAnnotation), rownames(exprDatSec)),]
-  
-  exprDatSec
-})
+# exprDatSec_Default <- reactive({
+#   validate(
+#     need(input$LoadExample2 =="Yes", "")
+#   )
+#   
+#   expressionData<-"data/metabolites.txt" #expression file path
+#   exprDatSec <- read.csv(expressionData, sep = ";", header = TRUE, row.names = 1)
+#   #exprDatSec <- exprDatSec[which(rownames(exprDatSec) %in% rownames(exprDat_present())),]
+#   validate(
+#     need(nrow(exprDatSec) != 0, "The sample names are differents between the datasets.")
+#   )
+#   exprDatSec[is.na(exprDatSec)] <- 0
+#   
+#   ### SELECTED FILTRATION
+#   if (input$Filtration1 == "Yes"){
+#     if (input$TypeFiltration1 == "prevalence"){
+#       if(input$prevalence1 != 0){
+#         Prevalence_threshold = round((input$prevalence1/100) * nrow(exprDatSec))
+#         names_OTU <- c()
+#         for (col in 1:ncol(exprDatSec)){
+#           nb_zero = 0
+#           for (row in 1:nrow(exprDatSec)){
+#             if (exprDatSec[row, col] == 0){
+#               nb_zero = nb_zero + 1
+#             }
+#           }
+#           
+#           if (nb_zero > (nrow(exprDatSec) - Prevalence_threshold)){
+#             names_OTU <- c(names_OTU, colnames(exprDatSec)[col])
+#           }
+#         }
+#         exprDatSec <- exprDatSec[,which(colnames(exprDatSec) %!in% names_OTU)]
+#       }
+#     }else{
+#       min_count = input$count1
+#       exprDatSec <- exprDatSec[, which(colSums(exprDatSec) >= min_count)]
+#     }
+#   }
+#   exprDatSec <- exprDatSec[which(rownames(exprDatSec) %!in% input$selectSample),]
+#   sampleAnnotation <- sampleAnnot_Default()
+#   sampleAnnotation <- sampleAnnotation[which(rownames(sampleAnnotation) %!in% input$selectSample),]
+#   sampleAnnotation <- sampleAnnotation[which(rownames(sampleAnnotation) %in% rownames(exprDatSec)),]
+#   exprDatSec <- exprDatSec[which(rownames(exprDatSec) %in% rownames(sampleAnnotation)),]
+#   
+#   # DATA NORMALIZATION
+#   if(input$Normalisation1 == "Yes"){
+#     if (input$TypeNormalisation1 == 'CSS'){
+#       MR_exprDatSec <- newMRexperiment(exprDatSec)
+#       if (input$LoadExample2 == "Yes" || input$LoadExample == "Yes" || input$OmicTable != 'OTUs'){
+#         p <- 0.5
+#       }else{
+#         p = cumNormStat(MR_exprDatSec) #default is 0.5
+#       }
+#       MR_exprDatSec = cumNorm(MR_exprDatSec, p=p)
+#       exprDatSec <- MRcounts(MR_exprDatSec, norm = TRUE)
+#       
+#     }else{
+#       if (input$TypeNormalisation1 == 'TSS'){
+#         exprDatSec <- apply(exprDatSec, 2, TSS.divide)
+#       }
+#     }
+#   }
+#   
+#   # DATA TRANSFORMATION
+#   if (input$Transformation1 == "Yes"){
+#     if (input$TypeTransformation1 == "Log10"){
+#       exprDatSec <- log((1 + exprDatSec), base = 10)
+#     }else{
+#       if(input$TypeTransformation1 == "Log2"){
+#         exprDatSec <- log((1 + exprDatSec), base = 2)
+#       }else{
+#         if(input$TypeTransformation1 == "Square"){
+#           exprDatSec <- exprDatSec^2
+#         }else{
+#           if(input$TypeTransformation1 == "sqrt"){
+#             exprDatSec <- sqrt(exprDatSec)
+#           }else{
+#             if(input$TypeTransformation1 == "Hellinger"){
+#               exprDatSec <- decostand(exprDatSec, method = "hellinger")
+#             }else{
+#               if (input$TypeTransformation1 == "CLR"){
+#                 exprDatSec = clr(exprDatSec)
+#               }else{
+#                 if (input$TypeTransformation1 == "ILR"){
+#                   exprDatSec.ilr = ilr(exprDatSec)
+#                   B <- exp(ilrBase(D=ncol(exprDatSec)))
+#                   exprDatSec = t(apply(exprDatSec.ilr, 1, function(x){
+#                     B[,1]^x[1] * B[,2]^x[2]
+#                   }))
+#                 }
+#               }
+#             }
+#           }
+#         }
+#       }
+#     }
+#   }
+#   exprDatSec <- exprDatSec[match(rownames(sampleAnnotation), rownames(exprDatSec)),]
+#   
+#   exprDatSec
+# })
 
 exprDatSec_present <- reactive({
-  if (input$LoadExample2 == "Yes"){
-    exprDatSec_present <- exprDatSec_Default()
+  if (input$LoadExample == "Yes"){
+    exprDatSec_present <- exprDatSec()
   }else{
     validate(
       need(input$file1$datapath != "", "Please select a data set")
@@ -628,40 +638,47 @@ exprDatSec_present <- reactive({
 
 
 exprDatTer <- reactive({
-  validate(
-    need(input$file5$datapath != "" && (input$Omic3), "Please select a data set")
-  )
-  
-  ### IMPORT CSV FORMAT
-  if (input$rownames5 == FALSE){
-    essai <- try(read.csv(input$file5$datapath,
+  if (input$LoadExample == "Yes" && input$TypeAnalysis == "multivariate" && input$Omic3){
+    updateRadioButtons(session, "OmicTable3", selected = "Metabolites")
+    expressionData<-"data/metabolomicsLIGHT.csv" #expression file path
+    exprDat <- read.csv(expressionData, sep = ",", header = TRUE, row.names = 1)
+  }else{
+    validate(
+      need(input$file5$datapath != "" && (input$Omic3), "Please select a data set")
+    )
+    
+    ### IMPORT CSV FORMAT
+    if (input$rownames5 == FALSE){
+      essai <- try(read.csv(input$file5$datapath,
+                            header = input$header5,
+                            sep = input$sep5,
+                            dec = input$dec5))
+      validate(
+        need(substr(essai,1,5) != "Error", "Your counting table cannot be uploaded. Please try to select a different separator or decimal. If you are still getting this error, verify the format of your file (you need a .csv file).")
+      )
+      exprDat <- read.csv(input$file5$datapath,
                           header = input$header5,
                           sep = input$sep5,
-                          dec = input$dec5))
-    validate(
-      need(substr(essai,1,5) != "Error", "Your counting table cannot be uploaded. Please try to select a different separator or decimal. If you are still getting this error, verify the format of your file (you need a .csv file).")
-    )
-    exprDat <- read.csv(input$file5$datapath,
-                        header = input$header5,
-                        sep = input$sep5,
-                        dec = input$dec5,
-                        check.names = FALSE)
-  }else{
-    essai <- try(read.csv(input$file5$datapath,
+                          dec = input$dec5,
+                          check.names = FALSE)
+    }else{
+      essai <- try(read.csv(input$file5$datapath,
+                            header = input$header5,
+                            row.names = 1,
+                            sep = input$sep5,
+                            dec = input$dec5))
+      validate(
+        need(substr(essai,1,5) != "Error", "Your counting table cannot be uploaded. Please try to select a different separator or decimal. If you are still getting this error, verify the format of your file (you need a .csv file).")
+      )
+      exprDat <- read.csv(input$file5$datapath,
                           header = input$header5,
                           row.names = 1,
                           sep = input$sep5,
-                          dec = input$dec5))
-    validate(
-      need(substr(essai,1,5) != "Error", "Your counting table cannot be uploaded. Please try to select a different separator or decimal. If you are still getting this error, verify the format of your file (you need a .csv file).")
-    )
-    exprDat <- read.csv(input$file5$datapath,
-                        header = input$header5,
-                        row.names = 1,
-                        sep = input$sep5,
-                        dec = input$dec5,
-                        check.names = FALSE)
+                          dec = input$dec5,
+                          check.names = FALSE)
+    }
   }
+  
   # Look if rows are OTUs and columns are samples.
   if (length(exprDat[which(colnames(exprDat) %in% rownames(sampleAnnot()))]) > 2){
     exprDat <- as.data.frame(t(exprDat))
@@ -765,12 +782,18 @@ exprDatTer <- reactive({
 })
 
 exprDatTer_present <- reactive({
-  if (input$Omic3){
-    validate(
-      need(input$file5$datapath != "", "Please select a data set")
-    )
-    exprDatTer_present <- exprDatTer()     
+  if (input$TypeAnalysis == "multivariate" && input$Omic3){
+    if (input$LoadExample == "Yes"){
+      exprDatTer_present <- exprDatTer()  
+    }else{
+      
+      validate(
+        need(input$file5$datapath != "", "Please select a data set")
+      )
+      exprDatTer_present <- exprDatTer()     
+    }
   }
+  
   if (nchar(colnames(exprDatTer_present)[5]) > 20 ){
     for (i in 1:ncol(exprDatTer_present)){
       colnames(exprDatTer_present)[i] <- paste(input$OmicTable3, i, sep = "") 
@@ -780,8 +803,8 @@ exprDatTer_present <- reactive({
 })
 
 exprDatSec_2 <- reactive({
-  if (input$LoadExample2 == "Yes"){
-    exprDatSec_2 <- exprDatSec_Default()
+  if (input$LoadExample == "Yes"){
+    exprDatSec_2 <- exprDatSec()
   }else{
     validate(
       need(input$file4$datapath != "", "Please select a data set")
@@ -793,70 +816,79 @@ exprDatSec_2 <- reactive({
 
 
 taxTable <- reactive({
-  if (input$TypeAnalysis == "simple"){
-    validate(
-      need(input$file3$datapath != "", "Please select a data set")
-    )
-    
-    if (input$TaxonFile){
-      if (input$rownames3 == FALSE){
-        essai <- try(read.csv(input$file3$datapath,
-                              header = input$header3,
-                              sep = input$sep3))
-        validate(
-          need(substr(essai,1,5) != "Error", "Your counting table cannot be uploaded. Please try to select a different separator or decimal. If you are still getting this error, verify the format of your file (you need a .csv file).")
-        )
-        taxTable <- read.csv(input$file3$datapath,
-                             header = input$header3,
-                             sep = input$sep3)
-      }else{
-        essai <- try(read.csv(input$file3$datapath,
-                              header = input$header3,
-                              sep = input$sep3,
-                              row.names = 1))
-        validate(
-          need(substr(essai,1,5) != "Error", "Your counting table cannot be uploaded. Please try to select a different separator or decimal. If you are still getting this error, verify the format of your file (you need a .csv file).")
-        )
-        taxTable <- read.csv(input$file3$datapath,
-                             header = input$header3,
-                             sep = input$sep3,
-                             row.names = 1)    
-      }
-    }else{
-      taxTable <- 0
-    }
+  if (input$LoadExample == "Yes"){
+    OTU_taxa_correspondance <- "data/taxTable.csv" # A correspondance table containing the OTU and its correspondant taxon
+    taxTable <- read.csv(OTU_taxa_correspondance, sep = ",", header = TRUE, row.names = 1)
+    exprDat <- exprDat()
+    taxTable <- taxTable[which(rownames(taxTable) %in% colnames(exprDat)),]
+    taxTable <- taxTable[match(rownames(taxTable), colnames(exprDat)),]
   }else{
-    validate(
-      need(input$file4$datapath != "", "Please select a data set")
-    )
-    
-    if (input$TaxonFile1){
-      if (input$rownames3 == FALSE){
-        essai <- try(read.csv(input$file3$datapath,
-                              header = input$header3,
-                              sep = input$sep3))
-        validate(
-          need(substr(essai,1,5) != "Error", "Your counting table cannot be uploaded. Please try to select a different separator or decimal. If you are still getting this error, verify the format of your file (you need a .csv file).")
-        )
-        taxTable <- read.csv(input$file3$datapath,
-                             header = input$header3,
-                             sep = input$sep3)
+    if (input$TypeAnalysis == "simple"){
+      validate(
+        need(input$file3$datapath != "", "Please select a data set")
+      )
+      
+      if (input$TaxonFile){
+        if (input$rownames3 == FALSE){
+          essai <- try(read.csv(input$file3$datapath,
+                                header = input$header3,
+                                sep = input$sep3))
+          validate(
+            need(substr(essai,1,5) != "Error", "Your counting table cannot be uploaded. Please try to select a different separator or decimal. If you are still getting this error, verify the format of your file (you need a .csv file).")
+          )
+          taxTable <- read.csv(input$file3$datapath,
+                               header = input$header3,
+                               sep = input$sep3)
+        }else{
+          essai <- try(read.csv(input$file3$datapath,
+                                header = input$header3,
+                                sep = input$sep3,
+                                row.names = 1))
+          validate(
+            need(substr(essai,1,5) != "Error", "Your counting table cannot be uploaded. Please try to select a different separator or decimal. If you are still getting this error, verify the format of your file (you need a .csv file).")
+          )
+          taxTable <- read.csv(input$file3$datapath,
+                               header = input$header3,
+                               sep = input$sep3,
+                               row.names = 1)    
+        }
       }else{
-        essai <- try(read.csv(input$file3$datapath,
-                              header = input$header3,
-                              sep = input$sep3,
-                              row.names = 1))
-        validate(
-          need(substr(essai,1,5) != "Error", "Your counting table cannot be uploaded. Please try to select a different separator or decimal. If you are still getting this error, verify the format of your file (you need a .csv file).")
-        )
-        taxTable <- read.csv(input$file3$datapath,
-                             header = input$header3,
-                             sep = input$sep3,
-                             row.names = 1)    
+        taxTable <- 0
       }
     }else{
-      taxTable <- 0
-    }
+      validate(
+        need(input$file4$datapath != "", "Please select a data set")
+      )
+      
+      if (input$TaxonFile1){
+        if (input$rownames3 == FALSE){
+          essai <- try(read.csv(input$file3$datapath,
+                                header = input$header3,
+                                sep = input$sep3))
+          validate(
+            need(substr(essai,1,5) != "Error", "Your counting table cannot be uploaded. Please try to select a different separator or decimal. If you are still getting this error, verify the format of your file (you need a .csv file).")
+          )
+          taxTable <- read.csv(input$file3$datapath,
+                               header = input$header3,
+                               sep = input$sep3)
+        }else{
+          essai <- try(read.csv(input$file3$datapath,
+                                header = input$header3,
+                                sep = input$sep3,
+                                row.names = 1))
+          validate(
+            need(substr(essai,1,5) != "Error", "Your counting table cannot be uploaded. Please try to select a different separator or decimal. If you are still getting this error, verify the format of your file (you need a .csv file).")
+          )
+          taxTable <- read.csv(input$file3$datapath,
+                               header = input$header3,
+                               sep = input$sep3,
+                               row.names = 1)    
+        }
+      }else{
+        taxTable <- 0
+      }
+  }
+  
   }
   exprDat <- exprDat()
   if (substr(colnames(exprDat), 1, 1) == "X"){
@@ -868,21 +900,21 @@ taxTable <- reactive({
   
 })
 
-taxTable_Default <- reactive({
-  validate(
-    need((input$LoadExample == "Yes" | input$LoadExample2 =="Yes"), "")
-  )
-  OTU_taxa_correspondance <- "data/otu_taxa_correspondance_silva.csv" # A correspondance table containing the OTU and its correspondant taxon
-  OTU_Taxa_table <- read.csv(OTU_taxa_correspondance, sep = ",", header = TRUE, row.names = 1)
-  exprDat <- exprDat_Default()
-  OTU_Taxa_table <- OTU_Taxa_table[which(rownames(OTU_Taxa_table) %in% colnames(exprDat)),]
-  OTU_Taxa_table <- OTU_Taxa_table[match(rownames(OTU_Taxa_table), colnames(exprDat)),]
-  OTU_Taxa_table
-})
+# taxTable_Default <- reactive({
+#   validate(
+#     need((input$LoadExample == "Yes" | input$LoadExample2 =="Yes"), "")
+#   )
+#   OTU_taxa_correspondance <- "data/otu_taxa_correspondance_silva.csv" # A correspondance table containing the OTU and its correspondant taxon
+#   OTU_Taxa_table <- read.csv(OTU_taxa_correspondance, sep = ",", header = TRUE, row.names = 1)
+#   exprDat <- exprDat_Default()
+#   OTU_Taxa_table <- OTU_Taxa_table[which(rownames(OTU_Taxa_table) %in% colnames(exprDat)),]
+#   OTU_Taxa_table <- OTU_Taxa_table[match(rownames(OTU_Taxa_table), colnames(exprDat)),]
+#   OTU_Taxa_table
+# })
 
 taxTable_present <- reactive({
-  if (input$LoadExample == "Yes" | input$LoadExample2 =="Yes"){
-    taxTable_present <- taxTable_Default()
+  if (input$LoadExample == "Yes"){
+    taxTable_present <- taxTable()
   }else{
     validate(
       need(input$file3$datapath != "", "Please select a data set")
@@ -903,57 +935,39 @@ taxTable_present <- reactive({
 })
 
 taxTable_rownames <- reactive({
-  if (input$LoadExample == "Yes" || input$LoadExample2 == "Yes"){
-    taxTable_row <- rownames(taxTable_Default())
-  }else{
-    taxTable_row <- rownames(taxTable())
-  }
-  taxTable_row
+  taxTable_row <- rownames(taxTable())
 })
 
-taxTable_report <- reactive({
-  if (input$LoadExample == "Yes" || input$LoadExample2 == "Yes"){
-    taxTable <- taxTable_Default()
-  }else{
-    taxTable <- taxTable()
-  }
-  
-  taxTable
-})
+# taxTable_report <- reactive({
+#   if (input$LoadExample == "Yes" || input$LoadExample2 == "Yes"){
+#     taxTable <- taxTable_Default()
+#   }else{
+#     taxTable <- taxTable()
+#   }
+#   
+#   taxTable
+# })
 
 
 
-exprDat_report <- reactive({
-  if (input$LoadExample == "Yes" || input$LoadExample2 == "Yes"){
-    exprDat <- exprDat_Default()
-  }else{
-    exprDat <- exprDat_2()
-  }
-  
-  exprDat
-})
+# exprDat_report <- reactive({
+#   if (input$LoadExample == "Yes" || input$LoadExample2 == "Yes"){
+#     exprDat <- exprDat_Default()
+#   }else{
+#     exprDat <- exprDat_2()
+#   }
+#   
+#   exprDat
+# })
 
 #### P2: REACTIVE OBJECTS ####
 
 
 
 exprDat_2 <- reactive({
-  if (input$LoadExample == "No" && input$LoadExample2 =="No"){
-    validate(
-      need(input$file1$datapath != "", "Please upload a counting table (it can be genes, OTUs or metabolites) in the general parameter tab"),
-      need(input$file2$datapath != "", "Please upload a annotation file in the general parameter tab"),
-      if (input$TaxonFile){
-        need(input$file3$datapath != "", "Please upload the corresponding taxa file for the OTUs counting table file in the general parameter tab")
-      }
-    )
-    expr <- exprDat()
-    annot <- sampleAnnot()
-  }else{
-    expr <- exprDat_Default()
-    annot <- sampleAnnot_Default()
-  }
-
-    exprDat1 <- expr
+  expr <- exprDat()
+  annot <- sampleAnnot()
+  exprDat1 <- expr
   
   if (any(rownames(annot) %!in% rownames(expr)) == TRUE ){
     sampleAnnot1 <- annot[which(rownames(annot ) %in% rownames(expr ) ),]
@@ -971,18 +985,7 @@ exprDat_2 <- reactive({
 
 
 sampleAnnot_2 <- reactive({
-  if (input$LoadExample == "No" && input$LoadExample2 =="No"){
-    validate(
-      need(input$file1$datapath != "", "Please upload a counting table (it can be genes, OTUs or metabolites) in the general parameter tab"),
-      need(input$file2$datapath != "", "Please upload a annotation file in the general parameter tab"),
-      if (input$TaxonFile == "OTUs"){
-        need(input$file3$datapath != "", "Please upload the corresponding taxa file for the OTUs counting table file in the general parameter tab")
-      }
-    )
-    annot <- sampleAnnot()
-  }else{
-    annot <- sampleAnnot_Default()
-  }
+  annot <- sampleAnnot()
   if (any(rownames(exprDat_2()) %!in% rownames(annot)) == TRUE ){
     exprDat1 <- exprDat2()[which(rownames(exprDat_2() ) %in% rownames(annot ) ),]
   }else{
@@ -997,13 +1000,7 @@ sampleAnnot_2 <- reactive({
 })
 
 sampleAnnot_WGCNA <- reactive({
-  if (input$LoadExample == "Yes" || input$LoadExample2 == "Yes"){
-    sampleAnnot <- sampleAnnot_Default()[which(rownames(sampleAnnot_Default()) %in% rownames(exprDat_2())),]
-    
-  }else{
-    sampleAnnot <- sampleAnnot()[which(rownames(sampleAnnot()) %in% rownames(exprDat_2())),]
-    
-  }
+  sampleAnnot <- sampleAnnot()[which(rownames(sampleAnnot()) %in% rownames(exprDat_2())),]
   sampleAnnot <- sampleAnnot[match(rownames(sampleAnnot), rownames(exprDat_2())),]
   sampleAnnot
 })
@@ -1014,11 +1011,7 @@ sampleAnnot_sec <- reactive({
 })
 
 sampleAnnot_sec_WGCNA <- reactive({
-  if (input$LoadExample2 == "Yes"){
-    sampleAnnot <- sampleAnnot_Default()[which(rownames(sampleAnnot_Default()) %in% rownames(exprDatSec_WGCNA())),]
-  }else{
-    sampleAnnot <- sampleAnnot()[which(rownames(sampleAnnot()) %in% rownames(exprDatSec_WGCNA())),]
-  }
+  sampleAnnot <- sampleAnnot()[which(rownames(sampleAnnot()) %in% rownames(exprDatSec_WGCNA())),]
   sampleAnnot <- sampleAnnot[match(rownames(sampleAnnot), rownames(exprDatSec_WGCNA())),]
   sampleAnnot
 })
@@ -1051,19 +1044,10 @@ exprDatTer_2 <- reactive({
 
 
 taxTable1 <- reactive({
-  if (input$LoadExample == 'No' && input$LoadExample2 =='No'){
-    taxTable <- taxTable()
-    taxTable <- taxTable[which(rownames(taxTable) %in% colnames(exprDat_2())),]
-    taxTable <- taxTable[match(rownames(taxTable), colnames(exprDat_2())),]
-    taxTable$rn <- colnames(exprDat_2())
-    
-  }else{
-    taxTable <- taxTable_Default()
-    taxTable <- taxTable[which(rownames(taxTable) %in% colnames(exprDat_2())),]
-    taxTable <- taxTable[match(rownames(taxTable), colnames(exprDat_2())),]
-    taxTable$rn <- colnames(exprDat_2())
-    
-  }
+  taxTable <- taxTable()
+  taxTable <- taxTable[which(rownames(taxTable) %in% colnames(exprDat_2())),]
+  taxTable <- taxTable[match(rownames(taxTable), colnames(exprDat_2())),]
+  taxTable$rn <- colnames(exprDat_2())
   taxTable
 })
 
@@ -1181,7 +1165,7 @@ exprDat_3 <- reactive({
     expr3 <- expr3[match(rownames(expr3), rownames(expr)),]
     
   }
-  if (input$CountingT1 == "OTUs" && input$OmicTable == "OTUs" && input$LoadExample2 == "No"){
+  if (input$CountingT1 == "OTUs" && input$OmicTable == "OTUs"){
     colnames(expr) <- paste("a", colnames(expr), sep ="")
   }
   expr
@@ -1202,7 +1186,7 @@ exprDatSec_4 <- reactive({
     expr2 <- expr2[match(rownames(expr2), rownames(expr)),]
     expr3 <- expr3[match(rownames(expr3), rownames(expr)),]
   }
-  if (input$CountingT1 == "OTUs" && input$OmicTable == "OTUs" && input$LoadExample2 == "No"){
+  if (input$CountingT1 == "OTUs" && input$OmicTable == "OTUs"){
     colnames(expr2) <- paste("a", colnames(expr2), sep ="")
   }
   expr2
@@ -1229,7 +1213,7 @@ exprDatTer_3 <- reactive({
 
 taxTable2 <- reactive({
   taxTable <- taxTable1()
-  if (input$CountingT1 == "OTUs" && input$OmicTable == "OTUs" && input$LoadExample2 == "No"){
+  if (input$CountingT1 == "OTUs" && input$OmicTable == "OTUs"){
     taxTable$rn <- paste("a", rownames(taxTable), sep ="")
   }
   taxTable
@@ -1415,7 +1399,7 @@ output$ViewPanel <- renderUI({
                  choices = c("Counting Table" = "counting", "Annotation Table" = "annot", "Taxa Table" = "taxa"),
                  selected = character(0))
   }else{
-    if (input$TypeAnalysis == 'multivariate' && (input$TaxonFile1 == TRUE | input$LoadExample2 == "Yes") && !input$Omic3){
+    if (input$TypeAnalysis == 'multivariate' && (input$TaxonFile1 == TRUE | input$LoadExample == "Yes") && !input$Omic3){
       radioButtons("View3",
                    "View: ",
                    choices = c("Counting Table" = "counting", "Annotation Table" = "annot", "Taxa Table" = "taxa", "Second Omic Table" = "sec"),
@@ -1427,7 +1411,7 @@ output$ViewPanel <- renderUI({
                      choices = c("Counting Table" = "counting", "Annotation Table" = "annot", "Second Omic Table" = "sec"),
                      selected = character(0))
       }else{
-        if (input$TypeAnalysis == 'multivariate' && (input$TaxonFile1 == TRUE | input$LoadExample2 == "Yes") && input$Omic3){
+        if (input$TypeAnalysis == 'multivariate' && (input$TaxonFile1 == TRUE | input$LoadExample == "Yes") && input$Omic3){
 
             radioButtons("View6",
                          "View: ",
@@ -1458,16 +1442,9 @@ output$ViewPanel <- renderUI({
 
 #select sample to remove
 output$selectSample <- renderUI({
-  if (input$LoadExample == "Yes" | input$LoadExample2 == "Yes"){
-    selectInput("selectSample", "Select samples to remove: ",
-                choices = sampleName(),
-                multiple = TRUE)
-  }else{
-    selectInput("selectSample", "Select samples to remove: ",
-                choices = rownames(sampleAnnot()),
-                multiple = TRUE) 
-  }
-  
+  selectInput("selectSample", "Select samples to remove: ",
+              choices = rownames(sampleAnnot()),
+              multiple = TRUE) 
 })
 
 
@@ -1571,7 +1548,7 @@ output$ViewTable <- renderDataTable({
         }
       }
     }else{
-      if(input$TaxonFile1 | input$LoadExample2 == "Yes"){
+      if(input$TaxonFile1 | input$LoadExample == "Yes"){
         if (!input$Omic3){
           if (input$View3 == "counting"){
             if (ncol(exprDat_present()) < 1000){
@@ -1826,7 +1803,7 @@ output$ViewDim <- renderDataTable({
         }
       }
     }else{
-      if(input$TaxonFile1 | input$LoadExample2 == "Yes"){
+      if(input$TaxonFile1 | input$LoadExample == "Yes"){
         if (!input$Omic3){
           if (input$View3 == "counting"){
             dimension <- as.data.frame(dim(exprDat_present()))

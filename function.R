@@ -212,7 +212,6 @@ hive_myLayers <- function(l_WGCNA_D1, l_WGCNA_D2, l_WGCNA_D3, myCorrs, myAnnots,
   df_size[df_size$pv > 0.05,] <- 0
   radius <- c(0, 0, 0, radius, 100, 100, 100)
   nodes <- data.frame(id = id, lab= as.character(label), axis = as.integer(axis), radius= radius, size= df_size$size, color= as.character(color))
-
   # Do we set the size of the node to zero if the p-value is not significative ?
   
   # create edge dataframe:
@@ -235,28 +234,39 @@ hive_myLayers <- function(l_WGCNA_D1, l_WGCNA_D2, l_WGCNA_D3, myCorrs, myAnnots,
       }
     }
   }
-  edges <- data.frame(id1 = id1, id2 = id2, weight = weight, color = as.character(color))
-  id_to_keep <- nodes[which(nodes$size != 0),]
-  id_to_keep <- id_to_keep$id
-  id_to_keep <- c(1, 2, 3, id_to_keep, nodes$id[(length(nodes$id)-2):length(nodes$id)])
-  nodes <- nodes[which(nodes$id %in% id_to_keep),]
-  edges <- edges[which(edges$id1 %in% id_to_keep),]
-  edges <- edges[which(edges$id2 %in% id_to_keep),]
+  if (length(id1) == 0){
+    myHive <- 0
+  }else{
+    edges <- data.frame(id1 = id1, id2 = id2, weight = weight, color = as.character(color))
+    print(edges)
+    id_to_keep <- nodes[which(nodes$size != 0),]
+    id_to_keep <- id_to_keep$id
+    id_to_keep <- c(1, 2, 3, id_to_keep, nodes$id[(length(nodes$id)-2):length(nodes$id)])
+    nodes <- nodes[which(nodes$id %in% id_to_keep),]
+    
+    
+    edges <- edges[which(edges$id1 %in% id_to_keep),]
+    print(edges)
+    edges <- edges[which(edges$id2 %in% id_to_keep),]
+    print(edges)
+    
+    if (cureCorr){
+      nodes <- nodes[which(nodes$radius > 40),]
+      print(edges)
+      edges <- edges[which(edges$id1 %in% nodes$id),]
+      edges <- edges[which(edges$id2 %in% nodes$id),]
+    }
+    type <- "2D"
+    desc <- "Hive Plot 3 Layers"
+    axis.cols <- c("#636363", "#636363", "#636363")
+    if (exportCSV){
+      write.csv(nodes, file = paste("nodes_", trait, "_", nameFile, ".csv", sep = ""))
+      write.csv(edges, file = paste("edges_", trait, "_", nameFile, ".csv", sep = ""))
+      
+    }
+    myHive <- list(nodes = nodes, edges = edges, type = type, desc = desc, axis.cols= axis.cols)
+  }
   
-  if (cureCorr){
-    nodes <- nodes[which(nodes$radius > 40),]
-    edges <- edges[which(edges$id1 %in% nodes$id),]
-    edges <- edges[which(edges$id2 %in% nodes$id),]
-  }
-  type <- "2D"
-  desc <- "Hive Plot 3 Layers"
-  axis.cols <- c("#636363", "#636363", "#636363")
-  if (exportCSV){
-    write.csv(nodes, file = paste("nodes_", trait, "_", nameFile, ".csv", sep = ""))
-    write.csv(edges, file = paste("edges_", trait, "_", nameFile, ".csv", sep = ""))
-
-  }
-  myHive <- list(nodes = nodes, edges = edges, type = type, desc = desc, axis.cols= axis.cols)
   return(myHive)
 }
 
@@ -325,31 +335,38 @@ hive_my2Layers <- function(l_WGCNA_D1, l_WGCNA_D2, myCorr, myAnnots, correlation
       }
     }
   }
-
-  edges <- data.frame(id1 = id1, id2 = id2, weight = weight, color = as.character(color))
-  id_to_keep <- nodes[which(nodes$size != 0),]
-  id_to_keep <- id_to_keep$id
-  id_to_keep <- c(1, 2, id_to_keep, nodes$id[(length(nodes$id)-1):length(nodes$id)])
-  nodes <- nodes[which(nodes$id %in% id_to_keep),]
-  edges <- edges[which(edges$id1 %in% id_to_keep),]
-  edges <- edges[which(edges$id2 %in% id_to_keep),]
-
-  
-  if (cureCorr){
-    nodes <- nodes[which(nodes$radius > 40),]
-    edges <- edges[which(edges$id1 %in% nodes$id),]
-    edges <- edges[which(edges$id2 %in% nodes$id),]
-  }
-
-  if (exportCSV){
-    write.csv(nodes, file = paste("nodes_", trait, "_", nameFile, ".csv", sep = ""))
-    write.csv(edges, file = paste("edges_", trait, "_", nameFile, ".csv", sep = ""))
+  if (length(id1) == 0){
+    myHive <- 0
+  }else{
+    edges <- data.frame(id1 = id1, id2 = id2, weight = weight, color = as.character(color))
+    id_to_keep <- nodes[which(nodes$size != 0),]
+    id_to_keep <- id_to_keep$id
+    id_to_keep <- c(1, 2, id_to_keep, nodes$id[(length(nodes$id)-1):length(nodes$id)])
+    nodes <- nodes[which(nodes$id %in% id_to_keep),]
+    edges <- edges[which(edges$id1 %in% id_to_keep),]
+    print(edges)
+    if (nrow(edges) != 0){
+      edges <- edges[which(edges$id2 %in% id_to_keep),]
+    }
     
+    
+    if (cureCorr){
+      nodes <- nodes[which(nodes$radius > 40),]
+      edges <- edges[which(edges$id1 %in% nodes$id),]
+      edges <- edges[which(edges$id2 %in% nodes$id),]
+    }
+    
+    if (exportCSV){
+      write.csv(nodes, file = paste("nodes_", trait, "_", nameFile, ".csv", sep = ""))
+      write.csv(edges, file = paste("edges_", trait, "_", nameFile, ".csv", sep = ""))
+      
+    }
+    type <- "2D"
+    desc <- "Hive Plot 2 Layers"
+    axis.cols <- c("#636363", "#636363")
+    myHive <- list(nodes = nodes, edges = edges, type = type, desc = desc, axis.cols= axis.cols)
   }
-  type <- "2D"
-  desc <- "Hive Plot 2 Layers"
-  axis.cols <- c("#636363", "#636363")
-  myHive <- list(nodes = nodes, edges = edges, type = type, desc = desc, axis.cols= axis.cols)
+  
   return(myHive)
   
 }

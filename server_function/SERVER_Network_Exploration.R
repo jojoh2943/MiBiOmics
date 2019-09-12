@@ -15,7 +15,7 @@ module_Relative_abundance <- reactive({
   modGenes = (selectedDynamicColor()== input$selectModule)
   exprDat <- exprDat_WGCNA()[which(rownames(exprDat_WGCNA()) %in% rownames(sampleAnnot_2())),]
   exprDat <- exprDat[match(rownames(exprDat), rownames(sampleAnnot_2())),]
-  if (input$LoadExample == "No" && input$LoadExample2 == "No"){
+  if (input$LoadExample == "No"){
     if (input$TypeAnalysis == "multivariate"){
       validate(
         #need(input$CountingT == "OTUs", "Only for OTUs counting table (multi-omics)."),
@@ -55,7 +55,7 @@ module_Relative_abundance <- reactive({
 
 module_Relative_abundanceSec <- reactive({
   validate(
-    need((input$OmicTable == "OTUs" && input$LoadExample2 == "No"), "This plot can only be realised with OTUs")
+    need((input$OmicTable == "OTUs"), "This plot can only be realised with OTUs")
   )
   exprDat <- exprDatSec_WGCNA()
   
@@ -617,7 +617,7 @@ edge_to_node <- reactive({
 df.hive.plot <- reactive({
   vip.df <- vip.df()
   col <- paste("Temp.Cor.GS.", input$sampleAnnotSelection, sep = "")
-  if (input$TaxonFile || input$TaxonFile1 || input$LoadExample == "Yes" || input$LoadExample2 == "Yes"){
+  if (input$TaxonFile || input$TaxonFile1 || input$LoadExample == "Yes"){
     Annot <- taxTable1()[rownames(vip.df), input$taxAnnot]
   }else{
     Annot <- rownames(vip.df)
@@ -706,7 +706,7 @@ edge_to_node_D2 <- reactive({
 df.hive.plot_D2 <- reactive({
   vip.df <- vip.df_D2()
   col <- paste("Temp.Cor.GS.", input$sampleAnnotSelection_D2, sep = "")
-  if (input$LoadExample2 == "Yes"){
+  if (input$LoadExample == "Yes"){
     Annot <- rownames(vip.df)
     
   }else{
@@ -1346,7 +1346,7 @@ output$Download_Network_Exploration <- downloadHandler(
       
       dev.off()
       fs <- c(fs, paste("Module_", input$selectModule ,"_Corr_Vs_Membership.pdf", sep=""))
-      if (input$TaxonFile || input$LoadExample == "Yes" || input$LoadExample2 == "Yes"){
+      if (input$TaxonFile || input$LoadExample == "Yes"){
         pdf(paste("Module_", input$selectModule ,"_Relative_Abundance.pdf", sep=""), width = input$widthPDF, height = input$heightPDF)
         
         print(ggplot(module_Relative_abundance(), aes_string(x = "variable", y = "value", fill = input$selectTaxo2)) +
@@ -1391,7 +1391,7 @@ output$Download_Network_Exploration <- downloadHandler(
       
       dev.off()
       fs <- c(fs, paste("Module_", input$selectModule ,"_Corr_Vs_Membership.svg", sep=""))
-      if (input$TaxonFile || input$LoadExample == "Yes" || input$LoadExample2 == "Yes"){
+      if (input$TaxonFile || input$LoadExample == "Yes"){
         svg(paste("Module_", input$selectModule ,"_Relative_Abundance.svg", sep=""), width = input$widthPDF, height = input$heightPDF)
         
         print(ggplot(module_Relative_abundance(), aes_string(x = "variable", y = "value", fill = input$selectTaxo2)) +
@@ -1432,7 +1432,7 @@ output$PLS_VIP <- downloadHandler(
   },
   content = function (filename){
     vip <- vip.df()
-    if (input$LoadExample == "Yes" || input$LoadExample2 == "Yes" || input$TaxonFile || input$TaxonFile1){
+    if (input$LoadExample == "Yes" || input$TaxonFile || input$TaxonFile1){
       taxTable <- taxTable1()[which(rownames(taxTable1()) %in% rownames(vip)),]
       taxTable <- taxTable[match(rownames(taxTable),rownames(vip)),]
       

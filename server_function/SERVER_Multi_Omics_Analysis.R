@@ -48,21 +48,17 @@ selected_sampleInfo <- reactive({
 LegendDF <- reactive({
   sample_info_mcoia <- selected_sampleInfo()
   sample_info_mcoia$DF <- substr(rownames(sample_info_mcoia), nchar(rownames(sample_info_mcoia))-2, nchar(rownames(sample_info_mcoia)))
-  if (input$LoadExample2 == "Yes"){
+
+  if (input$Omic3){
     PlotLegend <- ggplot(data = sample_info_mcoia) +
       geom_point(aes_string(x=colnames(sample_info_mcoia)[1], y=colnames(sample_info_mcoia)[2], shape = "DF"))+
-      scale_shape_manual(name="Omics", labels=c("OTUs", "Metabolites"), values=c(15, 16))
+      scale_shape_manual(name="Omics", labels=c(input$CountingT1, input$OmicTable, input$OmicTable3), values=c(15, 16, 17))
   }else{
-    if (input$Omic3){
-      PlotLegend <- ggplot(data = sample_info_mcoia) +
-        geom_point(aes_string(x=colnames(sample_info_mcoia)[1], y=colnames(sample_info_mcoia)[2], shape = "DF"))+
-        scale_shape_manual(name="Omics", labels=c(input$CountingT1, input$OmicTable, input$OmicTable3), values=c(15, 16, 17))
-    }else{
-      PlotLegend <- ggplot(data = sample_info_mcoia) +
-        geom_point(aes_string(x=colnames(sample_info_mcoia)[1], y=colnames(sample_info_mcoia)[2], shape = "DF"))+
-        scale_shape_manual(name="Omics", labels=c(input$CountingT1, input$OmicTable), values=c(15, 16))
-    }
+    PlotLegend <- ggplot(data = sample_info_mcoia) +
+      geom_point(aes_string(x=colnames(sample_info_mcoia)[1], y=colnames(sample_info_mcoia)[2], shape = "DF"))+
+      scale_shape_manual(name="Omics", labels=c(input$CountingT1, input$OmicTable), values=c(15, 16))
   }
+  
   myLegend <- get_legend(PlotLegend)
   myLegend
 })
@@ -152,11 +148,9 @@ bivariate_plot <- reactive({
     need(!input$Omic3, 'Only for multi-omics analysis with two datasets')
   ) 
   bivariate_plot <- data.frame(mcoia()[["mcoa"]]$Tl1[1:(nrow(selected_sampleInfo())/2), 1], mcoia()[["mcoa"]]$Tl1[(nrow(selected_sampleInfo())/2+1):(nrow(selected_sampleInfo())), 1])
-  if (input$LoadExample2 == "Yes"){
-    colnames(bivariate_plot) <- c("Coinertia_OTUs_axis", "Coinertia_Metabolite_axis")
-  }else{
+
     colnames(bivariate_plot) <- c(paste("Coinertia_", input$CountingT1, "_axis", sep =""), paste("Coinertia_", input$OmicTable, "D2_axis", sep=""))
-  }
+  
   bivariate_plot$sampleName <- rownames(sampleAnnot_3())
   bivariate_plot
 })
@@ -234,32 +228,26 @@ selected_axis1_drivers <- reactive({
     drivers <- data.frame("old" = rownames(axis1_drivers), "new" = name_axis_drivers)
     for (i in 1:nrow(drivers)){
       if (substr(drivers$old[i], 1, 1) == "a"){
-        if (input$LoadExample2 == "Yes"){
-          feature_type_axis_1 <- c(feature_type_axis_1,"OTUs")
-          spec_axis_1 <- c(spec_axis_1,as.character(taxTable_default()[as.character(name_axis_drivers[i]), input$selectTaxonomy]))
-        }else{
+
           feature_type_axis_1 <- c(feature_type_axis_1, input$CountingT1)
           if (input$CountingT1 == "OTUs" && input$TaxonFile1){
             spec_axis_1 <- c(spec_axis_1, as.character(taxTable()[as.character(drivers$new[i]), input$selectTaxonomy]))
           }else{
             spec_axis_1 <- c(spec_axis_1, as.character(drivers$new[i]))
           }
-        }
+        
 
         
       }else{
         if (substr(drivers$old[i], 1, 1) == "b"){
-          if (input$LoadExample2 == "Yes"){
-            feature_type_axis_1 <- c(feature_type_axis_1, "Metabolites")
-            spec_axis_1 <- c(spec_axis_1, as.character(drivers$new[i]))
-          }else{
+
             feature_type_axis_1 <- c(feature_type_axis_1, input$OmicTable)
             if (input$OmicTable == "OTUs" && input$TaxonFile1){
               spec_axis_1 <- c(spec_axis_1, as.character(taxTable()[as.character(drivers$new[i]), input$selectTaxonomy]))
             }else{
               spec_axis_1 <- c(spec_axis_1, as.character(drivers$new[i]))
             }
-          }
+          
         }else{
           feature_type_axis_1 <- c(feature_type_axis_1, "unkwown")
           spec_axis_1 <- c(spec_axis_1, as.character(drivers$new[i]))
@@ -415,10 +403,16 @@ hive_data <- reactive({
     my_Annot[[3]] <- sampleAnnot_ter_WGCNA()
     my_hive <- hive_myLayers(WGCNA_1, WGCNA_2, WGCNA_3, myCorrs = my_Corrs, myAnnots = my_Annot, trait = input$traitHive)
     validate(
+      need(my_hive != 0, "No significant interaction between modules and external trait")
+    )
+    validate(
       need(nrow(my_hive$edges) != 0, "No significant interaction between modules and external trait")
     )
   }else{
     my_hive <- hive_my2Layers(WGCNA_1, WGCNA_2, myCorr = myCorr_D1_D2, myAnnots = my_Annot, trait = input$traitHive)
+    validate(
+      need(my_hive != 0, "No significant interaction between modules and external trait")
+    )
     validate(
       need(nrow(my_hive$edges) != 0, "No significant interaction between modules and external trait")
     )
@@ -469,11 +463,20 @@ p_val_MEs_D1D3 <- reactive({
 })
 
 corr_expr <- reactive({
+  print(exprDatSec_51())
+  validate(
+    need(any(rowSums(exprDat_41()) == 0), "Modules' variables are not expressed in your samples. Please transform your data to avoid zeros.")
+  )
+  validate(
+    need(any(rowSums(exprDatSec_51()) == 0), "Modules' variables are not expressed in your samples. Please transform your data to avoid zeros.")
+  )
+
   corr_expr_1 <- cor(exprDat_41(), exprDatSec_51(), use = "p", method = "spearman")
   corr_expr_1 <- as.data.frame(corr_expr_1)
   rownames(corr_expr_1) <- paste("DF1_", rownames(corr_expr_1), sep = "")
   colnames(corr_expr_1) <- paste("DF2_", colnames(corr_expr_1), sep = "")
-  
+  corr_expr_1[is.na(corr_expr_1)] <- 0
+  corr_expr_1 <- corr_expr_1[, which(colSums(corr_expr_1) != 0)]
   row.order <- hclust(dist(corr_expr_1, method = "euclidean"), method = "ward.D")$order 
   col.order <- hclust(dist(t(corr_expr_1), method = "euclidean"), method = "ward.D")$order
   corr_expr_new <- corr_expr_1[row.order, col.order]
@@ -481,11 +484,18 @@ corr_expr <- reactive({
 })
 
 corr_expr23 <- reactive({
-
+  validate(
+    need(any(rowSums(exprDatSec_52()) == 0), "Your second omics dataset must be filtrated to remove low counts")
+  )
+  validate(
+    need(any(rowSums(exprDatTer_52()) == 0), "Your third omics dataset must be filtrated to remove low counts")
+  )
   corr_expr_1 <- cor(exprDatSec_52(), exprDatTer_52(), use = "p", method = "spearman")
   corr_expr_1 <- as.data.frame(corr_expr_1)
   rownames(corr_expr_1) <- paste("DF2_", rownames(corr_expr_1), sep = "")
   colnames(corr_expr_1) <- paste("DF3_", colnames(corr_expr_1), sep = "")
+  corr_expr_1[is.na(corr_expr_1)] <- 0
+  corr_expr_1 <- corr_expr_1[, which(colSums(corr_expr_1) != 0)]
   row.order <- hclust(dist(corr_expr_1, method = "euclidean"), method = "ward.D")$order 
   col.order <- hclust(dist(t(corr_expr_1), method = "euclidean"), method = "ward.D")$order
   corr_expr_new <- corr_expr_1[row.order, col.order]
@@ -493,10 +503,20 @@ corr_expr23 <- reactive({
 })
 
 corr_expr13 <- reactive({
+  validate(
+    need(any(rowSums(exprDat_43()) == 0), "Your first omics dataset must be filtrated to remove low counts")
+  )
+  validate(
+    need(any(rowSums(exprDatTer_53()) == 0), "Your third omics dataset must be filtrated to remove low counts")
+  )
+  print(exprDat_43())
+  print(exprDatTer_53())
   corr_expr_1 <- cor(exprDat_43(), exprDatTer_53(), use = "p", method = "spearman")
   corr_expr_1 <- as.data.frame(corr_expr_1)
   rownames(corr_expr_1) <- paste("DF1_", rownames(corr_expr_1), sep = "")
   colnames(corr_expr_1) <- paste("DF3_", colnames(corr_expr_1), sep = "")
+  corr_expr_1[is.na(corr_expr_1)] <- 0
+  corr_expr_1 <- corr_expr_1[, which(colSums(corr_expr_1) != 0)]
   row.order <- hclust(dist(corr_expr_1, method = "euclidean"), method = "ward.D")$order 
   col.order <- hclust(dist(t(corr_expr_1), method = "euclidean"), method = "ward.D")$order
   corr_expr_new <- corr_expr_1[row.order, col.order]
@@ -505,7 +525,7 @@ corr_expr13 <- reactive({
 
 
 family_group12_1 <- reactive({
-  if (input$CountingT1 == "OTUs" || input$LoadExample2){
+  if (input$CountingT1 == "OTUs"){
     taxon_group <- c()
     for (i in 1:ncol(corr_expr())){
       taxon_group <- c(taxon_group, (taxTable2()[which(taxTable2()[["rn"]] == colnames(corr_expr())[i]),input$selectTaxonomy]))
@@ -569,10 +589,7 @@ family_group23_3 <- reactive({
 
 #### BI-PARTITE NETWORK 
 adjacency_expr12 <- reactive({
-  corr_expr_1 <- cor(exprDat_41(), exprDatSec_51(), use = "p", method = "spearman")
-  corr_expr_1 <- as.data.frame(corr_expr_1)
-  rownames(corr_expr_1) <- paste("DF1_", rownames(corr_expr_1), sep = "")
-  colnames(corr_expr_1) <- paste("DF2_", colnames(corr_expr_1), sep = "")
+  corr_expr_1 <- corr_expr()
   #corr_expr_1[which(corr_expr_1 < 0.30 && corr_expr_1 > -0.30),] <- 0
   corr_expr_1[abs(corr_expr_1) < 0.5] <- 0
   #corr_expr_1[(corr_expr_1 < 0.70 && corr_expr_1 > 0.50) || (corr_expr_1 > -0.70 && corr_expr_1 < -0.50)] <- 1
@@ -596,10 +613,7 @@ adjacency_expr12 <- reactive({
 
 
 adjacency_expr13 <- reactive({
-  corr_expr_1 <- cor(exprDat_43(), exprDatTer_53(), use = "p", method = "spearman")
-  corr_expr_1 <- as.data.frame(corr_expr_1)
-  rownames(corr_expr_1) <- paste("DF1_", rownames(corr_expr_1), sep = "")
-  colnames(corr_expr_1) <- paste("DF3_", colnames(corr_expr_1), sep = "")
+  corr_expr_1 <- corr_expr13()
   #corr_expr_1[which(corr_expr_1 < 0.30 && corr_expr_1 > -0.30),] <- 0
   corr_expr_1[abs(corr_expr_1) < 0.5] <- 0
   #corr_expr_1[(corr_expr_1 < 0.70 && corr_expr_1 > 0.50) || (corr_expr_1 > -0.70 && corr_expr_1 < -0.50)] <- 1
@@ -622,10 +636,7 @@ adjacency_expr13 <- reactive({
 })
 
 adjacency_expr23 <- reactive({
-  corr_expr_1 <- cor(exprDatSec_52(), exprDatTer_52(), use = "p", method = "spearman")
-  corr_expr_1 <- as.data.frame(corr_expr_1)
-  rownames(corr_expr_1) <- paste("DF2_", rownames(corr_expr_1), sep = "")
-  colnames(corr_expr_1) <- paste("DF3_", colnames(corr_expr_1), sep = "")
+  corr_expr_1 <- corr_expr23()
   #corr_expr_1[which(corr_expr_1 < 0.30 && corr_expr_1 > -0.30),] <- 0
   corr_expr_1[abs(corr_expr_1) < 0.5] <- 0
   #corr_expr_1[(corr_expr_1 < 0.70 && corr_expr_1 > 0.50) || (corr_expr_1 > -0.70 && corr_expr_1 < -0.50)] <- 1

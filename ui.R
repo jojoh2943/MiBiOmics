@@ -50,20 +50,19 @@ ui <- tagList(
                                                                   "Type of analysis: ",
                                                                   choices = c("Simple WGCNA" = "simple", "Multi-omics Analysis" = "multivariate", " " = "blank"),
                                                                   selected = "blank"),
+                                                      radioButtons("LoadExample", "Load the example dataset: ", choices = c("Yes"= "Yes", "No" = "No"), selected = "No"),
                                                       conditionalPanel("input.TypeAnalysis == 'simple'",
-                                                                       radioButtons("LoadExample", "Load the example dataset: ", choices = c("Yes"= "Yes", "No" = "No"), selected = "No"),
                                                                        conditionalPanel("input.LoadExample == 'No'",
                                                                                         radioButtons("CountingT", "Counting Table:", choices = c("Genes" = "Genes", "OTUs" = "OTUs"), selected = character(0)),
                                                                                         conditionalPanel("input.CountingT == 'OTUs'",
                                                                                                          checkboxInput("TaxonFile", "Additionnal Taxon File (CSV)", FALSE)))),
                                                       conditionalPanel("input.TypeAnalysis == 'multivariate'",
-                                                                       radioButtons("LoadExample2", "Load the example dataset: ", choices = c("Yes"= "Yes", "No" = "No"), selected = "No"),
-                                                                       conditionalPanel("input.LoadExample2 == 'No'",
+                                                                       checkboxInput("Omic3", "Third Omic Table ?", FALSE),
+                                                                       conditionalPanel("input.LoadExample == 'No'",
                                                                                         radioButtons("CountingT1", "Counting Table:", choices = c("Genes" = "Genes", "OTUs" = "OTUs"), selected = character(0)),
                                                                                         conditionalPanel("input.CountingT1 == 'OTUs'",
                                                                                                          checkboxInput("TaxonFile1", "Additionnal Taxon File (CSV)", FALSE)),
                                                                                         radioButtons("OmicTable", "Second 'Omic' Table:", choices = c("Genes" = "Genes", "OTUs" = "OTUs", "Metabolites" = "Metabolites"), selected = character(0)),
-                                                                                        checkboxInput("Omic3", "Third Omic Table ?", FALSE),
                                                                                         conditionalPanel("input.Omic3",
                                                                                                          radioButtons("OmicTable3", "Third 'Omic' Table:", choices = c("Genes" = "Genes", "OTUs" = "OTUs", "Metabolites" = "Metabolites"), selected = character(0))
                                                                                                          )
@@ -144,7 +143,7 @@ ui <- tagList(
                           #### COUNTING TABLE UPLOAD
                           column(3,
                             h3("Upload first omic Table"),
-                            conditionalPanel(("input.LoadExample == 'No' && input.LoadExample2 == 'No'"),
+                            conditionalPanel(("input.LoadExample == 'No'"),
                                              fileInput("file1", "Choose CSV File (Counting Table): ",
                                                        multiple = FALSE,
                                                        accept = c("text/csv", "text/comma-separated-values,text/plain",".csv")),
@@ -158,7 +157,7 @@ ui <- tagList(
                           
                           column(3,
                                  h3("Upload your second omic table"),
-                                 conditionalPanel("input.TypeAnalysis == 'multivariate' && input.LoadExample2 == 'No'",
+                                 conditionalPanel("input.TypeAnalysis == 'multivariate' && input.LoadExample == 'No'",
                                                   fileInput("file4", "Choose CSV File ('Omics' Counting Table): ",
                                                             multiple = FALSE,
                                                             accept = c("text/csv", "text/comma-separated-values,text/plain",".csv")),
@@ -171,7 +170,7 @@ ui <- tagList(
                           
                           column(3,
                                  h3("Upload your third omic table"),
-                                 conditionalPanel("input.Omic3",
+                                 conditionalPanel("input.Omic3 && input.LoadExample == 'No'",
                                                   fileInput("file5", "Choose CSV File ('Omics' Counting Table): ",
                                                             multiple = FALSE,
                                                             accept = c("text/csv", "text/comma-separated-values,text/plain",".csv")),
@@ -185,7 +184,7 @@ ui <- tagList(
                           #### ANNOTATION TABLE UPLOAD
                           column(3,
                             h3("Upload Annotation File"),
-                            conditionalPanel(("input.LoadExample == 'No' && input.LoadExample2 == 'No'"),
+                            conditionalPanel(("input.LoadExample == 'No'"),
                                              fileInput("file2", "Choose CSV File (Annotation File): ",
                                                        multiple = FALSE,
                                                        accept = c("text/csv", "text/comma-separated-values,text/plain",".csv")),
@@ -199,7 +198,7 @@ ui <- tagList(
                           #### TAXA TABLE UPLOAD
                           column(3,
                             h3("Upload Optional File"),
-                            conditionalPanel(condition = "((input.CountingT == 'OTUs' | input.CountingT1 == 'OTUs') && (input.TaxonFile | input.TaxonFile1) && (input.LoadExample == 'No' | input.LoadExample2 == 'No'))",
+                            conditionalPanel(condition = "((input.CountingT == 'OTUs' | input.CountingT1 == 'OTUs') && (input.TaxonFile | input.TaxonFile1) && (input.LoadExample == 'No'))",
                                              fileInput("file3", "Choose CSV File (Taxa Table): ",
                                                        multiple = FALSE,
                                                        accept = c("text/csv", "text/comma-separated-values,text/plain",".csv")),
