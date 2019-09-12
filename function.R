@@ -223,7 +223,7 @@ hive_myLayers <- function(l_WGCNA_D1, l_WGCNA_D2, l_WGCNA_D3, myCorrs, myAnnots,
     myCorr <- myCorrs[[k]]
     for (i in 1:nrow(myCorr[[2]])){
       for (j in 1:ncol(myCorr[[2]])){
-        if (myCorr[[2]][i, j] < 0.05 && abs(myCorr[[1]][i, j]) > 0.4){
+        if (myCorr[[2]][i, j] < 0.05 && abs(myCorr[[1]][i, j]) > 0.3){
           myNode1 <-nodes[which(nodes$lab==rownames(myCorr[[2]])[i]),]
           myNode2 <-nodes[which(nodes$lab==colnames(myCorr[[2]])[j]),]
           id1 <- c(id1, myNode1$id)
@@ -235,10 +235,9 @@ hive_myLayers <- function(l_WGCNA_D1, l_WGCNA_D2, l_WGCNA_D3, myCorrs, myAnnots,
     }
   }
   if (length(id1) == 0){
-    myHive <- 0
+    edges <- 0
   }else{
     edges <- data.frame(id1 = id1, id2 = id2, weight = weight, color = as.character(color))
-    print(edges)
     id_to_keep <- nodes[which(nodes$size != 0),]
     id_to_keep <- id_to_keep$id
     id_to_keep <- c(1, 2, 3, id_to_keep, nodes$id[(length(nodes$id)-2):length(nodes$id)])
@@ -246,13 +245,10 @@ hive_myLayers <- function(l_WGCNA_D1, l_WGCNA_D2, l_WGCNA_D3, myCorrs, myAnnots,
     
     
     edges <- edges[which(edges$id1 %in% id_to_keep),]
-    print(edges)
     edges <- edges[which(edges$id2 %in% id_to_keep),]
-    print(edges)
-    
+
     if (cureCorr){
       nodes <- nodes[which(nodes$radius > 40),]
-      print(edges)
       edges <- edges[which(edges$id1 %in% nodes$id),]
       edges <- edges[which(edges$id2 %in% nodes$id),]
     }
@@ -264,8 +260,8 @@ hive_myLayers <- function(l_WGCNA_D1, l_WGCNA_D2, l_WGCNA_D3, myCorrs, myAnnots,
       write.csv(edges, file = paste("edges_", trait, "_", nameFile, ".csv", sep = ""))
       
     }
-    myHive <- list(nodes = nodes, edges = edges, type = type, desc = desc, axis.cols= axis.cols)
   }
+  myHive <- list(nodes = nodes, edges = edges, type = type, desc = desc, axis.cols= axis.cols)
   
   return(myHive)
 }
@@ -344,7 +340,6 @@ hive_my2Layers <- function(l_WGCNA_D1, l_WGCNA_D2, myCorr, myAnnots, correlation
     id_to_keep <- c(1, 2, id_to_keep, nodes$id[(length(nodes$id)-1):length(nodes$id)])
     nodes <- nodes[which(nodes$id %in% id_to_keep),]
     edges <- edges[which(edges$id1 %in% id_to_keep),]
-    print(edges)
     if (nrow(edges) != 0){
       edges <- edges[which(edges$id2 %in% id_to_keep),]
     }

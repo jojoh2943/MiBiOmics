@@ -402,14 +402,18 @@ hive_data <- reactive({
     my_Corrs[[3]] <- myCorr_D2_D3
     my_Annot[[3]] <- sampleAnnot_ter_WGCNA()
     my_hive <- hive_myLayers(WGCNA_1, WGCNA_2, WGCNA_3, myCorrs = my_Corrs, myAnnots = my_Annot, trait = input$traitHive)
-    validate(
-      need(my_hive != 0, "No significant interaction between modules and external trait")
-    )
+    print(my_hive)
+    print(nrow(edges))
     validate(
       need(nrow(my_hive$edges) != 0, "No significant interaction between modules and external trait")
     )
+    validate(
+      need(my_hive$edges != 0, "No significant interaction between modules and external trait")
+    )
   }else{
     my_hive <- hive_my2Layers(WGCNA_1, WGCNA_2, myCorr = myCorr_D1_D2, myAnnots = my_Annot, trait = input$traitHive)
+    print(my_hive)
+    
     validate(
       need(my_hive != 0, "No significant interaction between modules and external trait")
     )

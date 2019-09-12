@@ -79,18 +79,6 @@ sampleAnnot <- reactive({
   sampleAnnot
 })
 
-# sampleAnnot_Default <- reactive({
-#   validate(
-#     need((input$LoadExample == "Yes" | input$LoadExample2 =="Yes"), "")
-#   )
-#   sampleMetadata<-"data/DS_Food_intake.csv" #sample sheet path
-#   sampleAnnot <- read.csv(sampleMetadata, sep = ";", header = TRUE, row.names = 1, dec = ",")
-#   # sampleAnnot <- sampleAnnot[which(rownames(sampleAnnot) %in% rownames(exprDat_Default())),]
-#   # sampleAnnot <- sampleAnnot[which(rownames(sampleAnnot) %in% rownames(exprDatSec_Default())),]
-#   #sampleAnnot <- sampleAnnot[which(rownames(sampleAnnot) %!in% input$selectSample),]
-# 
-#   sampleAnnot
-# })
 
 sampleName <- reactive({
   sampleName <- rownames(sampleAnnot())
@@ -188,8 +176,15 @@ exprDat <- reactive({
   # DATA NORMALIZATION
   if(input$Normalisation == "Yes"){
     if (input$TypeNormalisation == 'CSS'){
+      validate(
+        need(!any(colSums(exprDat) == 0), "Please filtrate your data for this normalization")
+      )
       MR_exprDat <- newMRexperiment(exprDat)
-      p = cumNormStat(MR_exprDat) #default is 0.5
+      if (input$CountingT != 'OTUs' && input$CountingT1 != 'OTUs'){
+        p <- 0.5
+      }else{
+        p = cumNormStat(MR_exprDat) #default is 0.5
+      }
       MR_exprDat = cumNorm(MR_exprDat, p=p)
       exprDat <- MRcounts(MR_exprDat, norm = TRUE)
     }else{
@@ -253,98 +248,6 @@ exprDat <- reactive({
   exprDat
 })
 
-# exprDat_Default <- reactive({
-#   validate(
-#     need((input$LoadExample == 'Yes' | input$LoadExample2 =="Yes"), "")
-#   )
-#   expressionData<-"data/otu_table_silva.csv" #expression file path
-#   exprDat <- read.csv(expressionData, sep = ",", header = TRUE, row.names = 1)
-#   exprDat[is.na(exprDat)] <- 0
-#   ### SELECTED FILTRATION
-#   if (input$Filtration == "Yes"){
-#     if (input$TypeFiltration == "prevalence"){
-#       if(input$prevalence != 0){
-#         Prevalence_threshold = round((input$prevalence/100) * nrow(exprDat))
-#         names_OTU <- c()
-#         for (col in 1:ncol(exprDat)){
-#           nb_zero = 0
-#           for (row in 1:nrow(exprDat)){
-#             if (exprDat[row, col] == 0){
-#               nb_zero = nb_zero + 1
-#             }
-#           }
-#           
-#           if (nb_zero > (nrow(exprDat) - Prevalence_threshold)){
-#             names_OTU <- c(names_OTU, colnames(exprDat)[col])
-#           }
-#         }
-#         exprDat <- exprDat[,which(colnames(exprDat) %!in% names_OTU)]
-#       }
-#     }else{
-#       min_count = input$count
-#       exprDat <- exprDat[, which(colSums(exprDat) >= min_count)]
-#     }
-#   }
-#   exprDat <- exprDat[which(rownames(exprDat) %!in% input$selectSample),]
-#   sampleAnnotation <- sampleAnnot_Default()
-#   sampleAnnotation <- sampleAnnotation[which(rownames(sampleAnnotation) %!in% input$selectSample),]
-#   
-#   # DATA NORMALIZATION
-#   if(input$Normalisation == "Yes"){
-#     if (input$TypeNormalisation == 'CSS'){
-#       MR_exprDat <- newMRexperiment(exprDat)
-#       p = cumNormStat(MR_exprDat) #default is 0.5
-#       MR_exprDat = cumNorm(MR_exprDat, p=p)
-#       exprDat <- MRcounts(MR_exprDat, norm = TRUE)
-#     }else{
-#       if (input$TypeNormalisation == 'TSS'){
-#         exprDat <- apply(exprDat, 2, TSS.divide)
-#       }
-#     }
-#   }
-#   
-#   # DATA TRANSFORMATION
-#   if (input$Transformation == "Yes"){
-#     if (input$TypeTransformation == "Log10"){
-#       exprDat <- log((1 + exprDat), base = 10)
-#     }else{
-#       if(input$TypeTransformation == "Log2"){
-#         exprDat <- log((1 + exprDat), base = 2)
-#       }else{
-#         if(input$TypeTransformation == "Square"){
-#           exprDat <- exprDat^2
-#         }else{
-#           if(input$TypeTransformation == "sqrt"){
-#             exprDat <- sqrt(exprDat)
-#           }else{
-#             if(input$TypeTransformation == "Hellinger"){
-#               exprDat <- decostand(exprDat, method = "hellinger")
-#             }else{
-#               if (input$TypeTransformation == "CLR"){
-#                 exprDat = clr(exprDat)
-# 
-#               }else{
-#                 if (input$TypeTransformation == "ILR"){
-#                   exprDat.ilr = ilr(exprDat)
-#                   B <- exp(ilrBase(D=ncol(exprDat)))
-#                   exprDat = t(apply(exprDat.ilr, 1, function(x){
-#                     B[,1]^x[1] * B[,2]^x[2]
-#                   }))
-#                 }
-#               }
-#             }
-#           }
-#         }
-#       }
-#     }
-#   }
-#   exprDat <- exprDat[which(rownames(exprDat) %in% rownames(sampleAnnotation)),]
-#   sampleAnnotation <- sampleAnnotation[which(rownames(sampleAnnotation) %in% rownames(exprDat)),]
-#   exprDat <- exprDat[match(rownames(sampleAnnotation), rownames(exprDat)),]
-#  
-#   
-#   exprDat
-# })
 
 exprDat_present <- reactive({
   if (input$LoadExample == "Yes"){
@@ -453,8 +356,12 @@ exprDatSec <- reactive ({
   # DATA NORMALIZATION
   if(input$Normalisation1 == "Yes"){
     if (input$TypeNormalisation1 == 'CSS'){
+      validate(
+        need(!any(colSums(exprDatSec) == 0), "Please filtrate your data for this normalization")
+      )
+
       MR_exprDatSec <- newMRexperiment(exprDatSec)
-      if (input$LoadExample2 == "Yes" || input$LoadExample == "Yes" || input$OmicTable != 'OTUs'){
+      if (input$LoadExample == "Yes" || input$OmicTable != 'OTUs'){
         p <- 0.5
       }else{
         p = cumNormStat(MR_exprDatSec) #default is 0.5
@@ -515,107 +422,6 @@ exprDatSec <- reactive ({
   exprDatSec
 })
 
-# exprDatSec_Default <- reactive({
-#   validate(
-#     need(input$LoadExample2 =="Yes", "")
-#   )
-#   
-#   expressionData<-"data/metabolites.txt" #expression file path
-#   exprDatSec <- read.csv(expressionData, sep = ";", header = TRUE, row.names = 1)
-#   #exprDatSec <- exprDatSec[which(rownames(exprDatSec) %in% rownames(exprDat_present())),]
-#   validate(
-#     need(nrow(exprDatSec) != 0, "The sample names are differents between the datasets.")
-#   )
-#   exprDatSec[is.na(exprDatSec)] <- 0
-#   
-#   ### SELECTED FILTRATION
-#   if (input$Filtration1 == "Yes"){
-#     if (input$TypeFiltration1 == "prevalence"){
-#       if(input$prevalence1 != 0){
-#         Prevalence_threshold = round((input$prevalence1/100) * nrow(exprDatSec))
-#         names_OTU <- c()
-#         for (col in 1:ncol(exprDatSec)){
-#           nb_zero = 0
-#           for (row in 1:nrow(exprDatSec)){
-#             if (exprDatSec[row, col] == 0){
-#               nb_zero = nb_zero + 1
-#             }
-#           }
-#           
-#           if (nb_zero > (nrow(exprDatSec) - Prevalence_threshold)){
-#             names_OTU <- c(names_OTU, colnames(exprDatSec)[col])
-#           }
-#         }
-#         exprDatSec <- exprDatSec[,which(colnames(exprDatSec) %!in% names_OTU)]
-#       }
-#     }else{
-#       min_count = input$count1
-#       exprDatSec <- exprDatSec[, which(colSums(exprDatSec) >= min_count)]
-#     }
-#   }
-#   exprDatSec <- exprDatSec[which(rownames(exprDatSec) %!in% input$selectSample),]
-#   sampleAnnotation <- sampleAnnot_Default()
-#   sampleAnnotation <- sampleAnnotation[which(rownames(sampleAnnotation) %!in% input$selectSample),]
-#   sampleAnnotation <- sampleAnnotation[which(rownames(sampleAnnotation) %in% rownames(exprDatSec)),]
-#   exprDatSec <- exprDatSec[which(rownames(exprDatSec) %in% rownames(sampleAnnotation)),]
-#   
-#   # DATA NORMALIZATION
-#   if(input$Normalisation1 == "Yes"){
-#     if (input$TypeNormalisation1 == 'CSS'){
-#       MR_exprDatSec <- newMRexperiment(exprDatSec)
-#       if (input$LoadExample2 == "Yes" || input$LoadExample == "Yes" || input$OmicTable != 'OTUs'){
-#         p <- 0.5
-#       }else{
-#         p = cumNormStat(MR_exprDatSec) #default is 0.5
-#       }
-#       MR_exprDatSec = cumNorm(MR_exprDatSec, p=p)
-#       exprDatSec <- MRcounts(MR_exprDatSec, norm = TRUE)
-#       
-#     }else{
-#       if (input$TypeNormalisation1 == 'TSS'){
-#         exprDatSec <- apply(exprDatSec, 2, TSS.divide)
-#       }
-#     }
-#   }
-#   
-#   # DATA TRANSFORMATION
-#   if (input$Transformation1 == "Yes"){
-#     if (input$TypeTransformation1 == "Log10"){
-#       exprDatSec <- log((1 + exprDatSec), base = 10)
-#     }else{
-#       if(input$TypeTransformation1 == "Log2"){
-#         exprDatSec <- log((1 + exprDatSec), base = 2)
-#       }else{
-#         if(input$TypeTransformation1 == "Square"){
-#           exprDatSec <- exprDatSec^2
-#         }else{
-#           if(input$TypeTransformation1 == "sqrt"){
-#             exprDatSec <- sqrt(exprDatSec)
-#           }else{
-#             if(input$TypeTransformation1 == "Hellinger"){
-#               exprDatSec <- decostand(exprDatSec, method = "hellinger")
-#             }else{
-#               if (input$TypeTransformation1 == "CLR"){
-#                 exprDatSec = clr(exprDatSec)
-#               }else{
-#                 if (input$TypeTransformation1 == "ILR"){
-#                   exprDatSec.ilr = ilr(exprDatSec)
-#                   B <- exp(ilrBase(D=ncol(exprDatSec)))
-#                   exprDatSec = t(apply(exprDatSec.ilr, 1, function(x){
-#                     B[,1]^x[1] * B[,2]^x[2]
-#                   }))
-#                 }
-#               }
-#             }
-#           }
-#         }
-#       }
-#     }
-#   }
-#   exprDatSec <- exprDatSec[match(rownames(sampleAnnotation), rownames(exprDatSec)),]
-#   
-#   exprDatSec
-# })
 
 exprDatSec_present <- reactive({
   if (input$LoadExample == "Yes"){
@@ -725,8 +531,15 @@ exprDatTer <- reactive({
   # DATA NORMALIZATION
   if(input$Normalisation2 == "Yes"){
     if (input$TypeNormalisation2 == 'CSS'){
+      validate(
+        need(!any(colSums(exprDat) == 0), "Please filtrate your data for this normalization")
+      )
       MR_exprDat <- newMRexperiment(exprDat)
-      p = cumNormStat(MR_exprDat) #default is 0.5
+      if (input$LoadExample == "Yes" || input$OmicTable3 != 'OTUs'){
+        p <- 0.5
+      }else{
+        p = cumNormStat(MR_exprDat) #default is 0.5
+      }
       MR_exprDat = cumNorm(MR_exprDat, p=p)
       exprDat <- MRcounts(MR_exprDat, norm = TRUE)
     }else{
