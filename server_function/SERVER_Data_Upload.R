@@ -55,9 +55,9 @@ sampleAnnot <- reactive({
     }
   }
   
-
   
- 
+  
+  
   col_to_remove <- c()
   for (i in 1:ncol(sampleAnnot)){
     if (length(unique(sampleAnnot[,i])) == 1){
@@ -66,15 +66,15 @@ sampleAnnot <- reactive({
   }
   if (!is.null(col_to_remove)){
     sampleAnnot <- sampleAnnot[,-col_to_remove]
-
+    
     
   }
-
+  
   validate(
     need(ncol(sampleAnnot)!= 1, "Please upload an annotation file containing at least two columns of non-unique features")
   )
-
-    sampleAnnot <- sampleAnnot[order(rownames(sampleAnnot)),]
+  
+  sampleAnnot <- sampleAnnot[order(rownames(sampleAnnot)),]
   
   sampleAnnot
 })
@@ -133,7 +133,7 @@ exprDat <- reactive({
     }
     # Look if rows are OTUs and columns are samples.
   }
-
+  
   if (length(exprDat[which(colnames(exprDat) %in% rownames(sampleAnnot()))]) > 1){
     
     exprDat <- as.data.frame(t(exprDat))
@@ -170,6 +170,8 @@ exprDat <- reactive({
     }else{
       min_count = input$count
       exprDat <- exprDat[, which(colSums(exprDat) >= min_count)]
+      validate(
+        need(ncol(exprDat) > 0, "Do not apply the minimal count filtration on normalized/transformed data"))
     }
   }
   
@@ -196,7 +198,7 @@ exprDat <- reactive({
   }
   exprDat <- exprDat[which(rownames(exprDat) %in% rownames(sampleAnnot())),]
   exprDat <- exprDat[which(rownames(exprDat) %!in% input$selectSample),]
-
+  
   
   sampleAnnotation <- sampleAnnot()
   rownamesAnnot <- as.character(rownames(sampleAnnot()))
@@ -205,7 +207,7 @@ exprDat <- reactive({
   sampleAnnotation <- as.data.frame(sampleAnnotation[which(rownames(sampleAnnotation) %!in% as.character(input$selectSample)),])
   colnames(sampleAnnotation) <- colnamesAnnot
   rownames(sampleAnnotation) <- rownamesAnnot[rownamesAnnot %!in% as.character(input$selectSample)]
-
+  
   # DATA TRANFORMATION
   if (input$Transformation == "Yes"){
     if (input$TypeTransformation == "Log10"){
@@ -241,10 +243,10 @@ exprDat <- reactive({
     }
   }
   exprDat <- exprDat[which(rownames(exprDat) %in% rownames(sampleAnnotation)),]
-
-
+  
+  
   exprDat <- exprDat[order(rownames(exprDat)),]
- 
+  
   exprDat
 })
 
@@ -258,18 +260,18 @@ exprDat_present <- reactive({
     )
     exprDat_present <- exprDat()     
   }
-  if (nchar(colnames(exprDat_present)[1]) > 20 ){
-    for (i in 1:ncol(exprDat_present)){
-      colnames(exprDat_present)[i] <- paste(input$CountingT, i, sep = "") 
-    }
-  }
+  # if (nchar(colnames(exprDat_present)[1]) > 20 ){
+  #   for (i in 1:ncol(exprDat_present)){
+  #     colnames(exprDat_present)[i] <- paste(input$CountingT, i, sep = "") 
+  #   }
+  # }
   exprDat_present
 })
 
 
 exprDatSec <- reactive ({
   if (input$LoadExample == "Yes" && input$TypeAnalysis == "multivariate"){
-    expressionData<-"data/host_txLIGHT.csv" #expression file path
+    expressionData<-"data/hostTXLIGHT2.csv" #expression file path
     exprDatSec <- read.csv(expressionData, sep = ",", header = TRUE, row.names = 1)
   }else{
     validate(
@@ -305,7 +307,7 @@ exprDatSec <- reactive ({
                              dec = input$dec4,
                              check.names = FALSE)
     }
-   
+    
   }
   if (length(exprDatSec[which(colnames(exprDatSec) %in% rownames(sampleAnnot()))]) > 2){
     exprDatSec <- as.data.frame(t(exprDatSec))
@@ -350,16 +352,17 @@ exprDatSec <- reactive ({
     }else{
       min_count = input$count1
       exprDatSec <- exprDatSec[, which(colSums(exprDatSec) >= min_count)]
+      validate(
+        need(ncol(exprDatSec) > 0, "Do not apply the minimal count filtration on normalized/transformed data"))
     }
   }
-  
   # DATA NORMALIZATION
   if(input$Normalisation1 == "Yes"){
     if (input$TypeNormalisation1 == 'CSS'){
       validate(
         need(!any(colSums(exprDatSec) == 0), "Please filtrate your data for this normalization")
       )
-
+      
       MR_exprDatSec <- newMRexperiment(exprDatSec)
       if (input$LoadExample == "Yes" || input$OmicTable != 'OTUs'){
         p <- 0.5
@@ -418,7 +421,7 @@ exprDatSec <- reactive ({
   exprDatSec <- exprDatSec[which(rownames(exprDatSec) %in% rownames(sampleAnnotation)),]
   exprDatSec <- exprDatSec[match(rownames(sampleAnnotation), rownames(exprDatSec)),]
   
- 
+  
   exprDatSec
 })
 
@@ -432,11 +435,11 @@ exprDatSec_present <- reactive({
     )
     exprDatSec_present <- exprDatSec()     
   }
-  if (nchar(colnames(exprDatSec_present)[5]) > 20 ){
-    for (i in 1:ncol(exprDatSec_present)){
-      colnames(exprDatSec_present)[i] <- paste(input$OmicTable, i, sep = "") 
-    }
-  }
+  # if (nchar(colnames(exprDatSec_present)[5]) > 20 ){
+  #   for (i in 1:ncol(exprDatSec_present)){
+  #     colnames(exprDatSec_present)[i] <- paste(input$OmicTable, i, sep = "") 
+  #   }
+  # }
   exprDatSec_present
 })
 
@@ -446,7 +449,7 @@ exprDatSec_present <- reactive({
 exprDatTer <- reactive({
   if (input$LoadExample == "Yes" && input$TypeAnalysis == "multivariate" && input$Omic3){
     updateRadioButtons(session, "OmicTable3", selected = "Metabolites")
-    expressionData<-"data/metabolomicsLIGHT.csv" #expression file path
+    expressionData<-"data/metaboLIGHT2.csv" #expression file path
     exprDat <- read.csv(expressionData, sep = ",", header = TRUE, row.names = 1)
   }else{
     validate(
@@ -496,7 +499,7 @@ exprDatTer <- reactive({
     exprDat <- sapply(exprDat, as.numeric)
     showNotification("The counting table does not contains numeric values. The values were transformed into numbers but your analysis may not worked as expected. Please check the format of your counting table.", type = "warning", duration = NULL)
   }
-
+  
   rownames(exprDat) <- sampleID
   
   
@@ -525,6 +528,8 @@ exprDatTer <- reactive({
     }else{
       min_count = input$count2
       exprDat <- exprDat[, which(colSums(exprDat) >= min_count)]
+      validate(
+        need(ncol(exprDat) > 0, "Do not apply the minimal count filtration on normalized/transformed data"))
     }
   }
   
@@ -607,11 +612,11 @@ exprDatTer_present <- reactive({
     }
   }
   
-  if (nchar(colnames(exprDatTer_present)[5]) > 20 ){
-    for (i in 1:ncol(exprDatTer_present)){
-      colnames(exprDatTer_present)[i] <- paste(input$OmicTable3, i, sep = "") 
-    }
-  }
+  # if (nchar(colnames(exprDatTer_present)[5]) > 20 ){
+  #   for (i in 1:ncol(exprDatTer_present)){
+  #     colnames(exprDatTer_present)[i] <- paste(input$OmicTable3, i, sep = "") 
+  #   }
+  # }
   exprDatTer_present
 })
 
@@ -700,8 +705,8 @@ taxTable <- reactive({
       }else{
         taxTable <- 0
       }
-  }
-  
+    }
+    
   }
   exprDat <- exprDat()
   if (substr(colnames(exprDat), 1, 1) == "X"){
@@ -738,11 +743,11 @@ taxTable_present <- reactive({
       taxTable_present <- 0
     }
   }
-  if (nchar(rownames(taxTable_present)) > 20){
-    for (i in 1:nrow(taxTable_present)){
-      rownames(taxTable_present)[i] <- paste("OTU", i, sep = "") 
-    }      
-  }
+  # if (nchar(rownames(taxTable_present)) > 20){
+  #   for (i in 1:nrow(taxTable_present)){
+  #     rownames(taxTable_present)[i] <- paste("OTU", i, sep = "") 
+  #   }      
+  # }
   
   taxTable_present
 })
@@ -886,7 +891,7 @@ exprDat_WGCNA <- reactive({
   if (nrow(expr) > 14){
     gsg = goodSamplesGenes(expr, verbose = 3)
     #If gsg$allOK is TRUE, all genes have passed the cuts.  If not, we remove the offending genes and samples
-
+    
     if (!gsg$allOK)
     {
       # Optionally, print the gene and sample names that were removed:
@@ -903,7 +908,7 @@ exprDat_WGCNA <- reactive({
       exprDat1 <- expr
     }
   }else{
-  exprDat1 <- expr
+    exprDat1 <- expr
   }
   exprDat1
 })
@@ -914,7 +919,7 @@ exprDatSec_WGCNA <- reactive({
   if (nrow(expr) > 14){
     gsg = goodSamplesGenes(expr, verbose = 3)
     #If gsg$allOK is TRUE, all genes have passed the cuts.  If not, we remove the offending genes and samples
-
+    
     if (!gsg$allOK)
     {
       # Optionally, print the gene and sample names that were removed:
@@ -1033,59 +1038,59 @@ taxTable2 <- reactive({
 })
 
 selectedMetab <- reactive({
-  expr <- exprDatSec_4()
+  Module_metab <- exprDatSec_4()
   
-  
-  if (input$selectModule2_p5 != "General"){
-    modGenes = (selectedDynamicColor2()== input$selectModule2_p5)
-    
-    Module_metab <- expr[,modGenes]
-    unique_col <- c()
-    for (i in 1:ncol(Module_metab)){
-      if (length(unique(Module_metab[,i])) == 1){ #if there is only one value for all the samples
-        unique_col <- c(unique_col, colnames(Module_metab)[i])
-      }
+  # 
+  # if (input$selectModule2_p5 != "General"){
+  #   modGenes = (selectedDynamicColor2()== input$selectModule2_p5)
+  #   
+  #   Module_metab <- expr[,modGenes]
+  #   unique_col <- c()
+  #   for (i in 1:ncol(Module_metab)){
+  #     if (length(unique(Module_metab[,i])) == 1){ #if there is only one value for all the samples
+  #       unique_col <- c(unique_col, colnames(Module_metab)[i])
+  #     }
+  #   }
+  #   Module_metab <- Module_metab[, which(colnames(Module_metab) %!in% unique_col)]
+  # }else{
+  # Module_metab <- expr
+  unique_col <- c()
+  for (i in 1:ncol(Module_metab)){
+    if (length(unique(Module_metab[,i])) == 1){ #if there is only one value for all the samples
+      unique_col <- c(unique_col, colnames(Module_metab)[i])
     }
-    Module_metab <- Module_metab[, which(colnames(Module_metab) %!in% unique_col)]
-  }else{
-    Module_metab <- expr
-    unique_col <- c()
-    for (i in 1:ncol(Module_metab)){
-      if (length(unique(Module_metab[,i])) == 1){ #if there is only one value for all the samples
-        unique_col <- c(unique_col, colnames(Module_metab)[i])
-      }
-    }
-    Module_metab <- Module_metab[, which(colnames(Module_metab) %!in% unique_col)]
   }
+  Module_metab <- Module_metab[, which(colnames(Module_metab) %!in% unique_col)]
+  # }
   Module_metab[which(is.na(Module_metab)),] <- 0
   Module_metab
 })
 
 
 selectedD3 <- reactive({
-  expr <- exprDatTer_3()
-
+  Module_metab <- exprDatTer_3()
   
-  if (input$selectModule3_p5 != "General"){
-    modGenes = (selectedDynamicColor3() == input$selectModule3_p5)
-    Module_metab <- expr[,modGenes]
-    unique_col <- c()
-    for (i in 1:ncol(Module_metab)){
-      if (length(unique(Module_metab[,i])) == 1){ #if there is only one value for all the samples
-        unique_col <- c(unique_col, colnames(Module_metab)[i])
-      }
+  
+  # if (input$selectModule3_p5 != "General"){
+  #   modGenes = (selectedDynamicColor3() == input$selectModule3_p5)
+  #   Module_metab <- expr[,modGenes]
+  #   unique_col <- c()
+  #   for (i in 1:ncol(Module_metab)){
+  #     if (length(unique(Module_metab[,i])) == 1){ #if there is only one value for all the samples
+  #       unique_col <- c(unique_col, colnames(Module_metab)[i])
+  #     }
+  #   }
+  #   Module_metab <- Module_metab[, which(colnames(Module_metab) %!in% unique_col)]
+  # }else{
+  # Module_metab <- expr
+  unique_col <- c()
+  for (i in 1:ncol(Module_metab)){
+    if (length(unique(Module_metab[,i])) == 1){ #if there is only one value for all the samples
+      unique_col <- c(unique_col, colnames(Module_metab)[i])
     }
-    Module_metab <- Module_metab[, which(colnames(Module_metab) %!in% unique_col)]
-  }else{
-    Module_metab <- expr
-    unique_col <- c()
-    for (i in 1:ncol(Module_metab)){
-      if (length(unique(Module_metab[,i])) == 1){ #if there is only one value for all the samples
-        unique_col <- c(unique_col, colnames(Module_metab)[i])
-      }
-    }
-    Module_metab <- Module_metab[, which(colnames(Module_metab) %!in% unique_col)]
   }
+  Module_metab <- Module_metab[, which(colnames(Module_metab) %!in% unique_col)]
+  # }
   Module_metab[which(is.na(Module_metab)),] <- 0
   
   Module_metab
@@ -1099,27 +1104,27 @@ sampleAnnot_3 <- reactive({
 
 
 selected_moduleOTU <- reactive({
-  if (input$selectModule1_p5 != "General"){
-    modGenes = (selectedDynamicColor()== input$selectModule1_p5)
-    
-    Module_OTU <- exprDat_3()[modGenes]
-    unique_col <- c()
-    for (i in 1:ncol(Module_OTU)){
-      if (length(unique(Module_OTU[,i])) == 1){ #if there is only one value for all the samples
-        unique_col <- c(unique_col, colnames(Module_OTU)[i])
-      }
+  # if (input$selectModule1_p5 != "General"){
+  #   modGenes = (selectedDynamicColor()== input$selectModule1_p5)
+  #   
+  #   Module_OTU <- exprDat_3()[modGenes]
+  #   unique_col <- c()
+  #   for (i in 1:ncol(Module_OTU)){
+  #     if (length(unique(Module_OTU[,i])) == 1){ #if there is only one value for all the samples
+  #       unique_col <- c(unique_col, colnames(Module_OTU)[i])
+  #     }
+  #   }
+  #   Module_OTU <- Module_OTU[, which(colnames(Module_OTU) %!in% unique_col)]
+  # }else{
+  Module_OTU <- exprDat_3()
+  unique_col <- c()
+  for (i in 1:ncol(Module_OTU)){
+    if (length(unique(Module_OTU[,i])) == 1){ #if there is only one value for all the samples
+      unique_col <- c(unique_col, colnames(Module_OTU)[i])
     }
-    Module_OTU <- Module_OTU[, which(colnames(Module_OTU) %!in% unique_col)]
-  }else{
-    Module_OTU <- exprDat_3()
-    unique_col <- c()
-    for (i in 1:ncol(Module_OTU)){
-      if (length(unique(Module_OTU[,i])) == 1){ #if there is only one value for all the samples
-        unique_col <- c(unique_col, colnames(Module_OTU)[i])
-      }
-    }
-    Module_OTU <- Module_OTU[, which(colnames(Module_OTU) %!in% unique_col)]
-  } 
+  }
+  Module_OTU <- Module_OTU[, which(colnames(Module_OTU) %!in% unique_col)]
+  # } 
   Module_OTU
   
   
@@ -1225,30 +1230,30 @@ output$ViewPanel <- renderUI({
                      selected = character(0))
       }else{
         if (input$TypeAnalysis == 'multivariate' && (input$TaxonFile1 == TRUE | input$LoadExample == "Yes") && input$Omic3){
-
-            radioButtons("View6",
-                         "View: ",
-                         choices = c("Counting Table" = "counting", "Annotation Table" = "annot", "Taxa Table" = "taxa", "Second Omic Table" = "sec", "Third Omic Table" = "ter"),
-                         selected = character(0))
+          
+          radioButtons("View6",
+                       "View: ",
+                       choices = c("Counting Table" = "counting", "Annotation Table" = "annot", "Taxa Table" = "taxa", "Second Omic Table" = "sec", "Third Omic Table" = "ter"),
+                       selected = character(0))
         }else{
-
-            if(input$TypeAnalysis == 'multivariate' && input$TaxonFile1 == FALSE && input$Omic3){
-              radioButtons("View5",
-                           "View: ",
-                           choices = c("Counting Table" = "counting", "Annotation Table" = "annot", "Second Omic Table" = "sec", "Third Omic Table" = "ter"),
+          
+          if(input$TypeAnalysis == 'multivariate' && input$TaxonFile1 == FALSE && input$Omic3){
+            radioButtons("View5",
+                         "View: ",
+                         choices = c("Counting Table" = "counting", "Annotation Table" = "annot", "Second Omic Table" = "sec", "Third Omic Table" = "ter"),
+                         selected = character(0))
+          }else{
+            if (input$TypeAnalysis == 'simple' && input$TaxonFile == FALSE){
+              radioButtons("View2", 
+                           "View: ", 
+                           choices = c("Counting Table" = "counting", "Annotation Table" = "annot"),
                            selected = character(0))
-            }else{
-              if (input$TypeAnalysis == 'simple' && input$TaxonFile == FALSE){
-                radioButtons("View2", 
-                             "View: ", 
-                             choices = c("Counting Table" = "counting", "Annotation Table" = "annot"),
-                             selected = character(0))
-              }
-
             }
+            
+          }
           
         }
-    }
+      }
     }
   }
 })
@@ -1269,7 +1274,7 @@ output$ViewTable <- renderDataTable({
   }else{
     length_expr <- 10
   }
-
+  
   
   
   if(is.null(input$View1)&is.null(input$View2)&is.null(input$View3)&is.null(input$View4)&is.null(input$View5)&is.null(input$View6)){
@@ -1391,7 +1396,7 @@ output$ViewTable <- renderDataTable({
                 }else{
                   length_expr_sec <- 10
                 }
-
+                
                 
                 datatable(exprDatSec_present()[,1:length_expr_sec],
                           options = list(lengthMenu = FALSE, pageLength = 5, dom = 'tip'), 
@@ -1422,13 +1427,13 @@ output$ViewTable <- renderDataTable({
                 }else{
                   length_expr_sec <- 10
                 }
-
+                
                 datatable(exprDatSec_present()[,1:length_expr_sec],
                           options = list(lengthMenu = FALSE, pageLength = 5, dom = 'tip'),
                           class = 'cell-border stripe')
               }else{
                 if (input$View6 == "ter"){
-     
+                  
                   
                   if (ncol(exprDatTer()) < 10){
                     length_expr_ter <- ncol(exprDatTer())
@@ -1449,74 +1454,74 @@ output$ViewTable <- renderDataTable({
         }
       }else{
         if (input$Omic3){
-            if (input$View5 == "annot"){
-              datatable(sampleAnnot_2(),
-                        options = list(lengthMenu = FALSE, pageLength = 5,  dom = 'tip'),
-                        class = 'cell-border stripe')
-            }else{
-              if (input$View5 =="counting"){
-                if(ncol(exprDat_present()) < 1000){
-                  datatable(exprDat_present()[,1:length_expr],
-                            options = list(lengthMenu = FALSE, pageLength = 5,  dom = 'tip'),
-                            class = 'cell-border stripe')
-                }else{
-                  datatable(head(exprDat_present()[,1:length_expr]),
-                            options = list(lengthMenu = FALSE, pageLength = 5,  dom = 'tip'),
-                            class = 'cell-border stripe')
-                }
-              }else{
-                if (input$View5 =="sec"){
-                  if (ncol(exprDatSec()) < 10){
-                    length_expr_sec <- ncol(exprDatSec())
-                  }else{
-                    length_expr_sec <- 10
-                  }
-
-                  datatable(exprDatSec_present()[,1:length_expr_sec],
-                            options = list(lengthMenu = FALSE, pageLength = 5, dom = 'tip'),
-                            class = 'cell-border stripe')
-                }else{
-
-                  
-                  if (ncol(exprDatTer()) < 10){
-                    length_expr_ter <- ncol(exprDatTer())
-                  }else{
-                    length_expr_ter <- 10
-                  }
-                  datatable(exprDatTer_present()[,1:length_expr_ter],
-                            options = list(lengthMenu = FALSE, pageLength = 5, dom = 'tip'),
-                            class = 'cell-border stripe')
-                }
-              }
-            }
+          if (input$View5 == "annot"){
+            datatable(sampleAnnot_2(),
+                      options = list(lengthMenu = FALSE, pageLength = 5,  dom = 'tip'),
+                      class = 'cell-border stripe')
           }else{
-            if (input$View4 == "annot"){
-              datatable(sampleAnnot_2(),
-                        options = list(lengthMenu = FALSE, pageLength = 5,  dom = 'tip'),
-                        class = 'cell-border stripe')
-            }else{
-              if (input$View4 =="counting"){
-                if(ncol(exprDat_present()) < 1000){
-                  datatable(exprDat_present()[,1:length_expr],
-                            options = list(lengthMenu = FALSE, pageLength = 5,  dom = 'tip'),
-                            class = 'cell-border stripe')
-                }else{
-                  datatable(head(exprDat_present()[,1:length_expr]),
-                            options = list(lengthMenu = FALSE, pageLength = 5,  dom = 'tip'),
-                            class = 'cell-border stripe')
-                }
+            if (input$View5 =="counting"){
+              if(ncol(exprDat_present()) < 1000){
+                datatable(exprDat_present()[,1:length_expr],
+                          options = list(lengthMenu = FALSE, pageLength = 5,  dom = 'tip'),
+                          class = 'cell-border stripe')
               }else{
+                datatable(head(exprDat_present()[,1:length_expr]),
+                          options = list(lengthMenu = FALSE, pageLength = 5,  dom = 'tip'),
+                          class = 'cell-border stripe')
+              }
+            }else{
+              if (input$View5 =="sec"){
                 if (ncol(exprDatSec()) < 10){
                   length_expr_sec <- ncol(exprDatSec())
                 }else{
                   length_expr_sec <- 10
                 }
+                
                 datatable(exprDatSec_present()[,1:length_expr_sec],
+                          options = list(lengthMenu = FALSE, pageLength = 5, dom = 'tip'),
+                          class = 'cell-border stripe')
+              }else{
+                
+                
+                if (ncol(exprDatTer()) < 10){
+                  length_expr_ter <- ncol(exprDatTer())
+                }else{
+                  length_expr_ter <- 10
+                }
+                datatable(exprDatTer_present()[,1:length_expr_ter],
                           options = list(lengthMenu = FALSE, pageLength = 5, dom = 'tip'),
                           class = 'cell-border stripe')
               }
             }
           }
+        }else{
+          if (input$View4 == "annot"){
+            datatable(sampleAnnot_2(),
+                      options = list(lengthMenu = FALSE, pageLength = 5,  dom = 'tip'),
+                      class = 'cell-border stripe')
+          }else{
+            if (input$View4 =="counting"){
+              if(ncol(exprDat_present()) < 1000){
+                datatable(exprDat_present()[,1:length_expr],
+                          options = list(lengthMenu = FALSE, pageLength = 5,  dom = 'tip'),
+                          class = 'cell-border stripe')
+              }else{
+                datatable(head(exprDat_present()[,1:length_expr]),
+                          options = list(lengthMenu = FALSE, pageLength = 5,  dom = 'tip'),
+                          class = 'cell-border stripe')
+              }
+            }else{
+              if (ncol(exprDatSec()) < 10){
+                length_expr_sec <- ncol(exprDatSec())
+              }else{
+                length_expr_sec <- 10
+              }
+              datatable(exprDatSec_present()[,1:length_expr_sec],
+                        options = list(lengthMenu = FALSE, pageLength = 5, dom = 'tip'),
+                        class = 'cell-border stripe')
+            }
+          }
+        }
         
       }
     }

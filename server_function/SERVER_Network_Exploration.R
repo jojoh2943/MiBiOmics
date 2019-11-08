@@ -744,6 +744,7 @@ env.markers.data_D3 <- reactive({
 })
 
 fit.object.ncomp_D3 <- reactive({
+  print(length(colnames(exprDatTer_WGCNA())[selectedDynamicColor3()==input$colorModule_D3]))
   if (length(colnames(exprDatTer_WGCNA())[selectedDynamicColor3()==input$colorModule_D3]) >= 10){
     ncomp=10
   }else{
@@ -1271,7 +1272,7 @@ output$edge_node_D2 <- renderPlot({
 #### VIP and PLS 
 
 output$PLS_D3 <- renderPlot({
-  predplot(fit.object_D3(), main=paste("Cor. in LOO CV:",cvs.object_D2()), col="blue", cex=0.5)
+  predplot(fit.object_D3(), main=paste("Cor. in LOO CV:",cvs.object_D3()), col="blue", cex=0.5)
   plot(fit.object_D3(), ncomp=input$ncomponent_D3, asp=1, line=TRUE)
 })
 
@@ -1470,7 +1471,7 @@ output$hivePlot_D1 <- downloadHandler(
       
     }else{
 
-        svg("HIVE.svg", width = input$HIVEwidthPDF, height = input$HIVEwidthPDF)
+      svg("HIVE.svg", width = input$HIVEwidthPDF, height = input$HIVEwidthPDF)
       
       print(  ggplot() +
                 geom_point(data = df.hive.plot(), aes(x1, y1, color = annotation, size = 3)) + # x1 is the VIP

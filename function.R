@@ -170,7 +170,169 @@ vector_geom_curve <- function(edge_df, df_ggplot){
 
 #### HIVE FUNCTIONS ####
 
-hive_myLayers <- function(l_WGCNA_D1, l_WGCNA_D2, l_WGCNA_D3, myCorrs, myAnnots, correlation= "spearman", trait, exportPDF = FALSE, exportSVG = FALSE, sizePlot = 10, nameFile = "hive_D1_D2_D3", cureCorr = FALSE, exportCSV = FALSE){
+# hive_myLayers <- function(l_WGCNA_D1, l_WGCNA_D2, l_WGCNA_D3, myCorrs, myAnnots, correlation= "spearman", trait, exportPDF = FALSE, exportSVG = FALSE, sizePlot = 10, nameFile = "hive_D1_D2_D3", cureCorr = FALSE, exportCSV = FALSE){
+#   require(leaflet)
+#   
+#   annot_D1 <- myAnnots[[1]]
+#   annot_D2 <- myAnnots[[2]]
+#   annot_D3 <- myAnnots[[3]]
+#   WGCNA_list <- list()
+#   WGCNA_list[[1]] <- l_WGCNA_D1
+#   WGCNA_list[[2]] <- l_WGCNA_D2
+#   WGCNA_list[[3]] <- l_WGCNA_D3
+#   pal <- colorNumeric(palette = "RdBu", 1:-1)
+#   
+#   
+#   # Create nodes dataframe:
+#   id <- c(seq(from = 1, to = (ncol(l_WGCNA_D1[[5]])+ ncol(l_WGCNA_D2[[5]]) + ncol(l_WGCNA_D3[[5]]) +6 )))
+#   label <- c("min_DF1", "min_DF2", "min_DF3", as.vector(paste(colnames(l_WGCNA_D1[[5]]), "DF1", sep = "_")), as.vector(paste( colnames(l_WGCNA_D2[[5]]), "DF2", sep = "_")), as.vector(paste( colnames(l_WGCNA_D3[[5]]), "DF3", sep = "_")), "extreme_DF1", "extreme_DF2", "extreme_DF3" )
+#   color <- c("white", "white", "white", as.vector(substr(colnames(l_WGCNA_D1[[5]]), 3, 30)), as.vector(substr( colnames(l_WGCNA_D2[[5]]), 3, 30)), as.vector(substr(colnames(l_WGCNA_D3[[5]]), 3, 30)), "white", "white", "white" )
+#   axis <- c(1, 2, 3, as.vector(rep(1, ncol(l_WGCNA_D1[[5]]))), as.vector(rep(2, ncol(l_WGCNA_D2[[5]]))), as.vector(rep(3, ncol(l_WGCNA_D3[[5]]))), 1, 2, 3 )
+#   size <- c(0, 0, 0, as.vector(rep(1, sum(ncol(l_WGCNA_D1[[5]]), ncol(l_WGCNA_D2[[5]]), ncol(l_WGCNA_D3[[5]])))), 0, 0, 0)
+#   radius <- c()
+#   v_pv <- c()
+#   for (i in 1:3){
+#     annot <- myAnnots[[i]]
+#     myWGCNA <- WGCNA_list[[i]]
+#     if (is.numeric(annot[,trait])){
+#       moduleTraitCor = cor(myWGCNA[[5]], annot[,trait], use = "p", method = correlation)
+#     }else{
+#       annot2<- annot
+#       annot2[,trait] <- as.factor(annot2[, trait])
+#       annot2[,trait] <- as.numeric(annot2[,trait])
+#       moduleTraitCor = cor(myWGCNA[[5]], annot2[,trait], use = "p", method = correlation)
+#     }
+#     pv <- corPvalueStudent(moduleTraitCor, nrow(annot))
+#     
+#     radius <- c(radius, abs(moduleTraitCor)*100)
+#     v_pv <- c(v_pv, pv)
+#   }
+#   v_pv <- c(0, 0, 0 ,v_pv, 0, 0, 0)
+#   df_size <- data.frame("size" = size, "pv" = v_pv)
+#   df_size[df_size$pv > 0.05,] <- 0
+#   radius <- c(0, 0, 0, radius, 100, 100, 100)
+#   nodes <- data.frame(id = id, lab= as.character(label), axis = as.integer(axis), radius= radius, size= df_size$size, color= as.character(color))
+#   # Do we set the size of the node to zero if the p-value is not significative ?
+#   
+#   # create edge dataframe:
+#   id1 <- c()
+#   id2 <- c()
+#   weight <- c()
+#   color <- c()
+#   for (k in 1:3){
+#     myCorr <- myCorrs[[k]]
+#     for (i in 1:nrow(myCorr[[2]])){
+#       for (j in 1:ncol(myCorr[[2]])){
+#         if (myCorr[[2]][i, j] < 0.05 && abs(myCorr[[1]][i, j]) > 0.3){
+#           myNode1 <-nodes[which(nodes$lab==rownames(myCorr[[2]])[i]),]
+#           myNode2 <-nodes[which(nodes$lab==colnames(myCorr[[2]])[j]),]
+#           id1 <- c(id1, myNode1$id)
+#           id2 <- c(id2, myNode2$id)
+#           weight <- c(weight, round(exp(abs(myCorr[[1]][i, j]))^3))
+#           color <- c(color, pal(c(myCorr[[1]][i, j])))
+#         }
+#       }
+#     }
+#   }
+#   if (length(id1) == 0){
+#     edges <- 0
+#   }else{
+#     edges <- data.frame(id1 = id1, id2 = id2, weight = weight, color = as.character(color))
+#     id_to_keep <- nodes[which(nodes$size != 0),]
+#     id_to_keep <- id_to_keep$id
+#     id_to_keep <- c(1, 2, 3, id_to_keep, nodes$id[(length(nodes$id)-2):length(nodes$id)])
+#     nodes <- nodes[which(nodes$id %in% id_to_keep),]
+#     
+#     
+#     edges <- edges[which(edges$id1 %in% id_to_keep),]
+#     edges <- edges[which(edges$id2 %in% id_to_keep),]
+# 
+#     if (cureCorr){
+#       nodes <- nodes[which(nodes$radius > 40),]
+#       edges <- edges[which(edges$id1 %in% nodes$id),]
+#       edges <- edges[which(edges$id2 %in% nodes$id),]
+#     }
+#     type <- "2D"
+#     desc <- "Hive Plot 3 Layers"
+#     axis.cols <- c("#636363", "#636363", "#636363")
+#     if (exportCSV){
+#       write.csv(nodes, file = paste("nodes_", trait, "_", nameFile, ".csv", sep = ""))
+#       write.csv(edges, file = paste("edges_", trait, "_", nameFile, ".csv", sep = ""))
+#       
+#     }
+#   }
+#   myHive <- list(nodes = nodes, edges = edges, type = type, desc = desc, axis.cols= axis.cols)
+#   
+#   return(myHive)
+# }
+
+keystoneMyNodes <- function(nodes, edges, returnNetwork = FALSE){
+  require("igraph")
+  require("psych")
+  net <- graph_from_data_frame(d=edges, vertices=nodes[7:nrow(nodes)-3,], directed=F)
+  print(V(net))
+  print(E(net))
+  colrs <- c("gray50", "tomato", "gold")
+  
+  V(net)$color <- colrs[V(net)$axis]
+  if (nrow(edges) != 0){
+    E(net)$width <- E(net)$weight
+    
+  }
+  V(net)$size <- V(net)$radius/3
+  # if (extractNetwork){
+  #   if(exportPDF){
+  #     pdf(paste(nameFile, "_network_", varInterest, ".pdf", sep = ""), height = 15, width = 15)
+  #     plot(net, vertex.label=V(net)$lab, vertex.label.cex = .7)
+  #     legend(x=-1, y=-1.1, c("Luminal","Adherent", "Host Transcriptome"), pch=21, col="#777777", pt.bg=colrs, pt.cex=2, cex=.8, bty="n", ncol=1)
+  #     dev.off()
+  #   }
+  #   if(exportSVG){
+  #     svg(paste(nameFile, "network", varInterest, ".svg", sep = ""), height = 15, width = 15)
+  #     plot(net, vertex.label=V(net)$lab, vertex.label.cex = .7)
+  #     legend(x=-1, y=-1.1, c("Luminal","Adherent", "Host Transcriptome"), pch=21, col="#777777", pt.bg=colrs, pt.cex=2, cex=.8, bty="n", ncol=1)
+  #     dev.off()
+  #   }
+  # }
+  
+  
+  #create a table with all centrality measure
+  if (nrow(edges) > 5){
+    centrality_measure <- data.frame(BC = betweenness(net, v = V(net), normalized = TRUE),
+                                     CC = closeness(net, vids= V(net), normalized = TRUE),
+                                     EC = eigen_centrality(net)$vector,
+                                     SC = subgraph_centrality(net),
+                                     DC = degree(net, v = V(net), normalized = TRUE))
+    
+    # Calculate the coefficient of each centrality measure via factor analysis
+    fa_weigth <- fa(centrality_measure)$weights
+    
+    #Calculate keystone index for each node of the network !
+    
+    PC1 <- fa_weigth[1] * betweenness(net, v = V(net), normalized = TRUE) +
+      fa_weigth[2] * closeness(net, vids= V(net), normalized = TRUE) +
+      fa_weigth[3] * eigen_centrality(net)$vector +
+      fa_weigth[4] * subgraph_centrality(net) +
+      fa_weigth[5] * degree(net, v = V(net), normalized = TRUE)
+    if (returnNetwork){
+      return(net)
+    }else{
+      return(PC1)
+    }
+  }else{
+    PC1 <- 0
+    if (returnNetwork){
+      return(net)
+    }else{
+      return(PC1)
+    }
+  }
+  
+
+}
+
+hive_myLayers <- function(l_WGCNA_D1, l_WGCNA_D2, l_WGCNA_D3, myCorrs, myAnnots, correlation= "spearman", trait, exportPDF = FALSE, exportSVG = FALSE, sizePlot = 10, nameFile = "hive_D1_D2_D3", cureCorr = FALSE, exportCSV = FALSE, networkOrdered = FALSE)
+{
   require(leaflet)
   
   annot_D1 <- myAnnots[[1]]
@@ -186,7 +348,7 @@ hive_myLayers <- function(l_WGCNA_D1, l_WGCNA_D2, l_WGCNA_D3, myCorrs, myAnnots,
   # Create nodes dataframe:
   id <- c(seq(from = 1, to = (ncol(l_WGCNA_D1[[5]])+ ncol(l_WGCNA_D2[[5]]) + ncol(l_WGCNA_D3[[5]]) +6 )))
   label <- c("min_DF1", "min_DF2", "min_DF3", as.vector(paste(colnames(l_WGCNA_D1[[5]]), "DF1", sep = "_")), as.vector(paste( colnames(l_WGCNA_D2[[5]]), "DF2", sep = "_")), as.vector(paste( colnames(l_WGCNA_D3[[5]]), "DF3", sep = "_")), "extreme_DF1", "extreme_DF2", "extreme_DF3" )
-  color <- c("white", "white", "white", as.vector(substr(colnames(l_WGCNA_D1[[5]]), 3, 30)), as.vector(substr( colnames(l_WGCNA_D2[[5]]), 3, 30)), as.vector(substr(colnames(l_WGCNA_D3[[5]]), 3, 30)), "white", "white", "white" )
+  color <- c("white", "white", "white", as.vector(rep("#D55E00", sum(ncol(l_WGCNA_D1[[5]]), ncol(l_WGCNA_D2[[5]]), ncol(l_WGCNA_D3[[5]])))), "white", "white", "white" )
   axis <- c(1, 2, 3, as.vector(rep(1, ncol(l_WGCNA_D1[[5]]))), as.vector(rep(2, ncol(l_WGCNA_D2[[5]]))), as.vector(rep(3, ncol(l_WGCNA_D3[[5]]))), 1, 2, 3 )
   size <- c(0, 0, 0, as.vector(rep(1, sum(ncol(l_WGCNA_D1[[5]]), ncol(l_WGCNA_D2[[5]]), ncol(l_WGCNA_D3[[5]])))), 0, 0, 0)
   radius <- c()
@@ -208,10 +370,11 @@ hive_myLayers <- function(l_WGCNA_D1, l_WGCNA_D2, l_WGCNA_D3, myCorrs, myAnnots,
     v_pv <- c(v_pv, pv)
   }
   v_pv <- c(0, 0, 0 ,v_pv, 0, 0, 0)
-  df_size <- data.frame("size" = size, "pv" = v_pv)
-  df_size[df_size$pv > 0.05,] <- 0
+  df_color <- data.frame("color" = color, "pv" = v_pv)
+  df_color[df_color$pv > 0.05,] <- "white"
   radius <- c(0, 0, 0, radius, 100, 100, 100)
-  nodes <- data.frame(id = id, lab= as.character(label), axis = as.integer(axis), radius= radius, size= df_size$size, color= as.character(color))
+  nodes <- data.frame(id = id, lab= as.character(label), axis = as.integer(axis), radius= radius, size= size, color= as.character(df_color$color))
+
   # Do we set the size of the node to zero if the p-value is not significative ?
   
   # create edge dataframe:
@@ -235,18 +398,28 @@ hive_myLayers <- function(l_WGCNA_D1, l_WGCNA_D2, l_WGCNA_D3, myCorrs, myAnnots,
     }
   }
   if (length(id1) == 0){
-    edges <- 0
+    myHive <- 0
   }else{
     edges <- data.frame(id1 = id1, id2 = id2, weight = weight, color = as.character(color))
-    id_to_keep <- nodes[which(nodes$size != 0),]
-    id_to_keep <- id_to_keep$id
-    id_to_keep <- c(1, 2, 3, id_to_keep, nodes$id[(length(nodes$id)-2):length(nodes$id)])
-    nodes <- nodes[which(nodes$id %in% id_to_keep),]
-    
-    
-    edges <- edges[which(edges$id1 %in% id_to_keep),]
-    edges <- edges[which(edges$id2 %in% id_to_keep),]
+    if (cureCorr){
+      nodes <- nodes[which(nodes$radius > 40),]
+      edges <- edges[which(edges$id1 %in% nodes$id),]
+      edges <- edges[which(edges$id2 %in% nodes$id),]
+    }
+    if (networkOrdered){
+      Keystone <- keystoneMyNodes(nodes = nodes, edges = edges)
+      if (Keystone != 0){
+        nodes$radius <- c(0, 0, 0, ((Keystone/max(Keystone))*100), 100, 100, 100)
+      }
 
+    }
+    #id_to_keep <- nodes[which(nodes$size != 0),]
+    #id_to_keep <- id_to_keep$id
+    #id_to_keep <- c(1, 2, 3, id_to_keep, nodes$id[(length(nodes$id)-2):length(nodes$id)])
+    #nodes <- nodes[which(nodes$id %in% id_to_keep),]
+    #edges <- edges[which(edges$id1 %in% id_to_keep),]
+    #edges <- edges[which(edges$id2 %in% id_to_keep),]
+    
     if (cureCorr){
       nodes <- nodes[which(nodes$radius > 40),]
       edges <- edges[which(edges$id1 %in% nodes$id),]
@@ -258,18 +431,16 @@ hive_myLayers <- function(l_WGCNA_D1, l_WGCNA_D2, l_WGCNA_D3, myCorrs, myAnnots,
     if (exportCSV){
       write.csv(nodes, file = paste("nodes_", trait, "_", nameFile, ".csv", sep = ""))
       write.csv(edges, file = paste("edges_", trait, "_", nameFile, ".csv", sep = ""))
-      
     }
-  }
-  myHive <- list(nodes = nodes, edges = edges, type = type, desc = desc, axis.cols= axis.cols)
-  
+    myHive <- list(nodes = nodes, edges = edges, type = type, desc = desc, axis.cols= axis.cols)
+    }
   return(myHive)
+  
 }
 
 
 
-
-hive_my2Layers <- function(l_WGCNA_D1, l_WGCNA_D2, myCorr, myAnnots, correlation= "spearman", trait, exportPDF = FALSE, exportSVG = FALSE, sizePlot = 10, nameFile = "hive_D1_D2_D3", cureCorr = FALSE, exportCSV = FALSE){
+hive_my2Layers <- function(l_WGCNA_D1, l_WGCNA_D2, myCorr, myAnnots, correlation= "spearman", trait, networkOrdered = FALSE, exportPDF = FALSE, exportSVG = FALSE, sizePlot = 10, nameFile = "hive_D1_D2_D3", cureCorr = FALSE, exportCSV = FALSE){
   require(leaflet)
   
   annot_D1 <- myAnnots[[1]]
@@ -283,7 +454,7 @@ hive_my2Layers <- function(l_WGCNA_D1, l_WGCNA_D2, myCorr, myAnnots, correlation
   # Create nodes dataframe:
   id <- c(seq(from = 1, to = (ncol(l_WGCNA_D1[[5]])+ ncol(l_WGCNA_D2[[5]]) + 4 )))
   label <- c("min_DF1", "min_DF2", as.vector(paste(colnames(l_WGCNA_D1[[5]]), "DF1", sep = "_")), as.vector(paste( colnames(l_WGCNA_D2[[5]]), "DF2", sep = "_")), "extreme_DF1", "extreme_DF2")
-  color <- c("white", "white", as.vector(substr(colnames(l_WGCNA_D1[[5]]), 3, 30)), as.vector(substr( colnames(l_WGCNA_D2[[5]]), 3, 30)), "white", "white")
+  color <- c("white", "white", as.vector(rep("red", sum(ncol(l_WGCNA_D1[[5]]), ncol(l_WGCNA_D2[[5]])))), "white", "white" )  
   axis <- c(1, 2, as.vector(rep(1, ncol(l_WGCNA_D1[[5]]))), as.vector(rep(2, ncol(l_WGCNA_D2[[5]]))), 1, 2 )
   size <- c(0, 0, as.vector(rep(1, sum(ncol(l_WGCNA_D1[[5]]), ncol(l_WGCNA_D2[[5]])))), 0, 0)
   radius <- c()
@@ -306,12 +477,11 @@ hive_my2Layers <- function(l_WGCNA_D1, l_WGCNA_D2, myCorr, myAnnots, correlation
     radius <- c(radius, abs(moduleTraitCor)*100)
     v_pv <- c(v_pv, pv)
   }
-  v_pv <- c(0, 0,v_pv, 0, 0)
-  df_size <- data.frame("size" = size, "pv" = v_pv)
-  df_size[df_size$pv > 0.05,] <- 0
+  v_pv <- c(0, 0 ,v_pv, 0, 0)
+  df_color <- data.frame("color" = color, "pv" = v_pv)
+  df_color[df_color$pv > 0.05,] <- "white"
   radius <- c(0, 0, radius, 100, 100)
-  nodes <- data.frame(id = id, lab= as.character(label), axis = as.integer(axis), radius= radius, size= df_size$size, color= as.character(color))
-  # Do we set the size of the node to zero if the p-value is not significative ?
+  nodes <- data.frame(id = id, lab= as.character(label), axis = as.integer(axis), radius= radius, size= size, color= as.character(df_color$color))
   
   # create edge dataframe:
   id1 <- c()
@@ -321,7 +491,7 @@ hive_my2Layers <- function(l_WGCNA_D1, l_WGCNA_D2, myCorr, myAnnots, correlation
   
   for (i in 1:nrow(myCorr[[2]])){
     for (j in 1:ncol(myCorr[[2]])){
-      if (myCorr[[2]][i, j] < 0.05 && abs(myCorr[[1]][i, j]) > 0.4){
+      if (myCorr[[2]][i, j] < 0.05 && abs(myCorr[[1]][i, j]) > 0.3){
         myNode1 <-nodes[which(nodes$lab==rownames(myCorr[[2]])[i]),]
         myNode2 <-nodes[which(nodes$lab==colnames(myCorr[[2]])[j]),]
         id1 <- c(id1, myNode1$id)
@@ -335,15 +505,15 @@ hive_my2Layers <- function(l_WGCNA_D1, l_WGCNA_D2, myCorr, myAnnots, correlation
     myHive <- 0
   }else{
     edges <- data.frame(id1 = id1, id2 = id2, weight = weight, color = as.character(color))
-    id_to_keep <- nodes[which(nodes$size != 0),]
-    id_to_keep <- id_to_keep$id
-    id_to_keep <- c(1, 2, id_to_keep, nodes$id[(length(nodes$id)-1):length(nodes$id)])
-    nodes <- nodes[which(nodes$id %in% id_to_keep),]
-    edges <- edges[which(edges$id1 %in% id_to_keep),]
-    if (nrow(edges) != 0){
-      edges <- edges[which(edges$id2 %in% id_to_keep),]
-    }
-    
+    # id_to_keep <- nodes[which(nodes$size != 0),]
+    # id_to_keep <- id_to_keep$id
+    # id_to_keep <- c(1, 2, id_to_keep, nodes$id[(length(nodes$id)-1):length(nodes$id)])
+    # nodes <- nodes[which(nodes$id %in% id_to_keep),]
+    # edges <- edges[which(edges$id1 %in% id_to_keep),]
+    # if (nrow(edges) != 0){
+    #   edges <- edges[which(edges$id2 %in% id_to_keep),]
+    # }
+    # 
     
     if (cureCorr){
       nodes <- nodes[which(nodes$radius > 40),]
@@ -355,6 +525,10 @@ hive_my2Layers <- function(l_WGCNA_D1, l_WGCNA_D2, myCorr, myAnnots, correlation
       write.csv(nodes, file = paste("nodes_", trait, "_", nameFile, ".csv", sep = ""))
       write.csv(edges, file = paste("edges_", trait, "_", nameFile, ".csv", sep = ""))
       
+    }
+    if (networkOrdered){
+      Keystone <- keystoneMyNodes(nodes, edges)
+      nodes$radius <- c(0, 0, ((Keystone/max(Keystone))*100), 100, 100)
     }
     type <- "2D"
     desc <- "Hive Plot 2 Layers"

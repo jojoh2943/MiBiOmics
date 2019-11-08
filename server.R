@@ -1,6 +1,7 @@
 # Define server logic ----
 server <- function(input, output, session) {
   options(shiny.maxRequestSize=30*1024^2)
+  options(warn=1)
   
   #### SERVER FUNCTIONS ####
   source("server_function/SERVER_Data_Upload.R", local=TRUE)

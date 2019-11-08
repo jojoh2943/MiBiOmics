@@ -17,7 +17,7 @@ install_packages <- c("shiny", "matrixStats", "Hmisc",
                       "pls", "BiocManager", "iheatmapr",
                       "rmarkdown", "plotly", "ade4",
                       "igraph", "network", "plotly",
-                      "compositions", "leaflet", "grid", "webshot")
+                      "compositions", "leaflet", "grid", "webshot", "igraph", "psych")
 
 if (!requireNamespace("BiocManager", quietly = TRUE))
     install.packages("BiocManager", repos = "https://cloud.r-project.org")
@@ -66,6 +66,8 @@ library("plotly")
 library("leaflet")
 library("grid")
 library("webshot") # save iheatmap
+library("igraph") # Keystone index
+library("psych") # factor analysis
 
 
 

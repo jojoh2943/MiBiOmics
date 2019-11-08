@@ -90,6 +90,7 @@ selectedDissTOM <- reactive({
 
 multiScaling <- reactive({
   
+
   if (ncol(exprDat_WGCNA()) > 2500){
     validate(
       need(input$goNet != 0, 'Because your dataset is too large, we will perform each step independantly. Push the STEP 2 button and wait. The operation may take a while.')
@@ -241,6 +242,9 @@ sft2 <- reactive({
 
 selectedDissTOM2 <- reactive({
   if (ncol(exprDatSec_WGCNA()) > 2500){
+    validate(
+      need(input$goNet2 != 0, 'Because your dataset is too large, we will perform each step independantly. Push the STEP 2 button and wait. The operation may take a while.')
+    )
     if (input$goNet2 == 0){
       return(0)
     }
@@ -284,15 +288,34 @@ selectedDissTOM2 <- reactive({
 })
 
 multiScaling2 <- reactive({
-  # We also propose to use classical multi-dimensional scaling plots for visualizing the network. 
-  #Here we chose 3 scaling dimensions
-  cmd1=cmdscale(as.dist(selectedDissTOM2()),3)
-  colnames(cmd1) <- c("scale1", "scale2", "scale3")
-  cmd1
+  
+  if (ncol(exprDatSec_WGCNA()) > 2500){
+    validate(
+      need(input$goNet2 != 0, 'Because your dataset is too large, we will perform each step independantly. Push the STEP 2 button and wait. The operation may take a while.')
+    )
+    if (input$goNet2 == 0){
+      return(0)
+    }
+    
+    cmd1 <- isolate({ 
+      withProgress({
+        cmdscale(as.dist(selectedDissTOM2()),3)
+      }, message = 'Multiscaling ...', value = 0, detail = 'This may take a while')
+    })
+  }else{
+    # We also propose to use classical multi-dimensional scaling plots for visualizing the network. 
+    #Here we chose 3 scaling dimensions
+    cmd1=cmdscale(as.dist(selectedDissTOM2()),3)
+    colnames(cmd1) <- c("scale1", "scale2", "scale3")
+    cmd1
+  }
 })
 
 selectedTree2 <- reactive({
   if (ncol(exprDatSec_WGCNA()) > 2500){
+    validate(
+      need(input$goNet2 != 0, 'Because your dataset is too large, we will perform each step independantly. Push the STEP 2 button and wait. The operation may take a while.')
+    )
     if (input$goNet2 == 0){
       return(0)
     }
@@ -310,6 +333,9 @@ selectedTree2 <- reactive({
 selectedDynamicColor2 <- reactive({
   minModuleSize = input$selectModuleSize2
   if (ncol(exprDatSec_WGCNA()) > 2500){
+    validate(
+      need(input$goNet2 != 0, 'Because your dataset is too large, we will perform each step independantly. Push the STEP 2 button and wait. The operation may take a while.')
+    )
     if (input$goNet2 == 0){
       return(0)
     }
@@ -333,13 +359,16 @@ selectedDynamicColor2 <- reactive({
 
 selectedMEs2 <- reactive ({
   if (ncol(exprDatSec_WGCNA()) > 2500){
+    validate(
+      need(input$goNet2 != 0, 'Because your dataset is too large, we will perform each step independantly. Push the STEP 2 button and wait. The operation may take a while.')
+    )
     if (input$goNet2 == 0){
       return(0)
     }
     isolate({
       withProgress(message = 'Module Eigenvalues...', value = 0, {
         MEList <- moduleEigengenes(exprDatSec_WGCNA(), colors = selectedDynamicColor2(), excludeGrey = TRUE)
-        MEList$eigengenes
+        MEs <- MEList$eigengenes
       })
     })
   }else{
@@ -355,6 +384,9 @@ selectedMETree2 <- reactive({
     need((ncol(selectedMEs2())> 1), "Not enough modules")
   )
   if (ncol(exprDatSec_WGCNA()) > 2500){
+    validate(
+      need(input$goNet2 != 0, 'Because your dataset is too large, we will perform each step independantly. Push the STEP 2 button and wait. The operation may take a while.')
+    )
     if (input$goNet2 == 0){
       return(0)
     }
@@ -405,6 +437,9 @@ sft3 <- reactive({
 
 selectedDissTOM3 <- reactive({
   if (ncol(exprDatTer_WGCNA()) > 2500){
+    validate(
+      need(input$goNet3 != 0, 'Because your dataset is too large, we will perform each step independantly. Push the STEP 2 button and wait. The operation may take a while.')
+    )
     if (input$goNet3 == 0){
       return(0)
     }
@@ -438,15 +473,33 @@ selectedDissTOM3 <- reactive({
 })
 
 multiScaling3 <- reactive({
-  # We also propose to use classical multi-dimensional scaling plots for visualizing the network. 
-  #Here we chose 3 scaling dimensions
-  cmd1=cmdscale(as.dist(selectedDissTOM3()),3)
-  colnames(cmd1) <- c("scale1", "scale2", "scale3")
-  cmd1
+  if (ncol(exprDatTer_WGCNA()) > 2500){
+    validate(
+      need(input$goNet3 != 0, 'Because your dataset is too large, we will perform each step independantly. Push the STEP 2 button and wait. The operation may take a while.')
+    )
+    if (input$goNet3 == 0){
+      return(0)
+    }
+    
+    cmd1 <- isolate({ 
+      withProgress({
+        cmdscale(as.dist(selectedDissTOM3()),3)
+      }, message = 'Multiscaling ...', value = 0, detail = 'This may take a while')
+    })
+  }else{
+    # We also propose to use classical multi-dimensional scaling plots for visualizing the network. 
+    #Here we chose 3 scaling dimensions
+    cmd1=cmdscale(as.dist(selectedDissTOM3()),3)
+    colnames(cmd1) <- c("scale1", "scale2", "scale3")
+    cmd1
+  }
 })
 
 selectedTree3 <- reactive({
   if (ncol(exprDatTer_WGCNA()) > 2500){
+    validate(
+      need(input$goNet3 != 0, 'Because your dataset is too large, we will perform each step independantly. Push the STEP 2 button and wait. The operation may take a while.')
+    )
     if (input$goNet3 == 0){
       return(0)
     }
@@ -464,6 +517,9 @@ selectedTree3 <- reactive({
 selectedDynamicColor3 <- reactive({
   minModuleSize = input$selectModuleSize3
   if (ncol(exprDatTer_WGCNA()) > 2500){
+    validate(
+      need(input$goNet3 != 0, 'Because your dataset is too large, we will perform each step independantly. Push the STEP 2 button and wait. The operation may take a while.')
+    )
     if (input$goNet3 == 0){
       return(0)
     }
@@ -487,13 +543,16 @@ selectedDynamicColor3 <- reactive({
 
 selectedMEs3 <- reactive ({
   if (ncol(exprDatTer_WGCNA()) > 2500){
+    validate(
+      need(input$goNet3 != 0, 'Because your dataset is too large, we will perform each step independantly. Push the STEP 2 button and wait. The operation may take a while.')
+    )
     if (input$goNet3 == 0){
       return(0)
     }
     isolate({
       withProgress(message = 'Module Eigenvalues...', value = 0, {
         MEList <- moduleEigengenes(exprDatTer_WGCNA(), colors = selectedDynamicColor3(), excludeGrey = TRUE)
-        MEList$eigengenes
+        MEs <- MEList$eigengenes
       })
     })
   }else{
@@ -509,6 +568,9 @@ selectedMETree3 <- reactive({
     need((ncol(selectedMEs3())> 1), "Not enough modules")
   )
   if (ncol(exprDatTer_WGCNA()) > 2500){
+    validate(
+      need(input$goNet3 != 0, 'Because your dataset is too large, we will perform each step independantly. Push the STEP 2 button and wait. The operation may take a while.')
+    )
     if (input$goNet3 == 0){
       return(0)
     }
@@ -758,6 +820,8 @@ output$multiScalePlot <- renderScatterplotThree({
 })
 
 output$multiScalePlotOutput <- renderUI({
+  if (is.null(multiScaling()))
+    return(NULL)
   scatterplotThreeOutput("multiScalePlot")
 })
 
@@ -818,6 +882,8 @@ output$multiScalePlot2 <- renderScatterplotThree({
 })
 
 output$multiScalePlotOutput2 <- renderUI({
+  if (is.null(multiScaling2()))
+    return(NULL)
   scatterplotThreeOutput("multiScalePlot2")
 })
 
@@ -879,6 +945,8 @@ output$multiScalePlot3 <- renderScatterplotThree({
 })
 
 output$multiScalePlotOutput3 <- renderUI({
+  if (is.null(multiScaling3()))
+    return(NULL)
   scatterplotThreeOutput("multiScalePlot3")
 })
 

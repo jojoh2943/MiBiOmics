@@ -30,10 +30,11 @@ css <- "
 # The UI generate the shiny web interface.
 
 ui <- tagList(
+  
   useShinyjs(),
   extendShinyjs(script = "function.js", functions = c("enableTab","disableTab")),
   inlineCSS(css),
-  navbarPage(theme = shinytheme('yeti'),
+  navbarPage(theme = shinytheme('flatly'),
              id = "navbar",
              "MiBiOmics",
              #### PAGE 1 ####
@@ -53,13 +54,13 @@ ui <- tagList(
                                                       radioButtons("LoadExample", "Load the example dataset: ", choices = c("Yes"= "Yes", "No" = "No"), selected = "No"),
                                                       conditionalPanel("input.TypeAnalysis == 'simple'",
                                                                        conditionalPanel("input.LoadExample == 'No'",
-                                                                                        radioButtons("CountingT", "Counting Table:", choices = c("Genes" = "Genes", "OTUs" = "OTUs"), selected = character(0)),
+                                                                                        radioButtons("CountingT", "Counting Table:", choices = c("Metabolites" = "Metabolites", "OTUs" = "OTUs", "Genes" = "Genes"), selected = character(0)),
                                                                                         conditionalPanel("input.CountingT == 'OTUs'",
                                                                                                          checkboxInput("TaxonFile", "Additionnal Taxon File (CSV)", FALSE)))),
                                                       conditionalPanel("input.TypeAnalysis == 'multivariate'",
                                                                        checkboxInput("Omic3", "Third Omic Table ?", FALSE),
                                                                        conditionalPanel("input.LoadExample == 'No'",
-                                                                                        radioButtons("CountingT1", "Counting Table:", choices = c("Genes" = "Genes", "OTUs" = "OTUs"), selected = character(0)),
+                                                                                        radioButtons("CountingT1", "Counting Table:", choices = c("Metabolites" = "Metabolites", "OTUs" = "OTUs", "Genes" = "Genes"), selected = character(0)),
                                                                                         conditionalPanel("input.CountingT1 == 'OTUs'",
                                                                                                          checkboxInput("TaxonFile1", "Additionnal Taxon File (CSV)", FALSE)),
                                                                                         radioButtons("OmicTable", "Second 'Omic' Table:", choices = c("Genes" = "Genes", "OTUs" = "OTUs", "Metabolites" = "Metabolites"), selected = character(0)),
@@ -782,7 +783,7 @@ ui <- tagList(
                                         plotOutput("ncomp"),
                                         numericInput("ncomponent", "Number of Components:",
                                                      1, min = 1, max = 10,
-                                                     value = 6),
+                                                     value = 1),
                                         
                                         
                                         downloadButton("PLS_VIP", "Download")),
@@ -878,7 +879,7 @@ ui <- tagList(
                             plotOutput("ncomp_D2"),
                             numericInput("ncomponent_D2", "Number of Components:",
                                          1, min = 1, max = 10,
-                                         value = 6),
+                                         value = 1),
                             
                             downloadButton("PLS_VIP_D2", "Download")),
                      column(6,
@@ -973,7 +974,7 @@ ui <- tagList(
                    plotOutput("ncomp_D3"),
                    numericInput("ncomponent_D3", "Number of Components:",
                                 1, min = 1, max = 10,
-                                value = 6),
+                                value = 1),
                    
                    downloadButton("PLS_VIP_D3", "Download")),
             column(6,
@@ -1010,19 +1011,19 @@ ui <- tagList(
            fluidRow( #First Row
              column(3,
                h3("Select your preferences: "),
-               h5("Choose an option for the first dataset:"),
-               uiOutput("SelectModule1"),
-
-               hr(),
-
-               h5("Choose an option for the second dataset:"),
-               uiOutput("SelectModule2"),
-               
-               conditionalPanel("input.Omic3",
-                                h5("Choose an option for the third dataset:"),
-                                uiOutput("SelectModule3")),
-
-               hr(),
+               # h5("Choose an option for the first dataset:"),
+               # uiOutput("SelectModule1"),
+               # 
+               # hr(),
+               # 
+               # h5("Choose an option for the second dataset:"),
+               # uiOutput("SelectModule2"),
+               # 
+               # conditionalPanel("input.Omic3",
+               #                  h5("Choose an option for the third dataset:"),
+               #                  uiOutput("SelectModule3")),
+               # 
+               # hr(),
 
                uiOutput("SelectVariable2"),
 
@@ -1065,6 +1066,7 @@ ui <- tagList(
                     h3("Hive Plot representing the association between the modules eigengenes of each network"),
                     uiOutput("traitHive"),
                     plotOutput("HIVE_MEs", height = 1000),
+                    #plotOutput("NETWORK_MEs", height = 800),
                     downloadButton("Download_Multivariate_Analysis2", "Download Hive Plot"),
                     radioButtons("pdf_or_svg_p5_2",
                                  "Choose an extension:",

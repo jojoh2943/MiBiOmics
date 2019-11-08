@@ -48,7 +48,7 @@ selected_sampleInfo <- reactive({
 LegendDF <- reactive({
   sample_info_mcoia <- selected_sampleInfo()
   sample_info_mcoia$DF <- substr(rownames(sample_info_mcoia), nchar(rownames(sample_info_mcoia))-2, nchar(rownames(sample_info_mcoia)))
-
+  
   if (input$Omic3){
     PlotLegend <- ggplot(data = sample_info_mcoia) +
       geom_point(aes_string(x=colnames(sample_info_mcoia)[1], y=colnames(sample_info_mcoia)[2], shape = "DF"))+
@@ -148,8 +148,8 @@ bivariate_plot <- reactive({
     need(!input$Omic3, 'Only for multi-omics analysis with two datasets')
   ) 
   bivariate_plot <- data.frame(mcoia()[["mcoa"]]$Tl1[1:(nrow(selected_sampleInfo())/2), 1], mcoia()[["mcoa"]]$Tl1[(nrow(selected_sampleInfo())/2+1):(nrow(selected_sampleInfo())), 1])
-
-    colnames(bivariate_plot) <- c(paste("Coinertia_", input$CountingT1, "_axis", sep =""), paste("Coinertia_", input$OmicTable, "D2_axis", sep=""))
+  
+  colnames(bivariate_plot) <- c(paste("Coinertia_", input$CountingT1, "_axis", sep =""), paste("Coinertia_", input$OmicTable, "D2_axis", sep=""))
   
   bivariate_plot$sampleName <- rownames(sampleAnnot_3())
   bivariate_plot
@@ -228,25 +228,25 @@ selected_axis1_drivers <- reactive({
     drivers <- data.frame("old" = rownames(axis1_drivers), "new" = name_axis_drivers)
     for (i in 1:nrow(drivers)){
       if (substr(drivers$old[i], 1, 1) == "a"){
-
-          feature_type_axis_1 <- c(feature_type_axis_1, input$CountingT1)
-          if (input$CountingT1 == "OTUs" && input$TaxonFile1){
+        
+        feature_type_axis_1 <- c(feature_type_axis_1, input$CountingT1)
+        if (input$CountingT1 == "OTUs" && input$TaxonFile1){
+          spec_axis_1 <- c(spec_axis_1, as.character(taxTable()[as.character(drivers$new[i]), input$selectTaxonomy]))
+        }else{
+          spec_axis_1 <- c(spec_axis_1, as.character(drivers$new[i]))
+        }
+        
+        
+        
+      }else{
+        if (substr(drivers$old[i], 1, 1) == "b"){
+          
+          feature_type_axis_1 <- c(feature_type_axis_1, input$OmicTable)
+          if (input$OmicTable == "OTUs" && input$TaxonFile1){
             spec_axis_1 <- c(spec_axis_1, as.character(taxTable()[as.character(drivers$new[i]), input$selectTaxonomy]))
           }else{
             spec_axis_1 <- c(spec_axis_1, as.character(drivers$new[i]))
           }
-        
-
-        
-      }else{
-        if (substr(drivers$old[i], 1, 1) == "b"){
-
-            feature_type_axis_1 <- c(feature_type_axis_1, input$OmicTable)
-            if (input$OmicTable == "OTUs" && input$TaxonFile1){
-              spec_axis_1 <- c(spec_axis_1, as.character(taxTable()[as.character(drivers$new[i]), input$selectTaxonomy]))
-            }else{
-              spec_axis_1 <- c(spec_axis_1, as.character(drivers$new[i]))
-            }
           
         }else{
           feature_type_axis_1 <- c(feature_type_axis_1, "unkwown")
@@ -255,7 +255,7 @@ selected_axis1_drivers <- reactive({
       }
     }
   }
-
+  
   axis1_drivers$feature <- feature_type_axis_1
   axis1_drivers$spec <- spec_axis_1
   axis1_drivers$name <- the_name
@@ -268,12 +268,12 @@ selected_axis1_drivers <- reactive({
 
 dudi_exprDat <- reactive({
   
-  if (input$selectModule1_p5 == "General"){
-    dudi_exprDat <- dudi.pca(exprDat_3(), scannf = FALSE, nf = 2 )
-  }else{
-    Module_OTU <- exprDat_3()[,modGenes]
-    dudi_exprDat <- dudi.pca(Module_OTU, scannf = FALSE, nf = 2 )
-  }
+  # if (input$selectModule1_p5 == "General"){
+  dudi_exprDat <- dudi.pca(exprDat_3(), scannf = FALSE, nf = 2 )
+  # }else{
+  #   Module_OTU <- exprDat_3()[,modGenes]
+  #   dudi_exprDat <- dudi.pca(Module_OTU, scannf = FALSE, nf = 2 )
+  # }
   
   dudi_exprDat
 })
@@ -366,18 +366,18 @@ hive_data <- reactive({
   rownames(myCorr_D1_D2[[2]]) <- paste(substr(rownames(myCorr_D1_D2[[2]]), 1, nchar(rownames(myCorr_D1_D2[[2]]))), "_DF2", sep ="")
   colnames(myCorr_D1_D2[[1]]) <- paste(substr(colnames(myCorr_D1_D2[[1]]), 1, nchar(colnames(myCorr_D1_D2[[1]]))), "_DF1" ,sep = "")
   colnames(myCorr_D1_D2[[2]]) <- paste(substr(colnames(myCorr_D1_D2[[2]]), 1, nchar(colnames(myCorr_D1_D2[[2]]))), "_DF1", sep ="")
-
+  
   WGCNA_1 <- list()
   WGCNA_1[[5]] <- selectedMEs()
   WGCNA_2 <- list()
   WGCNA_2[[5]] <- selectedMEs2()
-
+  
   my_Corrs <- list()
   my_Corrs[[1]] <- myCorr_D1_D2
   my_Annot <- list()
   my_Annot[[1]] <- sampleAnnot_WGCNA()
   my_Annot[[2]] <- sampleAnnot_sec_WGCNA()
-
+  
   if (input$Omic3){
     myCorr_D1_D3 <- list()
     myCorr_D2_D3 <- list()
@@ -422,8 +422,78 @@ hive_data <- reactive({
     )
   }
   my_hive
-
+  
 })
+
+# hive_data_keystone <- reactive({
+#   myCorr_D1_D2 <- list()
+#   
+#   myCorr_D1_D2[[1]] <- corr_MEs_D1D2()
+#   myCorr_D1_D2[[2]] <- p_val_MEs_D1D2()
+#   
+#   rownames(myCorr_D1_D2[[1]]) <- paste(substr(rownames(myCorr_D1_D2[[1]]), 1, nchar(rownames(myCorr_D1_D2[[1]]))), "_DF2" ,sep = "")
+#   rownames(myCorr_D1_D2[[2]]) <- paste(substr(rownames(myCorr_D1_D2[[2]]), 1, nchar(rownames(myCorr_D1_D2[[2]]))), "_DF2", sep ="")
+#   colnames(myCorr_D1_D2[[1]]) <- paste(substr(colnames(myCorr_D1_D2[[1]]), 1, nchar(colnames(myCorr_D1_D2[[1]]))), "_DF1" ,sep = "")
+#   colnames(myCorr_D1_D2[[2]]) <- paste(substr(colnames(myCorr_D1_D2[[2]]), 1, nchar(colnames(myCorr_D1_D2[[2]]))), "_DF1", sep ="")
+#   
+#   WGCNA_1 <- list()
+#   WGCNA_1[[5]] <- selectedMEs()
+#   WGCNA_2 <- list()
+#   WGCNA_2[[5]] <- selectedMEs2()
+#   
+#   my_Corrs <- list()
+#   my_Corrs[[1]] <- myCorr_D1_D2
+#   my_Annot <- list()
+#   my_Annot[[1]] <- sampleAnnot_WGCNA()
+#   my_Annot[[2]] <- sampleAnnot_sec_WGCNA()
+#   
+#   if (input$Omic3){
+#     myCorr_D1_D3 <- list()
+#     myCorr_D2_D3 <- list()
+#     myCorr_D1_D3[[1]] <- corr_MEs_D1D3()
+#     myCorr_D1_D3[[2]] <- p_val_MEs_D1D3()
+#     myCorr_D2_D3[[1]] <- corr_MEs_D2D3()
+#     myCorr_D2_D3[[2]] <- p_val_MEs_D2D3()
+#     rownames(myCorr_D1_D3[[1]]) <- paste(substr(rownames(myCorr_D1_D3[[1]]), 1, nchar(rownames(myCorr_D1_D3[[1]]))), "_DF3" ,sep = "")
+#     rownames(myCorr_D1_D3[[2]]) <- paste(substr(rownames(myCorr_D1_D3[[2]]), 1, nchar(rownames(myCorr_D1_D3[[2]]))), "_DF3", sep ="")
+#     colnames(myCorr_D1_D3[[1]]) <- paste(substr(colnames(myCorr_D1_D3[[1]]), 1, nchar(colnames(myCorr_D1_D3[[1]]))), "_DF1" ,sep = "")
+#     colnames(myCorr_D1_D3[[2]]) <- paste(substr(colnames(myCorr_D1_D3[[2]]), 1, nchar(colnames(myCorr_D1_D3[[2]]))), "_DF1", sep ="")
+#     
+#     colnames(myCorr_D2_D3[[1]]) <- paste(substr(colnames(myCorr_D2_D3[[1]]), 1, nchar(colnames(myCorr_D2_D3[[1]]))), "_DF2" ,sep = "")
+#     colnames(myCorr_D2_D3[[2]]) <- paste(substr(colnames(myCorr_D2_D3[[2]]), 1, nchar(colnames(myCorr_D2_D3[[2]]))), "_DF2", sep ="")
+#     rownames(myCorr_D2_D3[[1]]) <- paste(substr(rownames(myCorr_D2_D3[[1]]), 1, nchar(rownames(myCorr_D2_D3[[1]]))), "_DF3" ,sep = "")
+#     rownames(myCorr_D2_D3[[2]]) <- paste(substr(rownames(myCorr_D2_D3[[2]]), 1, nchar(rownames(myCorr_D2_D3[[2]]))), "_DF3", sep ="")
+#     
+#     WGCNA_3 <- list()
+#     WGCNA_3[[5]] <- selectedMEs3()
+#     
+#     my_Corrs[[2]] <- myCorr_D1_D3
+#     my_Corrs[[3]] <- myCorr_D2_D3
+#     my_Annot[[3]] <- sampleAnnot_ter_WGCNA()
+#     my_hive <- hive_myLayers(WGCNA_1, WGCNA_2, WGCNA_3, myCorrs = my_Corrs, myAnnots = my_Annot, trait = input$traitHive, networkOrdered = TRUE)
+#     print(my_hive)
+#     print(nrow(edges))
+#     validate(
+#       need(nrow(my_hive$edges) != 0, "No significant interaction between modules and external trait")
+#     )
+#     validate(
+#       need(my_hive$edges != 0, "No significant interaction between modules and external trait")
+#     )
+#   }else{
+#     my_hive <- hive_my2Layers(WGCNA_1, WGCNA_2, myCorr = myCorr_D1_D2, myAnnots = my_Annot, trait = input$traitHive, networkOrdered = TRUE)
+#     print(my_hive)
+#     
+#     validate(
+#       need(my_hive != 0, "No significant interaction between modules and external trait")
+#     )
+#     validate(
+#       need(nrow(my_hive$edges) != 0, "No significant interaction between modules and external trait")
+#     )
+#   }
+#   my_hive
+#   
+# })
+
 
 
 ##########################
@@ -467,15 +537,15 @@ p_val_MEs_D1D3 <- reactive({
 })
 
 corr_expr <- reactive({
-  print(exprDatSec_51())
-  validate(
-    need(any(rowSums(exprDat_41()) == 0), "Modules' variables are not expressed in your samples. Please transform your data to avoid zeros.")
-  )
-  validate(
-    need(any(rowSums(exprDatSec_51()) == 0), "Modules' variables are not expressed in your samples. Please transform your data to avoid zeros.")
-  )
-
-  corr_expr_1 <- cor(exprDat_41(), exprDatSec_51(), use = "p", method = "spearman")
+  # print(exprDatSec_51())
+  # validate(
+  #   need(any(rowSums(exprDat_41()) == 0), "Modules' variables are not expressed in your samples. Please transform your data to avoid zeros.")
+  # )
+  # validate(
+  #   need(any(rowSums(exprDatSec_51()) == 0), "Modules' variables are not expressed in your samples. Please transform your data to avoid zeros.")
+  # )
+  
+  corr_expr_1 <- cor(exprDat_41(), exprDatSec_51(), use = "p", method = "pearson")
   corr_expr_1 <- as.data.frame(corr_expr_1)
   rownames(corr_expr_1) <- paste("DF1_", rownames(corr_expr_1), sep = "")
   colnames(corr_expr_1) <- paste("DF2_", colnames(corr_expr_1), sep = "")
@@ -488,13 +558,13 @@ corr_expr <- reactive({
 })
 
 corr_expr23 <- reactive({
-  validate(
-    need(any(rowSums(exprDatSec_52()) == 0), "Your second omics dataset must be filtrated to remove low counts")
-  )
-  validate(
-    need(any(rowSums(exprDatTer_52()) == 0), "Your third omics dataset must be filtrated to remove low counts")
-  )
-  corr_expr_1 <- cor(exprDatSec_52(), exprDatTer_52(), use = "p", method = "spearman")
+  # validate(
+  #   need(any(rowSums(exprDatSec_52()) == 0), "Your second omics dataset must be filtrated to remove low counts")
+  # )
+  # validate(
+  #   need(any(rowSums(exprDatTer_52()) == 0), "Your third omics dataset must be filtrated to remove low counts")
+  # )
+  corr_expr_1 <- cor(exprDatSec_52(), exprDatTer_52(), use = "p", method = "pearson")
   corr_expr_1 <- as.data.frame(corr_expr_1)
   rownames(corr_expr_1) <- paste("DF2_", rownames(corr_expr_1), sep = "")
   colnames(corr_expr_1) <- paste("DF3_", colnames(corr_expr_1), sep = "")
@@ -507,15 +577,15 @@ corr_expr23 <- reactive({
 })
 
 corr_expr13 <- reactive({
-  validate(
-    need(any(rowSums(exprDat_43()) == 0), "Your first omics dataset must be filtrated to remove low counts")
-  )
-  validate(
-    need(any(rowSums(exprDatTer_53()) == 0), "Your third omics dataset must be filtrated to remove low counts")
-  )
+  # validate(
+  #   need(any(rowSums(exprDat_43()) == 0), "Your first omics dataset must be filtrated to remove low counts")
+  # )
+  # validate(
+  #   need(any(rowSums(exprDatTer_53()) == 0), "Your third omics dataset must be filtrated to remove low counts")
+  # )
   print(exprDat_43())
   print(exprDatTer_53())
-  corr_expr_1 <- cor(exprDat_43(), exprDatTer_53(), use = "p", method = "spearman")
+  corr_expr_1 <- cor(exprDat_43(), exprDatTer_53(), use = "p", method = "pearson")
   corr_expr_1 <- as.data.frame(corr_expr_1)
   rownames(corr_expr_1) <- paste("DF1_", rownames(corr_expr_1), sep = "")
   colnames(corr_expr_1) <- paste("DF3_", colnames(corr_expr_1), sep = "")
@@ -699,19 +769,19 @@ bip13 <- reactive({
 #### INTERFACE VARIABLES ####
 
 
-output$SelectModule1 <- renderUI({
-  selectInput("selectModule1_p5",
-              label= "Choose a module color: ",
-              choices = c("General", substr(names(selectedMEs()), 3, 40)),
-              selected = "Individual Variables")
-})
-
-output$SelectModule3 <- renderUI({
-  selectInput("selectModule3_p5",
-              label= "Choose a module color: ",
-              choices = c("General", substr(names(selectedMEs3()), 3, 40)),
-              selected = "Individual Variables")
-})
+# output$SelectModule1 <- renderUI({
+#   selectInput("selectModule1_p5",
+#               label= "Choose a module color: ",
+#               choices = c("General", substr(names(selectedMEs()), 3, 40)),
+#               selected = "Individual Variables")
+# })
+# 
+# output$SelectModule3 <- renderUI({
+#   selectInput("selectModule3_p5",
+#               label= "Choose a module color: ",
+#               choices = c("General", substr(names(selectedMEs3()), 3, 40)),
+#               selected = "Individual Variables")
+# })
 
 output$SelectModule12 <- renderUI({
   selectInput("selectModule12_p5",
@@ -727,12 +797,12 @@ output$SelectModule13 <- renderUI({
               selected = NULL)
 })
 
-output$SelectModule2 <- renderUI({
-  selectInput("selectModule2_p5",
-              label= "Choose a module color: ",
-              choices = c("General", substr(names(selectedMEs2()), 3, 40)),
-              selected = "General")
-})
+# output$SelectModule2 <- renderUI({
+#   selectInput("selectModule2_p5",
+#               label= "Choose a module color: ",
+#               choices = c("General", substr(names(selectedMEs2()), 3, 40)),
+#               selected = "General")
+# })
 
 output$SelectModule21 <- renderUI({
   selectInput("selectModule21_p5",
@@ -774,7 +844,7 @@ output$SelectVariable2 <- renderUI({
 output$traitHive <- renderUI({
   selectInput("traitHive", 
               label = "Choose a variable: ", 
-              choices = colnames(sampleAnnot_2()), 
+              choices = c(colnames(sampleAnnot_2())), 
               selected = colnames(sampleAnnot_2())[2])
 })
 
@@ -868,7 +938,7 @@ output$coinertia <- renderPlot({
                            100 * round(mcoia()[["mcoa"]]$pseudoeig[1] / sum(mcoia()[["mcoa"]]$pseudoeig), 2)),
                y = sprintf("Axis2 [%s%% Variance]",
                            100 * round(mcoia()[["mcoa"]]$pseudoeig[2] / sum(mcoia()[["mcoa"]]$pseudoeig), 2)))
-        }
+      }
     }else{
       if (input$ShowDrivers){
         coinertia_plot <-
@@ -922,7 +992,7 @@ output$coinertia <- renderPlot({
       annotate("text", label = "maximal correlation", x = -0.5, y =-0.5, color = "red", size = 5)
     print(plot_grid(coinertia_plot,LegendDF(),bivariate_plot, ncol = 2, rel_widths = c(1, .3)))
   }else{
-
+    
     
     all_sample_info <- selected_sampleInfo_all()
     mco <- mcoia()
@@ -946,22 +1016,22 @@ output$coinertia <- renderPlot({
                y = sprintf("Axis2 [%s%% Variance]",
                            100 * round(mco[["mcoa"]]$pseudoeig[2] / sum(mco[["mcoa"]]$pseudoeig), 2)))
       }else{
-          coinertia_plot <- ggplot(data = all_sample_info) +
-            geom_point(aes_string(x = colnames(all_sample_info)[1], y = colnames(all_sample_info)[2], col = colnames(all_sample_info)[9]), size = 3, shape = 15) +
-            geom_point(aes_string(x = colnames(all_sample_info)[3], y = colnames(all_sample_info)[4], col = colnames(all_sample_info)[9]), shape = 16, size = 3) +
-            geom_point(aes_string(x = colnames(all_sample_info)[5], y = colnames(all_sample_info)[6], col = colnames(all_sample_info)[9]), shape = 17, size = 3) +  
-            geom_segment(aes_string(x = colnames(all_sample_info)[1], y = colnames(all_sample_info)[2], colour = colnames(all_sample_info)[9], xend = colnames(all_sample_info)[3], yend = colnames(all_sample_info)[4])) +
-            geom_segment(aes_string(x = colnames(all_sample_info)[1], y = colnames(all_sample_info)[2], colour = colnames(all_sample_info)[9], xend = colnames(all_sample_info)[5], yend = colnames(all_sample_info)[6])) +
-            geom_segment(aes_string(x = colnames(all_sample_info)[3], y = colnames(all_sample_info)[4], colour = colnames(all_sample_info)[9], xend = colnames(all_sample_info)[5], yend = colnames(all_sample_info)[6])) +
-            # geom_label_repel(data = axis1_drivers,
-            #                  aes(x = 0.10 * SV1, y = 0.10 * SV2, label = spec, fill = feature),
-            #                  size = 4, segment.size = 0.5,
-            #                  label.padding = unit(0.1, "lines"), label.size = 0.5) +
-            theme_bw() +
-            labs(x = sprintf("Axis1 [%s%% Variance]",
-                             100 * round(mco[["mcoa"]]$pseudoeig[1] / sum(mco[["mcoa"]]$pseudoeig), 2)),
-                 y = sprintf("Axis2 [%s%% Variance]",
-                             100 * round(mco[["mcoa"]]$pseudoeig[2] / sum(mco[["mcoa"]]$pseudoeig), 2)))
+        coinertia_plot <- ggplot(data = all_sample_info) +
+          geom_point(aes_string(x = colnames(all_sample_info)[1], y = colnames(all_sample_info)[2], col = colnames(all_sample_info)[9]), size = 3, shape = 15) +
+          geom_point(aes_string(x = colnames(all_sample_info)[3], y = colnames(all_sample_info)[4], col = colnames(all_sample_info)[9]), shape = 16, size = 3) +
+          geom_point(aes_string(x = colnames(all_sample_info)[5], y = colnames(all_sample_info)[6], col = colnames(all_sample_info)[9]), shape = 17, size = 3) +  
+          geom_segment(aes_string(x = colnames(all_sample_info)[1], y = colnames(all_sample_info)[2], colour = colnames(all_sample_info)[9], xend = colnames(all_sample_info)[3], yend = colnames(all_sample_info)[4])) +
+          geom_segment(aes_string(x = colnames(all_sample_info)[1], y = colnames(all_sample_info)[2], colour = colnames(all_sample_info)[9], xend = colnames(all_sample_info)[5], yend = colnames(all_sample_info)[6])) +
+          geom_segment(aes_string(x = colnames(all_sample_info)[3], y = colnames(all_sample_info)[4], colour = colnames(all_sample_info)[9], xend = colnames(all_sample_info)[5], yend = colnames(all_sample_info)[6])) +
+          # geom_label_repel(data = axis1_drivers,
+          #                  aes(x = 0.10 * SV1, y = 0.10 * SV2, label = spec, fill = feature),
+          #                  size = 4, segment.size = 0.5,
+          #                  label.padding = unit(0.1, "lines"), label.size = 0.5) +
+          theme_bw() +
+          labs(x = sprintf("Axis1 [%s%% Variance]",
+                           100 * round(mco[["mcoa"]]$pseudoeig[1] / sum(mco[["mcoa"]]$pseudoeig), 2)),
+               y = sprintf("Axis2 [%s%% Variance]",
+                           100 * round(mco[["mcoa"]]$pseudoeig[2] / sum(mco[["mcoa"]]$pseudoeig), 2)))
       }
       
     }else{
@@ -984,7 +1054,7 @@ output$coinertia <- renderPlot({
                y = sprintf("Axis2 [%s%% Variance]",
                            100 * round(mco[["mcoa"]]$pseudoeig[2] / sum(mco[["mcoa"]]$pseudoeig), 2)))
       }else{
-
+        
         coinertia_plot <- ggplot(data = all_sample_info) +
           geom_point(aes_string(x = colnames(all_sample_info)[1], y = colnames(all_sample_info)[2], col = colnames(all_sample_info)[9]), size = 3, shape = 15) +
           geom_point(aes_string(x = colnames(all_sample_info)[3], y = colnames(all_sample_info)[4], col = colnames(all_sample_info)[9]), shape = 16, size = 3) +
@@ -1005,7 +1075,7 @@ output$coinertia <- renderPlot({
       }
       
     }
-
+    
     print(plot_grid(coinertia_plot,LegendDF(), ncol = 2, rel_widths = c(1, .3)))
   }
   
@@ -1028,11 +1098,11 @@ output$coinertia_bivariate <- renderPlot({
   plot_hist_coia <-
     ggplot(distance_mcoia_df_supp_info(), aes(distance_coia.v, fill = color)) + geom_histogram(binwidth = 0.1)
   print(plot_grid(dendrogramme_coia, 
-            plot_dist_coia, 
-            plot_hist_coia, 
-            labels = c("A", "B", "C"), 
-            nrow = 2, 
-            align = "h"))
+                  plot_dist_coia, 
+                  plot_hist_coia, 
+                  labels = c("A", "B", "C"), 
+                  nrow = 2, 
+                  align = "h"))
   
 })
 
@@ -1061,9 +1131,14 @@ output$PA <- renderPlot({
 
 
 output$HIVE_MEs <- renderPlot({
-  if (is.null(hive_data()))
+  # if (input$traitHive == "Keystone"){
+  #   myHive <- hive_data_keystone()
+  # }else{
+    myHive <- hive_data()
+  # }
+  if (is.null(myHive))
     return(NULL)
-  myHive <- hive_data()
+  
   myHive$nodes$lab <- as.character(myHive$nodes$lab)
   myHive$nodes$color <- as.character(myHive$nodes$color)
   myHive$edges$color <- as.character(myHive$edges$color)
@@ -1075,6 +1150,12 @@ output$HIVE_MEs <- renderPlot({
   }
   
 })
+
+# output$NETWORK_MEs <- renderPlot({
+#   myHive <- hive_data_keystone()
+#   Keystone_net <- keystoneMyNodes(nodes=myHive$nodes, edges= myHive$edges, returnNetwork= TRUE)
+#   plot(Keystone_net, vertex.label=V(Keystone_net)$lab, vertex.label.cex = .7)
+# })
 
 output$HEATMAP_MEs12 <- renderIheatmap({
   if (is.null(corr_MEs_D1D2()))
@@ -1288,7 +1369,7 @@ output$Download_Multivariate_Analysis3 <- downloadHandler(
       add_row_clustering() %>%
       add_col_title("Modules of the first dataset") %>% 
       add_row_title("Modules of the second dataset")
-
+    
     if (input$pdf_or_svg_p5_3 == "pdf"){
       save_iheatmap(hm, "heatmap12.pdf" )
       fs <- c(fs, paste("heatmap12.pdf"))
@@ -1404,7 +1485,7 @@ output$Download_Multivariate_Analysis6 <- downloadHandler(
         add_col_title("Variables of the first datasets in each module") %>% 
         add_row_title("Variables of the second dataset")
     }
-
+    
     
     if (input$pdf_or_svg_p5_6 == "pdf"){
       save_iheatmap(hm, paste("heatmap12_",input$selectModule12_p5,"_", input$selectModule21_p5, ".pdf", sep = "") )
@@ -1412,7 +1493,7 @@ output$Download_Multivariate_Analysis6 <- downloadHandler(
       pdf(paste("bipartite_",input$selectModule12_p5,"_", input$selectModule21_p5, ".pdf", sep = ""), height = input$heightPDF6, width = input$widthPDF6)
       col = c("actor" = "red", "event" = "blue")
       print(ggnet2(bip12(), color = "mode", palette = col, label = TRUE, layout.exp = 0.25, shape= "mode") +
-        theme(legend.position="none")    )
+              theme(legend.position="none")    )
       dev.off()
       fs <- c(fs, paste("bipartite_",input$selectModule12_p5,"_", input$selectModule21_p5, ".pdf", sep = ""))
     }else{
@@ -1421,13 +1502,13 @@ output$Download_Multivariate_Analysis6 <- downloadHandler(
       svg(paste("bipartite_",input$selectModule12_p5,"_", input$selectModule21_p5, ".svg", sep = ""), height = input$heightPDF6, width = input$widthPDF6)
       col = c("actor" = "red", "event" = "blue")
       print(ggnet2(bip12(), color = "mode", palette = col, label = TRUE, layout.exp = 0.25, shape= "mode") +
-        theme(legend.position="none")    )
+              theme(legend.position="none")    )
       dev.off()
       fs <- c(fs, paste("bipartite_",input$selectModule12_p5,"_", input$selectModule21_p5, ".svg", sep = ""))
     }
     write.csv(corr_expr(), "Corr_expr_D1D2.csv")
     fs <- c(fs, "Corr_expr_D1D2.csv")
-
+    
     
     zip(zipfile=filename, files=fs)
     
@@ -1466,7 +1547,7 @@ output$Download_Multivariate_Analysis7 <- downloadHandler(
       pdf(paste("bipartite_",input$selectModule23_p5,"_", input$selectModule32_p5, ".pdf", sep = ""), height = input$heightPDF7, width = input$widthPDF7)
       col = c("actor" = "red", "event" = "blue")
       print(ggnet2(bip23(), color = "mode", palette = col, label = TRUE, layout.exp = 0.25, shape= "mode") +
-        theme(legend.position="none")    )
+              theme(legend.position="none")    )
       dev.off()
       fs <- c(fs, paste("bipartite_",input$selectModule23_p5,"_", input$selectModule32_p5, ".pdf", sep = ""))
     }else{
@@ -1475,7 +1556,7 @@ output$Download_Multivariate_Analysis7 <- downloadHandler(
       svg(paste("bipartite_",input$selectModule23_p5,"_", input$selectModule32_p5, ".svg", sep = ""), height = input$heightPDF7, width = input$widthPDF7)
       col = c("actor" = "red", "event" = "blue")
       print(ggnet2(bip23(), color = "mode", palette = col, label = TRUE, layout.exp = 0.25, shape= "mode") +
-        theme(legend.position="none")    )
+              theme(legend.position="none")    )
       dev.off()
       fs <- c(fs, paste("bipartite_",input$selectModule23_p5,"_", input$selectModule32_p5, ".svg", sep = ""))
     }
@@ -1520,7 +1601,7 @@ output$Download_Multivariate_Analysis8 <- downloadHandler(
       pdf(paste("bipartite_",input$selectModule13_p5,"_", input$selectModule31_p5, ".pdf", sep = ""), height = input$heightPDF8, width = input$widthPDF8)
       col = c("actor" = "red", "event" = "blue")
       print(ggnet2(bip13(), color = "mode", palette = col, label = TRUE, layout.exp = 0.25, shape= "mode") +
-        theme(legend.position="none")    )
+              theme(legend.position="none")    )
       dev.off()
       fs <- c(fs, paste("bipartite_",input$selectModule13_p5,"_", input$selectModule31_p5, ".pdf", sep = ""))
     }else{
@@ -1529,7 +1610,7 @@ output$Download_Multivariate_Analysis8 <- downloadHandler(
       svg(paste("bipartite_",input$selectModule13_p5,"_", input$selectModule31_p5, ".svg", sep = ""), height = input$heightPDF8, width = input$widthPDF8)
       col = c("actor" = "red", "event" = "blue")
       print(ggnet2(bip13(), color = "mode", palette = col, label = TRUE, layout.exp = 0.25, shape= "mode") +
-        theme(legend.position="none")  )  
+              theme(legend.position="none")  )  
       dev.off()
       fs <- c(fs, paste("bipartite_",input$selectModule13_p5,"_", input$selectModule31_p5, ".svg", sep = ""))
     }
@@ -1653,7 +1734,7 @@ output$Download_Multivariate_Analysis <- downloadHandler(
         dev.off()
         
         fs <- c(fs, paste("Co_inertia_df1.", input$selectModule1_p5 ,"_df2.", input$selectModule2_p5, "_df3.",input$selectModule3_p5 , ".pdf", sep = ""))
-
+        
         # if (!((input$selectModule12_p5 == "Individual_Variables" && is.null(input$selectVariablesExprDat) || (input$selectModule21_p5 == "Individual_Variables" && is.null(input$selectVariables)) ))){
         #   pdf(paste("Heatmap_df1.", input$selectModule12_p5 ,"_df2.", input$selectModule21_p5,".pdf", sep = ""), 10, 10)
         #   heatmap(corr_expr(), margins = c(15,15))
@@ -1775,7 +1856,7 @@ output$Download_Multivariate_Analysis <- downloadHandler(
         
         dev.off()
         fs <- c(fs, paste("Co_inertia_df1.", input$selectModule1_p5 ,"_df2.", input$selectModule2_p5, "_df3.",input$selectModule3_p5 , ".svg", sep = ""))
-
+        
         # if (!((input$selectModule12_p5 == "Individual_Variables" && is.null(input$selectVariablesExprDat) || (input$selectModule21_p5 == "Individual_Variables" && is.null(input$selectVariables)) ))){
         #   svg(paste("Heatmap_df1.", input$selectModule12_p5 ,"_df2.", input$selectModule21_p5,".svg", sep = ""), 10, 10)
         #   heatmap(corr_expr(), margins = c(15,15))
@@ -1800,7 +1881,7 @@ output$Download_Multivariate_Analysis <- downloadHandler(
       }
     }else{
       #-----------------------------------------------------------------------------------------------------
-
+      
       if (input$pdf_or_svg_p5 == "pdf"){
         # pdf(paste("HIVEPLOT_", input$traitHive,".pdf", sep = ""), width = 10, height = 10)
         # 
@@ -1815,7 +1896,7 @@ output$Download_Multivariate_Analysis <- downloadHandler(
         
         pdf(paste("Co_inertia_df1.", input$selectModule1_p5 ,"_df2.", input$selectModule2_p5,".pdf", sep = ""), width = 10, height = 10)
         if (!is.numeric(sampleAnnot_2()[,input$SelectVariable2])){
-
+          
           if (input$ShowDrivers){
             coinertia_plot <-
               ggplot(data = selected_sampleInfo_all()) +
@@ -2091,7 +2172,7 @@ output$Download_Multivariate_Analysis <- downloadHandler(
         
       }
     }
-   
+    
     
     zip(zipfile=filename, files=fs)
     
