@@ -14,7 +14,7 @@ All the necessary packages will be installed automatically for the usage of MiBi
 ```bash
 conda env create -f MiBiOmics.yml
 conda activate MiBiOmics
-R -e 'shiny::runGitHub("MiBiOmics", "jojoh2943", launch.browser = TRUE)'
+R -e 'shiny::runGitHub("MiBiOmics", "jojoh2943")'
 ```
 
 The first launch will take some time (about one hour) due to the installation of all the necessary packages.
