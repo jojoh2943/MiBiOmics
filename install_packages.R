@@ -17,7 +17,7 @@ install_packages <- c("shiny", "matrixStats", "Hmisc",
                       "pls", "BiocManager", "iheatmapr",
                       "rmarkdown", "plotly", "ade4",
                       "igraph", "network", "plotly",
-                      "compositions", "leaflet", "grid", "webshot", "igraph", "psych", "htmltools")
+                      "compositions","grid", "webshot", "igraph", "psych")
 
 if (!requireNamespace("BiocManager", quietly = TRUE))
     install.packages("BiocManager", repos = "https://cloud.r-project.org")
@@ -25,17 +25,16 @@ if (length(setdiff(c(bioconductor_packages, install_packages), rownames(installe
   BiocManager::install(setdiff(c(bioconductor_packages, install_packages), rownames(installed.packages())), updates = FALSE)
 }
 
-i <- installed.packages()
 
 # prevent error writeImpl --> dur to version 0.4.0 of htmltools loaded as a dependency of leaflet
-if ("htmltools" %in% rownames(installed.packages())){
-  i <- installed.packages()
-  if (i["htmltools", "Version"] != "0.3.6"){
-    remove.packages("htmltools")
-    packageurl <- "https://cran.r-project.org/src/contrib/Archive/htmltools/htmltools_0.3.6.tar.gz"
-    install.packages(packageurl, repos=NULL, type="source")
-  }
-}
+# if ("htmltools" %in% rownames(installed.packages())){
+#   i <- installed.packages()
+#   if (i["htmltools", "Version"] != "0.3.6"){
+#     remove.packages("htmltools")
+#     packageurl <- "https://cran.r-project.org/src/contrib/Archive/htmltools/htmltools_0.3.6.tar.gz"
+#     install.packages(packageurl, repos=NULL, type="source")
+#   }
+# }
 
 #define MAX_NUM_DLLS 10000
 library("flexdashboard")
@@ -74,7 +73,6 @@ library("rmarkdown")
 library("pls")
 library("sva") #Batch correction
 library("plotly")
-library("leaflet")
 library("grid")
 library("webshot") # save iheatmap
 library("igraph") # Keystone index

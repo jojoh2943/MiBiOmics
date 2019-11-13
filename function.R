@@ -333,7 +333,7 @@ keystoneMyNodes <- function(nodes, edges, returnNetwork = FALSE){
 
 hive_myLayers <- function(l_WGCNA_D1, l_WGCNA_D2, l_WGCNA_D3, myCorrs, myAnnots, correlation= "spearman", trait, exportPDF = FALSE, exportSVG = FALSE, sizePlot = 10, nameFile = "hive_D1_D2_D3", cureCorr = FALSE, exportCSV = FALSE, networkOrdered = FALSE)
 {
-  require(leaflet)
+  #require(leaflet)
   
   annot_D1 <- myAnnots[[1]]
   annot_D2 <- myAnnots[[2]]
@@ -342,7 +342,7 @@ hive_myLayers <- function(l_WGCNA_D1, l_WGCNA_D2, l_WGCNA_D3, myCorrs, myAnnots,
   WGCNA_list[[1]] <- l_WGCNA_D1
   WGCNA_list[[2]] <- l_WGCNA_D2
   WGCNA_list[[3]] <- l_WGCNA_D3
-  pal <- colorNumeric(palette = "RdBu", 1:-1)
+  #pal <- colorNumeric(palette = "RdBu", 1:-1)
   
   
   # Create nodes dataframe:
@@ -392,7 +392,7 @@ hive_myLayers <- function(l_WGCNA_D1, l_WGCNA_D2, l_WGCNA_D3, myCorrs, myAnnots,
           id1 <- c(id1, myNode1$id)
           id2 <- c(id2, myNode2$id)
           weight <- c(weight, round(exp(abs(myCorr[[1]][i, j]))^3))
-          color <- c(color, pal(c(myCorr[[1]][i, j])))
+          color <- c(color, brewer.pal(c(myCorr[[1]][i, j]), "RdBu"))
         }
       }
     }
@@ -441,14 +441,14 @@ hive_myLayers <- function(l_WGCNA_D1, l_WGCNA_D2, l_WGCNA_D3, myCorrs, myAnnots,
 
 
 hive_my2Layers <- function(l_WGCNA_D1, l_WGCNA_D2, myCorr, myAnnots, correlation= "spearman", trait, networkOrdered = FALSE, exportPDF = FALSE, exportSVG = FALSE, sizePlot = 10, nameFile = "hive_D1_D2_D3", cureCorr = FALSE, exportCSV = FALSE){
-  require(leaflet)
+  #require(leaflet)
   
   annot_D1 <- myAnnots[[1]]
   annot_D2 <- myAnnots[[2]]
   WGCNA_list <- list()
   WGCNA_list[[1]] <- l_WGCNA_D1 
   WGCNA_list[[2]] <- l_WGCNA_D2
-  pal <- colorNumeric(palette = "RdBu", 1:-1)
+  #pal <- colorNumeric(palette = "RdBu", 1:-1)
   
   
   # Create nodes dataframe:
@@ -497,7 +497,7 @@ hive_my2Layers <- function(l_WGCNA_D1, l_WGCNA_D2, myCorr, myAnnots, correlation
         id1 <- c(id1, myNode1$id)
         id2 <- c(id2, myNode2$id)
         weight <- c(weight, round(exp(abs(myCorr[[1]][i, j]))^3))
-        color <- c(color, pal(c(myCorr[[1]][i, j])))
+        color <- c(color, brewer.pal(c(myCorr[[1]][i, j]), "RdBu"))
       }
     }
   }
