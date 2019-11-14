@@ -4,8 +4,8 @@ channels:
   - defaults
 dependencies:
   - curl<8
-  - r-base=3.5
-  - r-fpc
+  - r-base=3.6
+#  - r-fpc
   - r-shiny<1.4
   - r-htmltools<0.4
   - r-xml
