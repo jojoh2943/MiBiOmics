@@ -1,0 +1,10 @@
+# Old environment:
+MiBiOmics_P.yml
+
+# Directories:
+version_to_upload/
+pipeline/
+
+# R related:
+report.Rmd
+*.Rhistory
