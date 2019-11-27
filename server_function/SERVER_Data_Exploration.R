@@ -15,13 +15,13 @@ dendrogramme <- reactive({
 })
 
 # Dendrogramme of the second dataset
-dendrogramme_sec <- reactive({ 
+dendrogramme_sec <- reactive({
   sampleTree = hclust(dist(exprDatSec_2()), method = input$selectMethod_sec)
   sampleTree
 })
 
 # Dendrogramme of the third dataset
-dendrogramme_ter <- reactive({ 
+dendrogramme_ter <- reactive({
   sampleTree = hclust(dist(exprDatTer_2()), method = input$selectMethod_ter)
   sampleTree
 })
@@ -35,7 +35,7 @@ info_dendrogramme <- reactive({
   dataCondition = sampleAnnot_2()[conditionRow, ]
   labs <- data.frame(labs, dataCondition)
   colnames(labs) <- c("x", "y", "label", colnames(dataCondition))
-  
+
   labs
 })
 
@@ -48,7 +48,7 @@ info_dendrogramme_sec <- reactive({
   dataCondition = sampleAnnot_2()[conditionRow, ]
   labs <- data.frame(labs, dataCondition)
   colnames(labs) <- c("x", "y", "label", colnames(dataCondition))
-  
+
   labs
 })
 
@@ -61,7 +61,7 @@ info_dendrogramme_ter <- reactive({
   dataCondition = sampleAnnot_2()[conditionRow, ]
   labs <- data.frame(labs, dataCondition)
   colnames(labs) <- c("x", "y", "label", colnames(dataCondition))
-  
+
   labs
 })
 
@@ -71,9 +71,9 @@ exprDat_Relative_abundance <- reactive({
   validate(
     need(input$LoadExample == "Yes" || (input$TaxonFile == TRUE|| input$TaxonFile1 == TRUE), "This plot can only be realised with OTUs")
   )
-  
+
   exprDat <- exprDat_2()
-  
+
 
   if (input$SelectVariable_rel_ab != "unordered"){
     exprDat <- exprDat[order(sampleAnnot_2()[,input$SelectVariable_rel_ab]),]
@@ -86,7 +86,7 @@ exprDat_Relative_abundance <- reactive({
     }
   }else{
     exprDat_rel_ab <- as.data.frame(t(apply(exprDat, 1, function(x) x / sum(x))))
-    
+
   }
 
   exprDat_rel_ab <- setDT(as.data.frame(t(exprDat_rel_ab)), keep.rownames = TRUE)
@@ -98,7 +98,7 @@ exprDat_Relative_abundance <- reactive({
 })
 
 exprDat_Relative_abundance_sec <- reactive({
-  
+
   validate(
     need((input$OmicTable == "OTUs"), "This plot can only be realised with OTUs")
   )
@@ -107,7 +107,7 @@ exprDat_Relative_abundance_sec <- reactive({
   if (input$SelectVariable_rel_ab_sec != "unordered"){
     exprDat <- exprDat[order(sampleAnnot_2()[,input$SelectVariable_rel_ab_sec]),]
   }
-  
+
   if (input$Transformation1 =="Yes"){
     if (input$TypeTransformation1=="CLR"){
       exprDat_rel_ab <- clrInv(exprDat)
@@ -116,7 +116,7 @@ exprDat_Relative_abundance_sec <- reactive({
     }
   }else{
     exprDat_rel_ab <- as.data.frame(t(apply(exprDat, 1, function(x) x / sum(x))))
-    
+
   }
   exprDat_rel_ab <- setDT(as.data.frame(t(exprDat_rel_ab)), keep.rownames = TRUE)
   exprDat_rel_ab <- merge(exprDat_rel_ab, taxTable_Sec(), by = "rn")
@@ -131,11 +131,11 @@ exprDat_Relative_abundance_ter <- reactive({
     need((input$OmicTable3 == "OTUs"), "This plot can only be realised with OTUs")
   )
   exprDat <- exprDatTer_2()
-  
+
   if (input$SelectVariable_rel_ab_sec != "unordered"){
     exprDat <- exprDat[order(sampleAnnot_2()[,input$SelectVariable_rel_ab_ter]),]
   }
-  
+
   if (input$Transformation2 =="Yes"){
     if (input$TypeTransformation2=="CLR"){
       exprDat_rel_ab <- clrInv(exprDat)
@@ -144,7 +144,7 @@ exprDat_Relative_abundance_ter <- reactive({
     }
   }else{
     exprDat_rel_ab <- as.data.frame(t(apply(exprDat, 1, function(x) x / sum(x))))
-    
+
   }
   exprDat_rel_ab <- setDT(as.data.frame(t(exprDat_rel_ab)), keep.rownames = TRUE)
   exprDat_rel_ab <- merge(exprDat_rel_ab, taxTable_Ter(), by = "rn")
@@ -163,7 +163,7 @@ dudi_PCoA <- reactive({
     if (input$Transformation == "Yes" && input$selectDist %in% c("bray", "binomial", "jaccard") ){
       if (input$TypeTransformation == "CLR"){
         exprDat <- clrInv(exprDat)
-        showNotification(paste("Because the CLR transformation can only be projected in euclidean space, for this plot the transformation was removed. Please select PCA or another distance than bray, jaccard, binomial for the PCoA if you want an ordination with the CLR transformation"), type = "warning", duration = NULL)    
+        showNotification(paste("Because the CLR transformation can only be projected in euclidean space, for this plot the transformation was removed. Please select PCA or another distance than bray, jaccard, binomial for the PCoA if you want an ordination with the CLR transformation"), type = "warning", duration = NULL)
       }
     }
     OTU_dist <- vegdist(exprDat, method = input$selectDist)
@@ -171,7 +171,7 @@ dudi_PCoA <- reactive({
   }else{
     dudi_Pcoa_OTU <- dudi.pca(exprDat, scannf = FALSE, nf = 2)
   }
-  
+
   dudi_Pcoa_OTU
 })
 
@@ -183,13 +183,13 @@ dudi_PCoA_sec <- reactive({
     if (input$Transformation1 == "Yes" && input$selectDist_sec %in% c("bray", "binomial", "jaccard") ){
       if (input$TypeTransformation1 == "CLR"){
         exprDat <- clrInv(exprDat)
-          showNotification(paste("Because the CLR transformation can only be projected in euclidean space, for this plot the transformation was removed. Please select PCA or another distance than bray, jaccard, binomial for the PCoA if you want an ordination with the CLR transformation"), type = "warning", duration = NULL)    
+          showNotification(paste("Because the CLR transformation can only be projected in euclidean space, for this plot the transformation was removed. Please select PCA or another distance than bray, jaccard, binomial for the PCoA if you want an ordination with the CLR transformation"), type = "warning", duration = NULL)
       }
     }
     OTU_dist <- vegdist(exprDat, method = input$selectDist_sec)
     dudi_Pcoa_OTU <- dudi.pco(OTU_dist, scannf = FALSE, nf = 2)
   }
-  
+
   dudi_Pcoa_OTU
 })
 
@@ -201,13 +201,13 @@ dudi_PCoA_ter <- reactive({
     if (input$Transformation2 =="Yes" && input$selectDist_ter %in% c("bray", "binomial", "jaccard")){
       if (input$TypeTransformation2 =="CLR"){
         exprDat <- clrInv(exprDat)
-        showNotification(paste("Because the CLR transformation can only be projected in euclidean space, for this plot the transformation was removed. Please select PCA or another distance than bray, jaccard, binomial for the PCoA if you want an ordination with the CLR transformation"), type = "warning", duration = NULL)    
+        showNotification(paste("Because the CLR transformation can only be projected in euclidean space, for this plot the transformation was removed. Please select PCA or another distance than bray, jaccard, binomial for the PCoA if you want an ordination with the CLR transformation"), type = "warning", duration = NULL)
       }
     }
     OTU_dist <- vegdist(exprDat, method = input$selectDist_ter)
     dudi_Pcoa_OTU <- dudi.pco(OTU_dist, scannf = FALSE, nf = 2)
   }
-  
+
   dudi_Pcoa_OTU
 })
 
@@ -233,7 +233,7 @@ observeEvent(input$showMethod, {
     title = "How to choose the right method ?",
     HTML("- Ward's minimum variance method aims at finding compact, spherical clusters. <br> <br>
          - The complete linkage method finds similar clusters. <br> <br>
-         - The single linkage method (which is closely related to the minimal spanning tree) adopts a âfriends of friendsâ clustering strategy. <br> <br>
+         - The single linkage method (which is closely related to the minimal spanning tree) adopts a Ã¢ÂÂfriends of friendsÃ¢ÂÂ clustering strategy. <br> <br>
          - The other methods can be regarded as aiming for clusters with characteristics somewhere between the single and complete link methods."),
     easyClose = TRUE,
     size = "l"
@@ -245,7 +245,7 @@ observeEvent(input$showMethod_sec, {
     title = "How to choose the right method ?",
     HTML("- Ward's minimum variance method aims at finding compact, spherical clusters. <br> <br>
          - The complete linkage method finds similar clusters. <br> <br>
-         - The single linkage method (which is closely related to the minimal spanning tree) adopts a âfriends of friendsâ clustering strategy. <br> <br>
+         - The single linkage method (which is closely related to the minimal spanning tree) adopts a Ã¢ÂÂfriends of friendsÃ¢ÂÂ clustering strategy. <br> <br>
          - The other methods can be regarded as aiming for clusters with characteristics somewhere between the single and complete link methods."),
     easyClose = TRUE,
     size = "l"
@@ -257,7 +257,7 @@ observeEvent(input$showMethod_ter, {
     title = "How to choose the right method ?",
     HTML("- Ward's minimum variance method aims at finding compact, spherical clusters. <br> <br>
          - The complete linkage method finds similar clusters. <br> <br>
-         - The single linkage method (which is closely related to the minimal spanning tree) adopts a âfriends of friendsâ clustering strategy. <br> <br>
+         - The single linkage method (which is closely related to the minimal spanning tree) adopts a Ã¢ÂÂfriends of friendsÃ¢ÂÂ clustering strategy. <br> <br>
          - The other methods can be regarded as aiming for clusters with characteristics somewhere between the single and complete link methods."),
     easyClose = TRUE,
     size = "l"
@@ -269,7 +269,7 @@ observeEvent(input$showMethod_P6, {
     title = "How to choose the right method ?",
     HTML("- Ward's minimum variance method aims at finding compact, spherical clusters. <br> <br>
          - The complete linkage method finds similar clusters. <br> <br>
-         - The single linkage method (which is closely related to the minimal spanning tree) adopts a âfriends of friendsâ clustering strategy. <br> <br>
+         - The single linkage method (which is closely related to the minimal spanning tree) adopts a Ã¢ÂÂfriends of friendsÃ¢ÂÂ clustering strategy. <br> <br>
          - The other methods can be regarded as aiming for clusters with characteristics somewhere between the single and complete link methods."),
     easyClose = TRUE,
     size = "l"
@@ -281,7 +281,7 @@ observeEvent(input$showMethod_P6, {
 observeEvent(input$showDist, {
   showModal(modalDialog(
     title = "How to choose the right distance ?",
-    HTML("- Binomial index is derived from Binomial deviance under null hypothesis that the two compared communities are equal. It should be able to handle variable sample sizes. The index does not have a fixed upper limit, but can vary among sites with no shared species.<br> <br> - Cao index or CYd index (Cao et al. 1997) was suggested as a minimally biased index for high beta diversity and variable sampling intensity. Cao index does not have a fixed upper limit, but can vary among sites with no shared species. The index is intended for count (integer) data, and it is undefined for zero abundances; these are replaced with arbitrary value 0.1 <br> <br> - Euclidean and Manhattan dissimilarities are not good in gradient separation without proper standardization <br> <br> - BrayâCurtis and Jaccard indices are rank-order similar, and some other indices become identical or rank-order similar after some standardizations. Jaccard index is metric, and probably should be preferred instead of the default Bray-Curtis which is semimetric"),
+    HTML("- Binomial index is derived from Binomial deviance under null hypothesis that the two compared communities are equal. It should be able to handle variable sample sizes. The index does not have a fixed upper limit, but can vary among sites with no shared species.<br> <br> - Cao index or CYd index (Cao et al. 1997) was suggested as a minimally biased index for high beta diversity and variable sampling intensity. Cao index does not have a fixed upper limit, but can vary among sites with no shared species. The index is intended for count (integer) data, and it is undefined for zero abundances; these are replaced with arbitrary value 0.1 <br> <br> - Euclidean and Manhattan dissimilarities are not good in gradient separation without proper standardization <br> <br> - BrayÃ¢ÂÂCurtis and Jaccard indices are rank-order similar, and some other indices become identical or rank-order similar after some standardizations. Jaccard index is metric, and probably should be preferred instead of the default Bray-Curtis which is semimetric"),
     easyClose = TRUE,
     size = "l"
   ))
@@ -290,7 +290,7 @@ observeEvent(input$showDist, {
 observeEvent(input$showDist_sec, {
   showModal(modalDialog(
     title = "How to choose the right distance ?",
-    HTML("- Binomial index is derived from Binomial deviance under null hypothesis that the two compared communities are equal. It should be able to handle variable sample sizes. The index does not have a fixed upper limit, but can vary among sites with no shared species.<br> <br> - Cao index or CYd index (Cao et al. 1997) was suggested as a minimally biased index for high beta diversity and variable sampling intensity. Cao index does not have a fixed upper limit, but can vary among sites with no shared species. The index is intended for count (integer) data, and it is undefined for zero abundances; these are replaced with arbitrary value 0.1 <br> <br> - Euclidean and Manhattan dissimilarities are not good in gradient separation without proper standardization <br> <br> - BrayâCurtis and Jaccard indices are rank-order similar, and some other indices become identical or rank-order similar after some standardizations. Jaccard index is metric, and probably should be preferred instead of the default Bray-Curtis which is semimetric"),
+    HTML("- Binomial index is derived from Binomial deviance under null hypothesis that the two compared communities are equal. It should be able to handle variable sample sizes. The index does not have a fixed upper limit, but can vary among sites with no shared species.<br> <br> - Cao index or CYd index (Cao et al. 1997) was suggested as a minimally biased index for high beta diversity and variable sampling intensity. Cao index does not have a fixed upper limit, but can vary among sites with no shared species. The index is intended for count (integer) data, and it is undefined for zero abundances; these are replaced with arbitrary value 0.1 <br> <br> - Euclidean and Manhattan dissimilarities are not good in gradient separation without proper standardization <br> <br> - BrayÃ¢ÂÂCurtis and Jaccard indices are rank-order similar, and some other indices become identical or rank-order similar after some standardizations. Jaccard index is metric, and probably should be preferred instead of the default Bray-Curtis which is semimetric"),
     easyClose = TRUE,
     size = "l"
   ))
@@ -299,7 +299,7 @@ observeEvent(input$showDist_sec, {
 observeEvent(input$showDist_ter, {
   showModal(modalDialog(
     title = "How to choose the right distance ?",
-    HTML("- Binomial index is derived from Binomial deviance under null hypothesis that the two compared communities are equal. It should be able to handle variable sample sizes. The index does not have a fixed upper limit, but can vary among sites with no shared species.<br> <br> - Cao index or CYd index (Cao et al. 1997) was suggested as a minimally biased index for high beta diversity and variable sampling intensity. Cao index does not have a fixed upper limit, but can vary among sites with no shared species. The index is intended for count (integer) data, and it is undefined for zero abundances; these are replaced with arbitrary value 0.1 <br> <br> - Euclidean and Manhattan dissimilarities are not good in gradient separation without proper standardization <br> <br> - BrayâCurtis and Jaccard indices are rank-order similar, and some other indices become identical or rank-order similar after some standardizations. Jaccard index is metric, and probably should be preferred instead of the default Bray-Curtis which is semimetric"),
+    HTML("- Binomial index is derived from Binomial deviance under null hypothesis that the two compared communities are equal. It should be able to handle variable sample sizes. The index does not have a fixed upper limit, but can vary among sites with no shared species.<br> <br> - Cao index or CYd index (Cao et al. 1997) was suggested as a minimally biased index for high beta diversity and variable sampling intensity. Cao index does not have a fixed upper limit, but can vary among sites with no shared species. The index is intended for count (integer) data, and it is undefined for zero abundances; these are replaced with arbitrary value 0.1 <br> <br> - Euclidean and Manhattan dissimilarities are not good in gradient separation without proper standardization <br> <br> - BrayÃ¢ÂÂCurtis and Jaccard indices are rank-order similar, and some other indices become identical or rank-order similar after some standardizations. Jaccard index is metric, and probably should be preferred instead of the default Bray-Curtis which is semimetric"),
     easyClose = TRUE,
     size = "l"
   ))
@@ -308,7 +308,7 @@ observeEvent(input$showDist_ter, {
 observeEvent(input$showDist_P6, {
   showModal(modalDialog(
     title = "How to choose the right distance ?",
-    HTML("- Binomial index is derived from Binomial deviance under null hypothesis that the two compared communities are equal. It should be able to handle variable sample sizes. The index does not have a fixed upper limit, but can vary among sites with no shared species.<br> <br> - Cao index or CYd index (Cao et al. 1997) was suggested as a minimally biased index for high beta diversity and variable sampling intensity. Cao index does not have a fixed upper limit, but can vary among sites with no shared species. The index is intended for count (integer) data, and it is undefined for zero abundances; these are replaced with arbitrary value 0.1 <br> <br> - Euclidean and Manhattan dissimilarities are not good in gradient separation without proper standardization <br> <br> - BrayâCurtis and Jaccard indices are rank-order similar, and some other indices become identical or rank-order similar after some standardizations. Jaccard index is metric, and probably should be preferred instead of the default Bray-Curtis which is semimetric"),
+    HTML("- Binomial index is derived from Binomial deviance under null hypothesis that the two compared communities are equal. It should be able to handle variable sample sizes. The index does not have a fixed upper limit, but can vary among sites with no shared species.<br> <br> - Cao index or CYd index (Cao et al. 1997) was suggested as a minimally biased index for high beta diversity and variable sampling intensity. Cao index does not have a fixed upper limit, but can vary among sites with no shared species. The index is intended for count (integer) data, and it is undefined for zero abundances; these are replaced with arbitrary value 0.1 <br> <br> - Euclidean and Manhattan dissimilarities are not good in gradient separation without proper standardization <br> <br> - BrayÃ¢ÂÂCurtis and Jaccard indices are rank-order similar, and some other indices become identical or rank-order similar after some standardizations. Jaccard index is metric, and probably should be preferred instead of the default Bray-Curtis which is semimetric"),
     easyClose = TRUE,
     size = "l"
   ))
@@ -317,16 +317,16 @@ observeEvent(input$showDist_P6, {
 #### INTERFACE VARIABLES ####
 
 output$SelectVariable <-  renderUI({
-  selectInput("selectVariable", 
-              label = "Choose a variable: ", 
-              choices = colnames(sampleAnnot_2()), 
+  selectInput("selectVariable",
+              label = "Choose a variable: ",
+              choices = colnames(sampleAnnot_2()),
               selected = colnames(sampleAnnot_2())[1])
 })
 
 output$SelectVariable3 <-  renderUI({
-  selectInput("selectVariable3", 
-              label = "Choose a variable: ", 
-              choices = colnames(sampleAnnot_2()), 
+  selectInput("selectVariable3",
+              label = "Choose a variable: ",
+              choices = colnames(sampleAnnot_2()),
               selected = colnames(sampleAnnot_2())[1])
 })
 
@@ -338,31 +338,31 @@ output$SelectTaxo <- renderUI({
 })
 
 output$SelectVariable_sec <-  renderUI({
-  selectInput("selectVariable_sec", 
-              label = "Choose a variable: ", 
-              choices = colnames(sampleAnnot_2()), 
+  selectInput("selectVariable_sec",
+              label = "Choose a variable: ",
+              choices = colnames(sampleAnnot_2()),
               selected = colnames(sampleAnnot_2())[1])
 })
 
 output$SelectVariable_ter <-  renderUI({
-  selectInput("selectVariable_ter", 
-              label = "Choose a variable: ", 
-              choices = colnames(sampleAnnot_2()), 
+  selectInput("selectVariable_ter",
+              label = "Choose a variable: ",
+              choices = colnames(sampleAnnot_2()),
               selected = colnames(sampleAnnot_2())[1])
 })
 
 
 output$SelectVariable3_sec <-  renderUI({
-  selectInput("selectVariable3_sec", 
-              label = "Choose a variable: ", 
-              choices = colnames(sampleAnnot_2()), 
+  selectInput("selectVariable3_sec",
+              label = "Choose a variable: ",
+              choices = colnames(sampleAnnot_2()),
               selected = colnames(sampleAnnot_2())[1])
 })
 
 output$SelectVariable3_ter <-  renderUI({
-  selectInput("selectVariable3_ter", 
-              label = "Choose a variable: ", 
-              choices = colnames(sampleAnnot_2()), 
+  selectInput("selectVariable3_ter",
+              label = "Choose a variable: ",
+              choices = colnames(sampleAnnot_2()),
               selected = colnames(sampleAnnot_2())[1])
 })
 
@@ -381,23 +381,23 @@ output$SelectTaxo_ter <- renderUI({
 })
 
 output$SelectVariable_rel_ab <- renderUI({
-  selectInput("SelectVariable_rel_ab", 
-              label = "Choose a variable: ", 
-              choices = c("unordered", colnames(sampleAnnot_2())), 
+  selectInput("SelectVariable_rel_ab",
+              label = "Choose a variable: ",
+              choices = c("unordered", colnames(sampleAnnot_2())),
               selected = "unordered")
 })
 
 output$SelectVariable_rel_ab_sec <- renderUI({
-  selectInput("SelectVariable_rel_ab_sec", 
-              label = "Choose a variable: ", 
-              choices = c("unordered", colnames(sampleAnnot_2())), 
+  selectInput("SelectVariable_rel_ab_sec",
+              label = "Choose a variable: ",
+              choices = c("unordered", colnames(sampleAnnot_2())),
               selected = "unordered")
 })
 
 output$SelectVariable_rel_ab_ter <- renderUI({
-  selectInput("SelectVariable_rel_ab_ter", 
-              label = "Choose a variable: ", 
-              choices = c("unordered", colnames(sampleAnnot_2())), 
+  selectInput("SelectVariable_rel_ab_ter",
+              label = "Choose a variable: ",
+              choices = c("unordered", colnames(sampleAnnot_2())),
               selected = "unordered")
 })
 
@@ -409,8 +409,8 @@ output$SelectVariable_rel_ab_ter <- renderUI({
 output$Relative_Abundance <- renderPlot({
   ggplot(exprDat_Relative_abundance(), aes_string(x = "variable", y = "value", fill = input$selectTaxo)) +
     geom_bar(stat = "identity") +
-    labs(x = "Samples", 
-         y = "Relative Abundance", 
+    labs(x = "Samples",
+         y = "Relative Abundance",
          title = paste("Relative abundance at the ", input$selectTaxo, " Taxonomic level", sep = "")) +
     theme(axis.text.x = element_text(angle = 90, hjust = 1))
 })
@@ -439,12 +439,12 @@ output$Dendrogramme <- renderPlot({
       scale_colour_gradientn(colours = terrain.colors(10)) +
       ylim(-0.15, NA))
   }
-  
+
 })
 
 # PCoA
 output$PCoA <- renderPlotly({
-  
+
   if (is.numeric(sampleAnnot_2()[,input$selectVariable3] )){
     print(ggplot(data = PCoA(),
            aes_string(x = colnames(PCoA())[1], y = colnames(PCoA())[2], col = input$selectVariable3)) +
@@ -454,7 +454,7 @@ output$PCoA <- renderPlotly({
       labs(x = sprintf("Axis 1 [%s%% Variance]", 100 * round(dudi_PCoA()$eig[1] / sum(dudi_PCoA()$eig), 2)),
            y = sprintf("Axis 2 [%s%% Variance]", 100 * round(dudi_PCoA()$eig[2] / sum(dudi_PCoA()$eig), 2))))
   }else{
-    
+
     print(ggplot(data = PCoA(),
            aes_string(x = colnames(PCoA())[1], y = colnames(PCoA())[2], col = input$selectVariable3)) +
       geom_point(size = 4) +
@@ -462,7 +462,7 @@ output$PCoA <- renderPlotly({
       labs(x = sprintf("Axis 1 [%s%% Variance]", 100 * round(dudi_PCoA()$eig[1] / sum(dudi_PCoA()$eig), 2)),
            y = sprintf("Axis 2 [%s%% Variance]", 100 * round(dudi_PCoA()$eig[2] / sum(dudi_PCoA()$eig), 2))))
   }
-  
+
 })
 
 
@@ -470,8 +470,8 @@ output$PCoA <- renderPlotly({
 output$Relative_Abundance_sec <- renderPlot({
   ggplot(exprDat_Relative_abundance_sec(), aes_string(x = "variable", y = "value", fill = input$selectTaxo_sec)) +
     geom_bar(stat = "identity") +
-    labs(x = "Samples", 
-         y = "Relative Abundance", 
+    labs(x = "Samples",
+         y = "Relative Abundance",
          title = paste("Relative abundance at the ", input$selectTaxo_sec, " Taxonomic level", sep = "")) +
     theme(axis.text.x = element_text(angle = 90, hjust = 1))
 })
@@ -500,7 +500,7 @@ output$Dendrogramme_sec <- renderPlot({
       scale_colour_gradientn(colours = terrain.colors(10)) +
       ylim(-0.15, NA)
   }
-  
+
 })
 
 # PCoA Dataset 2
@@ -527,8 +527,8 @@ output$PCoA_sec <- renderPlotly({
 output$Relative_Abundance_ter <- renderPlot({
   ggplot(exprDat_Relative_abundance_ter(), aes_string(x = "variable", y = "value", fill = input$selectTaxo_ter)) +
     geom_bar(stat = "identity") +
-    labs(x = "Samples", 
-         y = "Relative Abundance", 
+    labs(x = "Samples",
+         y = "Relative Abundance",
          title = paste("Relative abundance at the ", input$selectTaxo_ter, " Taxonomic level", sep = "")) +
     theme(axis.text.x = element_text(angle = 90, hjust = 1))
 })
@@ -557,7 +557,7 @@ output$Dendrogramme_ter <- renderPlot({
       scale_colour_gradientn(colours = terrain.colors(10)) +
       ylim(-0.15, NA)
   }
-  
+
 })
 
 # PCoA Dataset 2
@@ -690,7 +690,7 @@ output$Download_Page2_dataset2_rel_ab <- downloadHandler(
     fs <- c()
     tmpdir <- tempdir()
     setwd(tempdir())
-    
+
     if (input$pdf_or_svg_page2_dataset2_rel_ab == "pdf"){
       if (input$TaxonFile1 || input$LoadExample == "Yes"){
         for (i in 1:ncol(taxTable_present())){
@@ -788,7 +788,7 @@ output$Download_Page2_dataset3_rel_ab <- downloadHandler(
     fs <- c()
     tmpdir <- tempdir()
     setwd(tempdir())
-    
+
     if (input$pdf_or_svg_page2_dataset3_rel_ab == "pdf"){
       if (input$TaxonFile1 || input$LoadExample == "Yes"){
         for (i in 1:ncol(taxTable_present())){

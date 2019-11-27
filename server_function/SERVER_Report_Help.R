@@ -15,7 +15,7 @@ exampleANNOT <- data.frame("SampleSite" = c("Site1", "Site6", "Site1", "Site5", 
 rownames(exampleANNOT) <- c("Sample1", "Sample2", "Sample3", "Sample4", "Sample5")
 exampleTAXA <-  data.frame("Kingdom" = c("Bacteria","Bacteria","Bacteria","Bacteria","Bacteria", "Bacteria"), "Phylum" = c("Bacteroidetes","Bacteroidetes","Bacteroidetes","Proteobacteria","Proteobacteria", "Firmicutes"), "Class" = c("Bacteroidia","Bacteroidia","Bacteroidia","Deltaproteobacteria","Deltaproteobacteria", "Bacilli"), "Order" = c("Bacteroidales","Bacteroidales","Bacteroidales","Desulfovibrionales","Desulfovibrionales", "Lactobacillales"), "Family" = c("Porphyromonadaceae","Bacteroidaceae","Bacteroidaceae","Desulfovibrionaceae","Desulfovibrionaceae", "Lactobacillaceae"), "Genus" = c("Parabacteroides","Bacteroidaceae","Alistipes","Desulfovibrio","Desulfovibrio", "Lactobacillus"), "Species" =c("Unassigned", "Unassigned", "Uncultured bacterium", "Unassigned", "Unassigned", "Unassigned"))
 rownames(exampleTAXA) <- c("OTU1", "OTU2", "OTU3", "OTU4", "OTU5", "OTU6")
-#### HELP PAGE 
+#### HELP PAGE
 output$exampleTable <- DT::renderDataTable({
   DT::datatable(exampleDATA, options = list(lengthMenu = FALSE, dom = 'tip'),
                 class = 'cell-border stripe',
@@ -49,7 +49,7 @@ tempReport <- reactive({
 generateReport <- observeEvent(input$produceReport,{
   input$produceReport
   withProgress({
-    
+
     filename = "report.html"
     datasets <- list()
     if (input$LoadExample == "No" && input$LoadExample2 == "No"){
@@ -67,13 +67,13 @@ generateReport <- observeEvent(input$produceReport,{
           datasets[["type"]] <- "MT" # Multivariate + Taxon
         }else{
           datasets[["type"]] <- "M" # Multivariate without taxon
-        } 
+        }
       }
     }else{
       datasets[["exprDat"]] <- exprDat_report()
       datasets[["sampleAnnot"]] <- sampleAnnot_Default()
       datasets[["taxaTable"]] <- taxTable_report()
-      datasets[["type"]] <- "ST" # Simple + Taxon 
+      datasets[["type"]] <- "ST" # Simple + Taxon
       if (input$TypeAnalysis == "multivariate"){
         datasets[["exprDatSec"]] <- exprDatSec_Default()
         datasets[["type"]] <- "MT" # Simple + Taxon
@@ -108,7 +108,7 @@ generateReport <- observeEvent(input$produceReport,{
           list_treatment[["filtrationD2"]] <- paste(list_treatment[["filtrationD2"]], "P", sep = "")
           list_treatment[["filtration_valueD2"]] <- input$prevalence1
           filtration_text <- paste(filtration_text, "A filtration on the second counting table was realized based on prevalence. A metabolite/OTU/gene is kept in the analysis if it is present in at least", input$prevalence1, "% of the samples.")
-        }  
+        }
       }else{
         list_treatment[["filtrationD2"]] <- "NONE"
         filtration_text <- paste(filtration_text,"")
@@ -135,13 +135,13 @@ generateReport <- observeEvent(input$produceReport,{
         }else{
           list_treatment[["normalizationD2"]] <- "Z"
           normalization_text <- paste(normalization_text, "A normalization on the second counting table was realized based on the Z-score method (function scale() in R).")
-        }  
+        }
       }else{
         list_treatment[["normalizationD2"]] <- "NONE"
         normalization_text <- paste(normalization_text,"")
       }
     }
-    
+
     #Input for transformation
     if (input$Transformation == "Yes"){
       list_treatment[["transformation"]] <- input$TypeTransformation
@@ -166,13 +166,13 @@ generateReport <- observeEvent(input$produceReport,{
       list_treatment[["SampleToRemove"]] <- "NONE"
       SampleToRemove <- "None"
     }
-    vector_input <- c(filtration_text, 
-                      normalization_text, 
-                      transformation_text, 
-                      SampleToRemove, 
-                      input$commentSection1, 
-                      input$LoadExample, 
-                      input$LoadExample2, 
+    vector_input <- c(filtration_text,
+                      normalization_text,
+                      transformation_text,
+                      SampleToRemove,
+                      input$commentSection1,
+                      input$LoadExample,
+                      input$LoadExample2,
                       input$commentSection2,
                       input$Power_P6,
                       input$Power_D2_P6,
@@ -200,7 +200,7 @@ generateReport <- observeEvent(input$produceReport,{
       list_Ordination[[2]] <- input$selectDist_P6
     }
     if (input$TypeAnalysis == "simple"){
-      list_input_P6 <- list(dist_PCoA_P2 = list_Ordination, 
+      list_input_P6 <- list(dist_PCoA_P2 = list_Ordination,
                             method_dendrogramme_P2 = input$selectMethod_P6,
                             power = input$Power_P6,
                             moduleSize = input$ModuleSize_P6,
@@ -217,8 +217,8 @@ generateReport <- observeEvent(input$produceReport,{
         list_Ordination_D2[[1]] <- "PCoA"
         list_Ordination_D2[[2]] <- input$selectDist_D2_P6
       }
-      list_input_P6 <- list(dist_PCoA_P2 = list_Ordination_D2, 
-                            method_dendrogramme_P2 = input$selectMethod_P6, 
+      list_input_P6 <- list(dist_PCoA_P2 = list_Ordination_D2,
+                            method_dendrogramme_P2 = input$selectMethod_P6,
                             dist_PCoA_D2_P2 = list_Ordination_D2,
                             method_dendrogramme_D2_P2 = input$selectMethod_D2_P6,
                             power = input$Power_P6,
@@ -236,12 +236,12 @@ generateReport <- observeEvent(input$produceReport,{
                             typeData_D2 = input$OmicTable,
                             minimalCorrelation = input$minimalCorrelation)
     }
-    
-    
+
+
     file.copy("report.Rmd", tempReport(), overwrite = TRUE)
-    
-    
-    
+
+
+
     # Set up parameters to pass to Rmd document
     if (input$LoadExample == "Yes"){
       params <- list(list_treatment = list_treatment,
@@ -289,8 +289,8 @@ generateReport <- observeEvent(input$produceReport,{
         }
       }
     }
-    
-    
+
+
     incProgress(0.80, detail = "kniting report")
     paste(dirname(tempReport()), "report.html", sep = "")
     # Knit the document, passing in the `params` list, and eval it in a
@@ -304,7 +304,7 @@ generateReport <- observeEvent(input$produceReport,{
 
 
 output$downloadReport <- downloadHandler(
-  
+
   # For PDF output, change this to "report.pdf"
   filename = paste(dirname(tempReport()), "/report.html", sep = ""),
   content = function(filename) {

@@ -1,60 +1,71 @@
-"","sex","consent_age","Age.at.diagnosis","Occupation","Ileum","Ileum.1","Ileum.2","Ileum.3","diagnosis","BMI"
-"C3002","Female",76,47,"Retired","No ulcers","No ulcers","Unaffected segment","No narrowings","CD",NA
-"C3003","Female",43,29,"Paid","No ulcers","No ulcers","Unaffected segment","No narrowings","UC",NA
-"C3004","Female",47,33,"Paid","No ulcers","No ulcers","Unaffected segment","No narrowings","UC",NA
-"C3005","Female",76,58,"Retired","No ulcers","No ulcers","Unaffected segment","No narrowings","UC",30.9
-"C3006","Male",32,24,"Paid","No ulcers","No ulcers","Unaffected segment","No narrowings","UC",20.1
-"C3011","Female",37,25,"Paid","No ulcers","No ulcers","Unaffected segment","No narrowings","UC",41.5
-"C3015","Female",50,37,"Unknown/Not Reported","No ulcers","No ulcers","Unaffected segment","No narrowings","UC",22.4
-"C3016","Female",32,12,"Paid","No ulcers","No ulcers","Unaffected segment","No narrowings","CD",24.7
-"C3017","Male",45,8,"Unknown/Not Reported","No ulcers","No ulcers","Unaffected segment","No narrowings","CD",24.2
-"C3021","Female",38,29,"Unknown/Not Reported","No ulcers","No ulcers","Unaffected segment","No narrowings","CD",25.6
-"C3022","Male",69,NA,"Unknown/Not Reported","No ulcers","No ulcers","Unaffected segment","No narrowings","nonIBD",NA
-"C3023","Male",60,45,"Unknown/Not Reported","Large ulcers (0.5 cm to 2 cm)","Less than 10% ulcerated","Less than 50% affected","No narrowings","CD",28
-"H4006","Male",8,8,"Student","No ulcers","No ulcers","Unaffected segment","No narrowings","CD",26.6
-"H4007","Female",15,15,"Student","Large ulcers (0.5 cm to 2 cm)","10% to 30% ulcerated","Less than 50% affected","No narrowings","CD",20.4
-"H4008","Female",13,NA,"Student","No ulcers","No ulcers","Unaffected segment","No narrowings","nonIBD",35.6
-"H4009","Female",6,NA,"Student","No ulcers","No ulcers","Unaffected segment","No narrowings","nonIBD",14
-"H4010","Male",13,13,"Student","No ulcers","No ulcers","Unaffected segment","No narrowings","UC",22
-"H4013","Male",8,NA,"Student","","","","","nonIBD",16.1
-"H4014","Female",10,10,"Student","Large ulcers (0.5 cm to 2 cm)","More than 30% ulcerated","More than 75% affected","No narrowings","CD",19.6
-"H4015","Male",15,15,"Student","Aphthous ulcers (0.1 cm to 0.5 cm)","Less than 10% ulcerated","Less than 50% affected","No narrowings","CD",19.2
-"H4016","Female",10,NA,"Student","","","","","nonIBD",13.5
-"H4017","Female",16,16,"Student","Very large ulcers (>2 cm)","More than 30% ulcerated","More than 75% affected","No narrowings","CD",28.6
-"H4018","Female",13,NA,"Student","","","","","nonIBD",25.2
-"H4019","Female",11,11,"Student","","","","","UC",16.9
-"H4020","Male",13,13,"Student","Large ulcers (0.5 cm to 2 cm)","More than 30% ulcerated","More than 75% affected","No narrowings","CD",27.7
-"H4022","Female",9,NA,"Student","","","","","nonIBD",18.9
-"H4023","Male",16,NA,"Student","","","","","nonIBD",18.8
-"H4024","Male",11,NA,"Student","","","","","nonIBD",15.4
-"H4028","Female",13,13,"Student","No ulcers","No ulcers","Less than 50% affected","No narrowings","CD",15.9
-"H4031","Male",12,12,"Student","Large ulcers (0.5 cm to 2 cm)","10% to 30% ulcerated","More than 75% affected","No narrowings","CD",NA
-"H4035","Male",16,16,"Student","","","","","UC",31
-"H4038","Male",15,15,"Student","Large ulcers (0.5 cm to 2 cm)","10% to 30% ulcerated","50% to 75% affected","No narrowings","CD",17.3
-"H4039","Female",12,12,"Student","No ulcers","No ulcers","Unaffected segment","No narrowings","CD",16.9
-"H4043","Female",14,14,"Student","","","","","CD",22
-"H4044","Male",16,16,"Student","","","","","UC",22.3
-"H4045","Female",14,NA,"Student","","","","","nonIBD",33.8
-"M2008","Female",30,30,"Paid","No ulcers","No ulcers","Unaffected segment","No narrowings","CD",24.1
-"M2014","Male",30,30,"Paid","Large ulcers (0.5 cm to 2 cm)","10% to 30% ulcerated","Less than 50% affected","Single narrowing, can be passed","CD",25.4
-"M2025","Female",43,43,"Paid","Aphthous ulcers (0.1 cm to 0.5 cm)","No ulcers","Unaffected segment","No narrowings","CD",19.3
-"M2026","Female",21,21,"Student","","","","","UC",20.3
-"M2027","Male",41,41,"Paid","Aphthous ulcers (0.1 cm to 0.5 cm)","Less than 10% ulcerated","Less than 50% affected","No narrowings","CD",23.7
-"M2028","Female",24,24,"Paid","Aphthous ulcers (0.1 cm to 0.5 cm)","Less than 10% ulcerated","Less than 50% affected","No narrowings","CD",20.9
-"M2034","Female",22,22,"Student","No ulcers","No ulcers","Less than 50% affected","No narrowings","CD",31.2
-"M2039","Female",40,NA,"Paid","","","","","nonIBD",40.6
-"M2041","Male",55,NA,"Paid","","","","","nonIBD",22.7
-"M2042","Male",44,NA,"Paid","","","","","nonIBD",24.5
-"M2047","Male",57,NA,"Paid","","","","","nonIBD",25.1
-"M2060","Female",62,NA,"Paid","","","","","nonIBD",20.2
-"M2061","Male",56,NA,"Paid","","","","","nonIBD",26.3
-"M2068","Female",19,19,"Student","No ulcers","No ulcers","Less than 50% affected","No narrowings","CD",21.3
-"M2072","Male",51,NA,"Unpaid/volunteer","","","","","nonIBD",28.7
-"M2084","Female",23,NA,"Student","No ulcers","No ulcers","Unaffected segment","No narrowings","nonIBD",21.6
-"P6005","Male",11,11,"Student","No ulcers","No ulcers","Unaffected segment","No narrowings","CD",14.3
-"P6009","Male",16,16,"Student","No ulcers","No ulcers","Unaffected segment","No narrowings","CD",22.1
-"P6012","Female",16,16,"Student","No ulcers","No ulcers","Unaffected segment","No narrowings","UC",21.1
-"P6013","Male",6,6,"Student","No ulcers","No ulcers","Unaffected segment","No narrowings","UC",13.5
-"P6017","Male",11,NA,"Student","No ulcers","No ulcers","Unaffected segment","No narrowings","nonIBD",NA
-"P6018","Female",17,NA,"Student","No ulcers","No ulcers","Unaffected segment","No narrowings","nonIBD",20.9
-"P6028","Male",9,9,"Student","Large ulcers (0.5 cm to 2 cm)","More than 30% ulcerated","More than 75% affected","No narrowings","CD",15.9
+"","sex","consent_age","Age.at.diagnosis","Occupation","Rectum.Flora.","Antibiotics","Rectum","diagnosis","BMI"
+"C3002","Female",76,47,"Retired",206619,"No","No ulcers","CD",NA
+"C3003","Female",43,29,"Paid",206621,"No","No ulcers","UC",NA
+"C3004","Female",47,33,"Paid",206624,"No","No ulcers","UC",NA
+"C3005","Female",76,58,"Retired",206628,"No","No ulcers","UC",30.9
+"C3006","Male",32,24,"Paid",206630,"No","No ulcers","UC",20.1
+"C3011","Female",37,25,"Paid",206636,"No","No ulcers","UC",41.5
+"C3015","Female",50,37,"Unknown/Not Reported",206644,"No","No ulcers","UC",22.4
+"C3016","Female",32,12,"Paid",206646,"No","No ulcers","CD",24.7
+"C3017","Male",45,8,"Unknown/Not Reported",206648,"No","No ulcers","CD",24.2
+"C3021","Female",38,29,"Unknown/Not Reported",206656,"No","Very large ulcers (>2 cm)","CD",25.6
+"C3022","Male",69,NA,"Unknown/Not Reported",206658,"No","No ulcers","nonIBD",NA
+"C3023","Male",60,45,"Unknown/Not Reported",206660,"No","No ulcers","CD",28
+"H4001","Male",14,14,"Student",206695,"No","Large ulcers (0.5 cm to 2 cm)","CD",NA
+"H4004","Male",14,14,"Student",206700,"No","No ulcers","CD",NA
+"H4006","Male",8,8,"Student",206701,"No","No ulcers","CD",26.6
+"H4007","Female",15,15,"Student",206709,"No","Aphthous ulcers (0.1 cm to 0.5 cm)","CD",20.4
+"H4008","Female",13,NA,"Student",206704,"No","No ulcers","nonIBD",35.6
+"H4009","Female",6,NA,"Student",206711,"No","No ulcers","nonIBD",14
+"H4010","Male",13,13,"Student",206713,"No","No ulcers","UC",22
+"H4013","Male",8,NA,"Student",206719,"No","","nonIBD",16.1
+"H4014","Female",10,10,"Student",206720,"No","No ulcers","CD",19.6
+"H4015","Male",15,15,"Student",206723,"No","Aphthous ulcers (0.1 cm to 0.5 cm)","CD",19.2
+"H4016","Female",10,NA,"Student",206726,"No","","nonIBD",13.5
+"H4017","Female",16,16,"Student",206727,"No","Very large ulcers (>2 cm)","CD",28.6
+"H4018","Female",13,NA,"Student",206730,"No","","nonIBD",25.2
+"H4019","Female",11,11,"Student",206732,"No","","UC",16.9
+"H4020","Male",13,13,"Student",206734,"No","No ulcers","CD",27.7
+"H4022","Female",9,NA,"Student",206739,"No","","nonIBD",18.9
+"H4023","Male",16,NA,"Student",206741,"No","","nonIBD",18.8
+"H4024","Male",11,NA,"Student",206742,"No","","nonIBD",15.4
+"H4028","Female",13,13,"Student",206751,"No","No ulcers","CD",15.9
+"H4031","Male",12,12,"Student",206755,"No","No ulcers","CD",NA
+"H4035","Male",16,16,"Student",206762,"No","","UC",31
+"H4038","Male",15,15,"Student",206767,"No","No ulcers","CD",17.3
+"H4039","Female",12,12,"Student",206769,"No","No ulcers","CD",16.9
+"H4040","Female",17,13,"Student",206770,"No","","UC",NA
+"H4042","Male",15,15,"Student",224330,"No","","UC",NA
+"H4043","Female",14,14,"Student",224328,"No","","CD",22
+"H4044","Male",16,16,"Student",224326,"No","","UC",22.3
+"H4045","Female",14,NA,"Student",224324,"No","","nonIBD",33.8
+"M2008","Female",30,30,"Paid",206538,"No","No ulcers","CD",24.1
+"M2014","Male",30,30,"Paid",206548,"No","No ulcers","CD",25.4
+"M2025","Female",43,43,"Paid",206570,"No","No ulcers","CD",19.3
+"M2026","Female",21,21,"Student",206572,"No","","UC",20.3
+"M2027","Male",41,41,"Paid",206605,"No","No ulcers","CD",23.7
+"M2028","Female",24,24,"Paid",206609,"No","No ulcers","CD",20.9
+"M2034","Female",22,22,"Student",214995,"No","No ulcers","CD",31.2
+"M2039","Female",40,NA,"Paid",215004,"No","","nonIBD",40.6
+"M2041","Male",55,NA,"Paid",215008,"No","","nonIBD",22.7
+"M2042","Male",44,NA,"Paid",215010,"No","","nonIBD",24.5
+"M2047","Male",57,NA,"Paid",215049,"No","","nonIBD",25.1
+"M2060","Female",62,NA,"Paid",215056,"No","","nonIBD",20.2
+"M2061","Male",56,NA,"Paid",215058,"No","","nonIBD",26.3
+"M2064","Male",74,74,"Paid",215062,"No","","UC",NA
+"M2068","Female",19,19,"Student",215075,"No","No ulcers","CD",21.3
+"M2069","Female",29,29,"Paid",215080,"No","No ulcers","UC",NA
+"M2072","Male",51,NA,"Unpaid/volunteer",215074,"No","","nonIBD",28.7
+"M2075","Male",61,NA,"Paid",222170,"No","No ulcers","nonIBD",NA
+"M2084","Female",23,NA,"Student",224844,"No","No ulcers","nonIBD",21.6
+"P6005","Male",11,11,"Student",219633,"No","No ulcers","CD",14.3
+"P6009","Male",16,16,"Student",219637,"No","No ulcers","CD",22.1
+"P6012","Female",16,16,"Student",219643,"No","No ulcers","UC",21.1
+"P6013","Male",6,6,"Student",219646,"No","No ulcers","UC",13.5
+"P6014","Male",15,NA,"Student",219651,"No","No ulcers","nonIBD",NA
+"P6016","Male",16,16,"Student",219654,"No","No ulcers","CD",NA
+"P6017","Male",11,NA,"Student",219656,"No","No ulcers","nonIBD",NA
+"P6018","Female",17,NA,"Student",219658,"No","No ulcers","nonIBD",20.9
+"P6024","Male",16,16,"Student",219668,"No","","CD",NA
+"P6025","Male",17,17,"Student",219669,"No","No ulcers","UC",NA
+"P6028","Male",9,9,"Student",219675,"No","No ulcers","CD",15.9

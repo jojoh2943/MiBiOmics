@@ -37,7 +37,7 @@ sampleAnnot <- reactive({
                               header = input$header2,
                               sep = input$sep2,
                               dec = input$dec2)
-      
+
     }else{
       essai <- try(read.csv(input$file2$datapath,
                             header = input$header2,
@@ -54,10 +54,10 @@ sampleAnnot <- reactive({
                               dec = input$dec2)
     }
   }
-  
-  
-  
-  
+
+
+
+
   col_to_remove <- c()
   for (i in 1:ncol(sampleAnnot)){
     if (length(unique(sampleAnnot[,i])) == 1){
@@ -66,16 +66,16 @@ sampleAnnot <- reactive({
   }
   if (!is.null(col_to_remove)){
     sampleAnnot <- sampleAnnot[,-col_to_remove]
-    
-    
+
+
   }
-  
+
   validate(
     need(ncol(sampleAnnot)!= 1, "Please upload an annotation file containing at least two columns of non-unique features")
   )
-  
+
   sampleAnnot <- sampleAnnot[order(rownames(sampleAnnot)),]
-  
+
   sampleAnnot
 })
 
@@ -100,7 +100,7 @@ exprDat <- reactive({
     validate(
       need(input$file1$datapath != "" && (input$LoadExample == "No"), "Please select a data set")
     )
-    
+
     ### IMPORT CSV FORMAT
     if (input$rownames == FALSE){
       essai <- try(read.csv(input$file1$datapath,
@@ -133,9 +133,9 @@ exprDat <- reactive({
     }
     # Look if rows are OTUs and columns are samples.
   }
-  
+
   if (length(exprDat[which(colnames(exprDat) %in% rownames(sampleAnnot()))]) > 1){
-    
+
     exprDat <- as.data.frame(t(exprDat))
   }
   exprDat[is.na(exprDat)] <- 0
@@ -146,7 +146,7 @@ exprDat <- reactive({
     showNotification("The counting table does not contains numeric values. The values were transformed into numbers but your analysis may not worked as expected. Please check the format of your counting table.", type = "warning", duration = NULL)
   }
   rownames(exprDat) <- sampleID
-  
+
   ### SELECTED FILTRATION
   if (input$Filtration == "Yes"){
     if (input$TypeFiltration == "prevalence"){
@@ -160,7 +160,7 @@ exprDat <- reactive({
               nb_zero = nb_zero + 1
             }
           }
-          
+
           if (nb_zero > (nrow(exprDat) - Prevalence_threshold)){
             names_OTU <- c(names_OTU, colnames(exprDat)[col])
           }
@@ -174,7 +174,7 @@ exprDat <- reactive({
         need(ncol(exprDat) > 0, "Do not apply the minimal count filtration on normalized/transformed data"))
     }
   }
-  
+
   # DATA NORMALIZATION
   if(input$Normalisation == "Yes"){
     if (input$TypeNormalisation == 'CSS'){
@@ -198,16 +198,16 @@ exprDat <- reactive({
   }
   exprDat <- exprDat[which(rownames(exprDat) %in% rownames(sampleAnnot())),]
   exprDat <- exprDat[which(rownames(exprDat) %!in% input$selectSample),]
-  
-  
+
+
   sampleAnnotation <- sampleAnnot()
   rownamesAnnot <- as.character(rownames(sampleAnnot()))
   colnamesAnnot <- as.character(colnames(sampleAnnot()))
-  
+
   sampleAnnotation <- as.data.frame(sampleAnnotation[which(rownames(sampleAnnotation) %!in% as.character(input$selectSample)),])
   colnames(sampleAnnotation) <- colnamesAnnot
   rownames(sampleAnnotation) <- rownamesAnnot[rownamesAnnot %!in% as.character(input$selectSample)]
-  
+
   # DATA TRANFORMATION
   if (input$Transformation == "Yes"){
     if (input$TypeTransformation == "Log10"){
@@ -243,10 +243,10 @@ exprDat <- reactive({
     }
   }
   exprDat <- exprDat[which(rownames(exprDat) %in% rownames(sampleAnnotation)),]
-  
-  
+
+
   exprDat <- exprDat[order(rownames(exprDat)),]
-  
+
   exprDat
 })
 
@@ -258,11 +258,11 @@ exprDat_present <- reactive({
     validate(
       need(input$file1$datapath != "", "Please select a data set")
     )
-    exprDat_present <- exprDat()     
+    exprDat_present <- exprDat()
   }
   # if (nchar(colnames(exprDat_present)[1]) > 20 ){
   #   for (i in 1:ncol(exprDat_present)){
-  #     colnames(exprDat_present)[i] <- paste(input$CountingT, i, sep = "") 
+  #     colnames(exprDat_present)[i] <- paste(input$CountingT, i, sep = "")
   #   }
   # }
   exprDat_present
@@ -307,7 +307,7 @@ exprDatSec <- reactive ({
                              dec = input$dec4,
                              check.names = FALSE)
     }
-    
+
   }
   if (length(exprDatSec[which(colnames(exprDatSec) %in% rownames(sampleAnnot()))]) > 2){
     exprDatSec <- as.data.frame(t(exprDatSec))
@@ -316,7 +316,7 @@ exprDatSec <- reactive ({
   validate(
     need(nrow(exprDatSec) != 0, "The sample names are differents between the datasets.")
   )
-  
+
   exprDatSec[is.na(exprDatSec)] <- 0
   sampleID <- rownames(exprDatSec)
   # If the values are not numeric --> tranform values into numbers.
@@ -326,9 +326,9 @@ exprDatSec <- reactive ({
   }else{
     exprDatSec <- sapply(exprDatSec, as.numeric)
   }
-  
+
   rownames(exprDatSec) <- sampleID
-  
+
   ### SELECTED FILTRATION
   if (input$Filtration1 == "Yes"){
     if (input$TypeFiltration1 == "prevalence"){
@@ -342,7 +342,7 @@ exprDatSec <- reactive ({
               nb_zero = nb_zero + 1
             }
           }
-          
+
           if (nb_zero > (nrow(exprDatSec) - Prevalence_threshold)){
             names_OTU <- c(names_OTU, colnames(exprDatSec)[col])
           }
@@ -362,7 +362,7 @@ exprDatSec <- reactive ({
       validate(
         need(!any(colSums(exprDatSec) == 0), "Please filtrate your data for this normalization")
       )
-      
+
       MR_exprDatSec <- newMRexperiment(exprDatSec)
       if (input$LoadExample == "Yes" || input$OmicTable != 'OTUs'){
         p <- 0.5
@@ -381,7 +381,7 @@ exprDatSec <- reactive ({
   exprDatSec <- exprDatSec[which(rownames(exprDatSec) %!in% input$selectSample),]
   sampleAnnotation <- sampleAnnot()
   sampleAnnotation <- sampleAnnotation[which(rownames(sampleAnnotation) %!in% input$selectSample),]
-  
+
   # DATA TRANFORMATION
   if (input$Transformation1 == "Yes"){
     if (input$TypeTransformation1 == "Log10"){
@@ -420,8 +420,8 @@ exprDatSec <- reactive ({
   sampleAnnotation <- sampleAnnotation[which(rownames(sampleAnnotation) %in% rownames(exprDatSec)),]
   exprDatSec <- exprDatSec[which(rownames(exprDatSec) %in% rownames(sampleAnnotation)),]
   exprDatSec <- exprDatSec[match(rownames(sampleAnnotation), rownames(exprDatSec)),]
-  
-  
+
+
   exprDatSec
 })
 
@@ -433,11 +433,11 @@ exprDatSec_present <- reactive({
     validate(
       need(input$file1$datapath != "", "Please select a data set")
     )
-    exprDatSec_present <- exprDatSec()     
+    exprDatSec_present <- exprDatSec()
   }
   # if (nchar(colnames(exprDatSec_present)[5]) > 20 ){
   #   for (i in 1:ncol(exprDatSec_present)){
-  #     colnames(exprDatSec_present)[i] <- paste(input$OmicTable, i, sep = "") 
+  #     colnames(exprDatSec_present)[i] <- paste(input$OmicTable, i, sep = "")
   #   }
   # }
   exprDatSec_present
@@ -455,7 +455,7 @@ exprDatTer <- reactive({
     validate(
       need(input$file5$datapath != "" && (input$Omic3), "Please select a data set")
     )
-    
+
     ### IMPORT CSV FORMAT
     if (input$rownames5 == FALSE){
       essai <- try(read.csv(input$file5$datapath,
@@ -487,7 +487,7 @@ exprDatTer <- reactive({
                           check.names = FALSE)
     }
   }
-  
+
   # Look if rows are OTUs and columns are samples.
   if (length(exprDat[which(colnames(exprDat) %in% rownames(sampleAnnot()))]) > 2){
     exprDat <- as.data.frame(t(exprDat))
@@ -499,12 +499,12 @@ exprDatTer <- reactive({
     exprDat <- sapply(exprDat, as.numeric)
     showNotification("The counting table does not contains numeric values. The values were transformed into numbers but your analysis may not worked as expected. Please check the format of your counting table.", type = "warning", duration = NULL)
   }
-  
+
   rownames(exprDat) <- sampleID
-  
-  
-  
-  
+
+
+
+
   ### SELECTED FILTRATION
   if (input$Filtration2 == "Yes"){
     if (input$TypeFiltration2 == "prevalence"){
@@ -518,7 +518,7 @@ exprDatTer <- reactive({
               nb_zero = nb_zero + 1
             }
           }
-          
+
           if (nb_zero > (nrow(exprDat) - Prevalence_threshold)){
             names_OTU <- c(names_OTU, colnames(exprDat)[col])
           }
@@ -532,7 +532,7 @@ exprDatTer <- reactive({
         need(ncol(exprDat) > 0, "Do not apply the minimal count filtration on normalized/transformed data"))
     }
   }
-  
+
   # DATA NORMALIZATION
   if(input$Normalisation2 == "Yes"){
     if (input$TypeNormalisation2 == 'CSS'){
@@ -595,26 +595,26 @@ exprDatTer <- reactive({
   exprDat <- exprDat[which(rownames(exprDat) %in% rownames(sampleAnnotation)),]
   sampleAnnotation <- sampleAnnotation[which(rownames(sampleAnnotation) %in% rownames(exprDat)),]
   exprDat <- exprDat[match(rownames(sampleAnnotation), rownames(exprDat)),]
-  
+
   exprDat
 })
 
 exprDatTer_present <- reactive({
   if (input$TypeAnalysis == "multivariate" && input$Omic3){
     if (input$LoadExample == "Yes"){
-      exprDatTer_present <- exprDatTer()  
+      exprDatTer_present <- exprDatTer()
     }else{
-      
+
       validate(
         need(input$file5$datapath != "", "Please select a data set")
       )
-      exprDatTer_present <- exprDatTer()     
+      exprDatTer_present <- exprDatTer()
     }
   }
-  
+
   # if (nchar(colnames(exprDatTer_present)[5]) > 20 ){
   #   for (i in 1:ncol(exprDatTer_present)){
-  #     colnames(exprDatTer_present)[i] <- paste(input$OmicTable3, i, sep = "") 
+  #     colnames(exprDatTer_present)[i] <- paste(input$OmicTable3, i, sep = "")
   #   }
   # }
   exprDatTer_present
@@ -627,7 +627,7 @@ exprDatSec_2 <- reactive({
     validate(
       need(input$file4$datapath != "", "Please select a data set")
     )
-    exprDatSec_2 <- exprDatSec()     
+    exprDatSec_2 <- exprDatSec()
   }
   exprDatSec_2
 })
@@ -645,7 +645,7 @@ taxTable <- reactive({
       validate(
         need(input$file3$datapath != "", "Please select a data set")
       )
-      
+
       if (input$TaxonFile){
         if (input$rownames3 == FALSE){
           essai <- try(read.csv(input$file3$datapath,
@@ -668,7 +668,7 @@ taxTable <- reactive({
           taxTable <- read.csv(input$file3$datapath,
                                header = input$header3,
                                sep = input$sep3,
-                               row.names = 1)    
+                               row.names = 1)
         }
       }else{
         taxTable <- 0
@@ -677,7 +677,7 @@ taxTable <- reactive({
       validate(
         need(input$file4$datapath != "", "Please select a data set")
       )
-      
+
       if (input$TaxonFile1){
         if (input$rownames3 == FALSE){
           essai <- try(read.csv(input$file3$datapath,
@@ -700,13 +700,13 @@ taxTable <- reactive({
           taxTable <- read.csv(input$file3$datapath,
                                header = input$header3,
                                sep = input$sep3,
-                               row.names = 1)    
+                               row.names = 1)
         }
       }else{
         taxTable <- 0
       }
     }
-    
+
   }
   exprDat <- exprDat()
   if (substr(colnames(exprDat), 1, 1) == "X"){
@@ -715,7 +715,7 @@ taxTable <- reactive({
   # taxTable <- taxTable[which(rownames(taxTable) %in% colnames(exprDat)),]
   # taxTable <- taxTable[match(rownames(taxTable), colnames(exprDat)),]
   taxTable
-  
+
 })
 
 # taxTable_Default <- reactive({
@@ -745,10 +745,10 @@ taxTable_present <- reactive({
   }
   # if (nchar(rownames(taxTable_present)) > 20){
   #   for (i in 1:nrow(taxTable_present)){
-  #     rownames(taxTable_present)[i] <- paste("OTU", i, sep = "") 
-  #   }      
+  #     rownames(taxTable_present)[i] <- paste("OTU", i, sep = "")
+  #   }
   # }
-  
+
   taxTable_present
 })
 
@@ -762,7 +762,7 @@ taxTable_rownames <- reactive({
 #   }else{
 #     taxTable <- taxTable()
 #   }
-#   
+#
 #   taxTable
 # })
 
@@ -774,7 +774,7 @@ taxTable_rownames <- reactive({
 #   }else{
 #     exprDat <- exprDat_2()
 #   }
-#   
+#
 #   exprDat
 # })
 
@@ -786,7 +786,7 @@ exprDat_2 <- reactive({
   expr <- exprDat()
   annot <- sampleAnnot()
   exprDat1 <- expr
-  
+
   if (any(rownames(annot) %!in% rownames(expr)) == TRUE ){
     sampleAnnot1 <- annot[which(rownames(annot ) %in% rownames(expr ) ),]
   }else{
@@ -797,8 +797,8 @@ exprDat_2 <- reactive({
   }else{
     exprDat1
   }
-  
-  
+
+
 })
 
 
@@ -814,7 +814,7 @@ sampleAnnot_2 <- reactive({
   }else{
     annot
   }
-  
+
 })
 
 sampleAnnot_WGCNA <- reactive({
@@ -891,7 +891,7 @@ exprDat_WGCNA <- reactive({
   if (nrow(expr) > 14){
     gsg = goodSamplesGenes(expr, verbose = 3)
     #If gsg$allOK is TRUE, all genes have passed the cuts.  If not, we remove the offending genes and samples
-    
+
     if (!gsg$allOK)
     {
       # Optionally, print the gene and sample names that were removed:
@@ -919,7 +919,7 @@ exprDatSec_WGCNA <- reactive({
   if (nrow(expr) > 14){
     gsg = goodSamplesGenes(expr, verbose = 3)
     #If gsg$allOK is TRUE, all genes have passed the cuts.  If not, we remove the offending genes and samples
-    
+
     if (!gsg$allOK)
     {
       # Optionally, print the gene and sample names that were removed:
@@ -940,11 +940,11 @@ exprDatSec_WGCNA <- reactive({
 exprDatTer_WGCNA <- reactive({
   expr <- exprDatTer_2()
   #expr <- expr[which(rownames(expr) %in% rownames(sampleAnnot_2()))]
-  
+
   if (nrow(expr) > 14){
     gsg = goodSamplesGenes(expr, verbose = 3)
     #If gsg$allOK is TRUE, all genes have passed the cuts.  If not, we remove the offending genes and samples
-    
+
     if (!gsg$allOK)
     {
       # Optionally, print the gene and sample names that were removed:
@@ -968,11 +968,11 @@ exprDatTer_WGCNA <- reactive({
 exprDat_3 <- reactive({
   expr <- exprDat_2()
   expr2 <- exprDatSec_3()
-  
+
   expr <- expr[which(rownames(expr) %in% rownames(expr2)),]
   expr2 <- expr2[which(rownames(expr2) %in% rownames(expr)),]
   expr <- expr[match(rownames(expr), rownames(expr2)),]
-  
+
   if (input$Omic3){
     expr3 <- exprDatTer_2()
     expr2 <- expr2[which(rownames(expr2) %in% rownames(expr3)),]
@@ -981,13 +981,13 @@ exprDat_3 <- reactive({
     expr3 <- expr3[which(rownames(expr3) %in% rownames(expr)),]
     expr2 <- expr2[match(rownames(expr2), rownames(expr)),]
     expr3 <- expr3[match(rownames(expr3), rownames(expr)),]
-    
+
   }
   if (input$CountingT1 == "OTUs" && input$OmicTable == "OTUs"){
     colnames(expr) <- paste("a", colnames(expr), sep ="")
   }
   expr
-}) 
+})
 
 exprDatSec_4 <- reactive({
   expr <- exprDat_2()
@@ -1008,7 +1008,7 @@ exprDatSec_4 <- reactive({
     colnames(expr2) <- paste("a", colnames(expr2), sep ="")
   }
   expr2
-}) 
+})
 
 exprDatTer_3 <- reactive({
   expr <- exprDat_2()
@@ -1022,12 +1022,12 @@ exprDatTer_3 <- reactive({
   expr3 <- expr3[which(rownames(expr3) %in% rownames(expr)),]
   expr2 <- expr2[match(rownames(expr2), rownames(expr)),]
   expr3 <- expr3[match(rownames(expr3), rownames(expr)),]
-  
+
   # if (input$CountingT1 == "OTUs" && input$OmicTable == "OTUs" && input$LoadExample2 == "No"){
   #   colnames(expr3) <- paste("a", colnames(expr2), sep ="")
   # }
   expr3
-}) 
+})
 
 taxTable2 <- reactive({
   taxTable <- taxTable1()
@@ -1039,11 +1039,11 @@ taxTable2 <- reactive({
 
 selectedMetab <- reactive({
   Module_metab <- exprDatSec_4()
-  
-  # 
+
+  #
   # if (input$selectModule2_p5 != "General"){
   #   modGenes = (selectedDynamicColor2()== input$selectModule2_p5)
-  #   
+  #
   #   Module_metab <- expr[,modGenes]
   #   unique_col <- c()
   #   for (i in 1:ncol(Module_metab)){
@@ -1069,8 +1069,8 @@ selectedMetab <- reactive({
 
 selectedD3 <- reactive({
   Module_metab <- exprDatTer_3()
-  
-  
+
+
   # if (input$selectModule3_p5 != "General"){
   #   modGenes = (selectedDynamicColor3() == input$selectModule3_p5)
   #   Module_metab <- expr[,modGenes]
@@ -1092,7 +1092,7 @@ selectedD3 <- reactive({
   Module_metab <- Module_metab[, which(colnames(Module_metab) %!in% unique_col)]
   # }
   Module_metab[which(is.na(Module_metab)),] <- 0
-  
+
   Module_metab
 })
 
@@ -1106,7 +1106,7 @@ sampleAnnot_3 <- reactive({
 selected_moduleOTU <- reactive({
   # if (input$selectModule1_p5 != "General"){
   #   modGenes = (selectedDynamicColor()== input$selectModule1_p5)
-  #   
+  #
   #   Module_OTU <- exprDat_3()[modGenes]
   #   unique_col <- c()
   #   for (i in 1:ncol(Module_OTU)){
@@ -1124,13 +1124,13 @@ selected_moduleOTU <- reactive({
     }
   }
   Module_OTU <- Module_OTU[, which(colnames(Module_OTU) %!in% unique_col)]
-  # } 
+  # }
   Module_OTU
-  
-  
+
+
 })
 
-#### HEATMAP 
+#### HEATMAP
 
 exprDat_41 <- reactive({
   if (input$selectModule12_p5 == "Individual_Variables"){
@@ -1164,9 +1164,9 @@ exprDatSec_51 <- reactive({
     exprDatSec_4()[,input$selectVariables]
   }else{
     modGenes = (selectedDynamicColor2()== input$selectModule21_p5)
-    exprDatSec_4()[,modGenes] 
+    exprDatSec_4()[,modGenes]
   }
-  
+
 })
 
 exprDatSec_52 <- reactive({
@@ -1177,9 +1177,9 @@ exprDatSec_52 <- reactive({
     exprDatSec_4()[,c(input$selectVariablesExprDat)]
   }else{
     modGenes = (selectedDynamicColor2()== input$selectModule23_p5)
-    exprDatSec_4()[,modGenes] 
+    exprDatSec_4()[,modGenes]
   }
-  
+
 })
 
 exprDatTer_52 <- reactive({
@@ -1190,9 +1190,9 @@ exprDatTer_52 <- reactive({
     exprDatTer_3()[,c(input$selectVariablesExprDat)]
   }else{
     modGenes = (selectedDynamicColor3()== input$selectModule32_p5)
-    exprDatTer_3()[,modGenes] 
+    exprDatTer_3()[,modGenes]
   }
-  
+
 })
 
 exprDatTer_53 <- reactive({
@@ -1203,9 +1203,9 @@ exprDatTer_53 <- reactive({
     exprDatTer_3()[,c(input$selectVariablesExprDat)]
   }else{
     modGenes = (selectedDynamicColor3()== input$selectModule31_p5)
-    exprDatTer_3()[,modGenes] 
+    exprDatTer_3()[,modGenes]
   }
-  
+
 })
 
 #### INTERFACE VARIABLES ####
@@ -1230,13 +1230,13 @@ output$ViewPanel <- renderUI({
                      selected = character(0))
       }else{
         if (input$TypeAnalysis == 'multivariate' && (input$TaxonFile1 == TRUE | input$LoadExample == "Yes") && input$Omic3){
-          
+
           radioButtons("View6",
                        "View: ",
                        choices = c("Counting Table" = "counting", "Annotation Table" = "annot", "Taxa Table" = "taxa", "Second Omic Table" = "sec", "Third Omic Table" = "ter"),
                        selected = character(0))
         }else{
-          
+
           if(input$TypeAnalysis == 'multivariate' && input$TaxonFile1 == FALSE && input$Omic3){
             radioButtons("View5",
                          "View: ",
@@ -1244,14 +1244,14 @@ output$ViewPanel <- renderUI({
                          selected = character(0))
           }else{
             if (input$TypeAnalysis == 'simple' && input$TaxonFile == FALSE){
-              radioButtons("View2", 
-                           "View: ", 
+              radioButtons("View2",
+                           "View: ",
                            choices = c("Counting Table" = "counting", "Annotation Table" = "annot"),
                            selected = character(0))
             }
-            
+
           }
-          
+
         }
       }
     }
@@ -1262,7 +1262,7 @@ output$ViewPanel <- renderUI({
 output$selectSample <- renderUI({
   selectInput("selectSample", "Select samples to remove: ",
               choices = rownames(sampleAnnot()),
-              multiple = TRUE) 
+              multiple = TRUE)
 })
 
 
@@ -1274,9 +1274,9 @@ output$ViewTable <- renderDataTable({
   }else{
     length_expr <- 10
   }
-  
-  
-  
+
+
+
   if(is.null(input$View1)&is.null(input$View2)&is.null(input$View3)&is.null(input$View4)&is.null(input$View5)&is.null(input$View6)){
     validate(
       need(input$file1$datapath != "", "Please upload a counting table")
@@ -1307,7 +1307,7 @@ output$ViewTable <- renderDataTable({
           need(input$View6 != "", "Please select a viewing option")
         )
       }
-      
+
     }else{
       if(input$TaxonFile){
         validate(
@@ -1319,10 +1319,10 @@ output$ViewTable <- renderDataTable({
       }else{
         validate(
           need(input$View1 != "", "Please select a viewing option")
-        ) 
-      }   
+        )
+      }
     }
-    
+
   }else{
     if(input$TypeAnalysis == 'simple'){
       if(input$TaxonFile | input$LoadExample == "Yes"){
@@ -1336,32 +1336,32 @@ output$ViewTable <- renderDataTable({
                       options = list(lengthMenu = FALSE, pageLength = 6,  dom = 'tip'),
                       class = 'cell-border stripe')
           }
-          
+
         }else{
           if (input$View1 == "annot"){
-            datatable(sampleAnnot_2(), 
+            datatable(sampleAnnot_2(),
                       options = list(lengthMenu = FALSE, pageLength = 5,  dom = 'tip'),
                       class = 'cell-border stripe')
           }else{
             datatable(taxTable_present(),
-                      options = list(lengthMenu = FALSE, pageLength = 5, dom = 'tip'), 
+                      options = list(lengthMenu = FALSE, pageLength = 5, dom = 'tip'),
                       class = 'cell-border stripe')
           }
         }
       }else{
         if (input$View2 == "annot"){
-          datatable(sampleAnnot_2(), 
+          datatable(sampleAnnot_2(),
                     options = list(lengthMenu = FALSE, pageLength = 5,  dom = 'tip'),
                     class = 'cell-border stripe')
         }else{
           if(ncol(exprDat_present()) < 1000){
             datatable(exprDat_present()[,1:length_expr],
                       options = list(lengthMenu = FALSE, pageLength = 5,  dom = 'tip'),
-                      class = 'cell-border stripe')       
+                      class = 'cell-border stripe')
           }else{
             datatable(head(exprDat_present()[,1:length_expr]),
                       options = list(lengthMenu = FALSE, pageLength = 5,  dom = 'tip'),
-                      class = 'cell-border stripe')                
+                      class = 'cell-border stripe')
           }
         }
       }
@@ -1378,17 +1378,17 @@ output$ViewTable <- renderDataTable({
                         options = list(lengthMenu = FALSE, pageLength = 6,  dom = 'tip'),
                         class = 'cell-border stripe')
             }
-            
+
           }else{
-            
+
             if (input$View3 == "annot"){
-              datatable(sampleAnnot_2(), 
+              datatable(sampleAnnot_2(),
                         options = list(lengthMenu = FALSE, pageLength = 5,  dom = 'tip'),
                         class = 'cell-border stripe')
             }else{
               if (input$View3 == "taxa"){
                 datatable(taxTable_present(),
-                          options = list(lengthMenu = FALSE, pageLength = 5, dom = 'tip'), 
+                          options = list(lengthMenu = FALSE, pageLength = 5, dom = 'tip'),
                           class = 'cell-border stripe')
               }else{
                 if (ncol(exprDatSec_present()) < 10){
@@ -1396,10 +1396,10 @@ output$ViewTable <- renderDataTable({
                 }else{
                   length_expr_sec <- 10
                 }
-                
-                
+
+
                 datatable(exprDatSec_present()[,1:length_expr_sec],
-                          options = list(lengthMenu = FALSE, pageLength = 5, dom = 'tip'), 
+                          options = list(lengthMenu = FALSE, pageLength = 5, dom = 'tip'),
                           class = 'cell-border stripe')
               }
             }
@@ -1427,14 +1427,14 @@ output$ViewTable <- renderDataTable({
                 }else{
                   length_expr_sec <- 10
                 }
-                
+
                 datatable(exprDatSec_present()[,1:length_expr_sec],
                           options = list(lengthMenu = FALSE, pageLength = 5, dom = 'tip'),
                           class = 'cell-border stripe')
               }else{
                 if (input$View6 == "ter"){
-                  
-                  
+
+
                   if (ncol(exprDatTer()) < 10){
                     length_expr_ter <- ncol(exprDatTer())
                   }else{
@@ -1476,13 +1476,13 @@ output$ViewTable <- renderDataTable({
                 }else{
                   length_expr_sec <- 10
                 }
-                
+
                 datatable(exprDatSec_present()[,1:length_expr_sec],
                           options = list(lengthMenu = FALSE, pageLength = 5, dom = 'tip'),
                           class = 'cell-border stripe')
               }else{
-                
-                
+
+
                 if (ncol(exprDatTer()) < 10){
                   length_expr_ter <- ncol(exprDatTer())
                 }else{
@@ -1522,7 +1522,7 @@ output$ViewTable <- renderDataTable({
             }
           }
         }
-        
+
       }
     }
   }
@@ -1559,7 +1559,7 @@ output$ViewDim <- renderDataTable({
           need(input$View6 != "", "Please select a viewing option")
         )
       }
-      
+
     }else{
       if(input$TaxonFile){
         validate(
@@ -1571,10 +1571,10 @@ output$ViewDim <- renderDataTable({
       }else{
         validate(
           need(input$View1 != "", "Please select a viewing option")
-        ) 
-      }   
+        )
+      }
     }
-    
+
   }else{
     if(input$TypeAnalysis == 'simple'){
       if(input$TaxonFile | input$LoadExample == "Yes"){
@@ -1585,7 +1585,7 @@ output$ViewDim <- renderDataTable({
           datatable(dimension,
                     options = list(lengthMenu = FALSE, dom = 'tip'),
                     class = 'cell-border stripe')
-          
+
         }else{
           if (input$View1 == "annot"){
             dimension <- as.data.frame(dim(sampleAnnot_2()))
@@ -1630,7 +1630,7 @@ output$ViewDim <- renderDataTable({
             datatable(dimension,
                       options = list(lengthMenu = FALSE, dom = 'tip'),
                       class = 'cell-border stripe')
-            
+
           }else{
             if (input$View3 == "annot"){
               dimension <- as.data.frame(dim(sampleAnnot_2()))
@@ -1665,7 +1665,7 @@ output$ViewDim <- renderDataTable({
             datatable(dimension,
                       options = list(lengthMenu = FALSE, dom = 'tip'),
                       class = 'cell-border stripe')
-            
+
           }else{
             if (input$View6 == "annot"){
               dimension <- as.data.frame(dim(sampleAnnot_2()))
@@ -1702,7 +1702,7 @@ output$ViewDim <- renderDataTable({
             }
           }
         }
-        
+
       }else{
         if (input$Omic3){
           if (input$View5 == "annot"){
@@ -1767,8 +1767,8 @@ output$ViewDim <- renderDataTable({
       }
     }
   }
-  
-  
+
+
 })
 
 
